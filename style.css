@@ -1,0 +1,146 @@
+/* Sticky footer styles
+-------------------------------------------------- */
+html {
+    position: relative;
+    min-height: 100%;
+  }
+  body {
+    /* Margin bottom by footer height */
+    margin-bottom: 60px;
+  }
+  .footer {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    /* Set the fixed height of the footer here */
+    height: 60px;
+    line-height: 60px; /* Vertically center the text there */
+    background-color: #f5f5f5;
+  }
+  
+  
+  /* Custom page CSS
+  -------------------------------------------------- */
+  /* Not required for template or sticky footer method. */
+  
+  body > .container {
+    padding: 60px 15px 0;
+  }
+  
+  .footer > .container {
+    padding-right: 15px;
+    padding-left: 15px;
+  }
+  
+  code {
+    font-size: 80%;
+  }
+  
+/* #canvas {
+    border: solid 1px red;
+    image-rendering: pixelated;
+} */
+
+/* The switch - the box around the slider */
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 34px;
+}
+/* Hide default HTML checkbox */
+.switch input {
+    display: none;
+}
+/* The slider */
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 11px;
+    left: 0;
+    right: 0;
+    bottom: -11px;
+    background-color: rgba(204, 204, 204, 0.473);
+    -webkit-transition: .4s;
+    transition: .4s;
+}
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 26px;
+    width: 26px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    -webkit-transition: .4s;
+    transition: .4s;
+}
+input:checked+.slider {
+    background-color: #2195f38c;
+}
+input:focus+.slider {
+    box-shadow: 0 0 1px #2195f38c;
+}
+input:checked+.slider:before {
+    -webkit-transform: translateX(26px);
+    -ms-transform: translateX(26px);
+    transform: translateX(26px);
+}
+.slidecontainer {
+    width: 100%;
+}
+.slider2 {
+    -webkit-appearance: none;
+    width: 120px;
+    height: 25px;
+    background: #d3d3d365;
+    outline: none;
+    opacity: 0.7;
+    -webkit-transition: .2s;
+    transition: opacity .2s;
+}
+.slider2:hover {
+    opacity: 1;
+}
+.slider2::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 25px;
+    height: 25px;
+    background: #4CAF50;
+    cursor: pointer;
+}
+.slider2::-moz-range-thumb {
+    width: 25px;
+    height: 25px;
+    background: #4CAF50;
+    cursor: pointer;
+}
+#option-1 {
+    background-color:#ff0000
+}
+#option-2 {
+    background-color:#00ff00
+}
+#option-3 {
+    background-color:#ff00ff
+}
+#option-4 {
+    background-color:#ffff00
+}
+#option-5 {
+    background-color:#414141
+}
+#option-6 {
+    background-color:#00ffff
+}
+#option-7 {
+    background-color:#8f8f8f
+}
+#option-8 {
+    background-color:#ffe86b
+}
+#option-9 {
+    background-color:#ffffff
+}
+
