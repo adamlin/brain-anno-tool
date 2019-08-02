@@ -1,4 +1,4 @@
-# annotation
+# annotation tool - Adam Version !
 
 Seperate js app file and html
 
