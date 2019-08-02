@@ -19,8 +19,8 @@ function jp2pathdescribe(jp2path)
 }
 
 
-var wid = 272;
-var hei = 272;
+var wid = 512;
+var hei = 512;
 var currentscale = 2;
 var currentcoloridx = 1;
 var colorlist = [
@@ -38,8 +38,8 @@ var colorlist = [
 var indicesWithSaidColor = [];
 var positionForColor = {};
 
-var stageWidth=800;
-var stageHeight=500;
+var stageWidth = $(window).width();
+var stageHeight = $(window).height() - 125;
 
 var stage = new Konva.Stage({
   container: "container",
@@ -66,6 +66,20 @@ function fitStageIntoParentContainer() {
   stage.draw();
 }
 
+
+
+// Adam's scroll zooming
+// window.addEventListener("wheel", event => {
+//     const delta = Math.sign(event.deltaY);
+//     console.info(delta);
+//     var current_v = $('#zoom_level_image').text();
+//     var newscale = Number(current_v) + Number(delta);
+//     $('#zoom_level_image').text(newscale);
+//     var change = Math.pow(2, newscale); // (slider.value * (maxScaleStage - minScaleStage) / 100) + minScaleStage;
+//     stage.scale({ x: change, y: change });
+//     stage.batchDraw();
+//     currentscale = change;
+// });
 
 var layer = new Konva.Layer(); // layer for pixel painting
 // var layer_vector = new Konva.Layer(); // layer for vector drawings
@@ -166,8 +180,14 @@ function checkEraseRect(evt) {
   }
 }
 function paintRect(clickpos) {
-  clickX = Math.floor(clickpos.x / currentscale) + stage.offsetX();
-  clickY = Math.floor(clickpos.y / currentscale) + stage.offsetY();
+  // clickX = Math.floor(clickpos.x / currentscale) + stage.offsetX(); //Mitsu
+  // clickY = Math.floor(clickpos.y / currentscale) + stage.offsetY(); //Mitsu
+
+/// Mitsu added ///
+  stgposition = stage.position();
+  clickX = Math.floor((clickpos.x - stgposition.x) / currentscale);
+  clickY = Math.floor((clickpos.y - stgposition.y) / currentscale);
+///////////////////
 
   linearindex = (clickY - 1) * wid + clickX;
   idxloc = idxarray.indexOf(linearindex);
@@ -201,13 +221,21 @@ var currentvector = undefined;
 
 function mouseevt() {
   clickpos = stage.getPointerPosition();
-  clickX = Math.floor(clickpos.x / currentscale) + stage.offsetX();
-  clickY = Math.floor(clickpos.y / currentscale) + stage.offsetY();
+  // clickX = Math.floor(clickpos.x / currentscale) + stage.offsetX(); //Mitsu
+  // clickY = Math.floor(clickpos.y / currentscale) + stage.offsetY();
+
+/// Mitsu added ///
+  stgposition = stage.position(); //Mitsu
+  clickX = Math.floor((clickpos.x - stgposition.x) / currentscale);
+  clickY = Math.floor((clickpos.y - stgposition.y) / currentscale);
+///////////////////
+
   //console.log(clickpos)
   if ($("#erase_check").is(":checked")) {
   } else if (isPaint) {
     var selection = $("input[name=drawingtype]:checked").val();
     var vecname = "hopefully-unique-" + typeOfOperations.length;
+    stage.draggable(false); // Mitsu
     if (selection == "vector_linestring" || selection == "vector_polygon") {
       // the below is now at mouseup event listener
       // as vectors need to be acted upon as a whole.
@@ -231,7 +259,19 @@ function mouseevt() {
         //data: {name: 'hopefully-unique-' + typeOfOperations.length}
       });
       paintRect(clickpos);
+    } else if (selection == "pointer") { //Mitsu added
+      isPaint = false;
+      stage.draggable(true);
     }
+
+    // For cursor type Mitsu
+    var selection = $("input[name=drawingtype]:checked").val();
+    if (selection == "pointer") {
+      stage.container().style.cursor = 'pointer';
+    }else{
+      stage.container().style.cursor = 'default';
+    }
+
   }
 }
 $("#leftbutton").click(function() {
@@ -292,6 +332,44 @@ stage.on("mouseup", function() {
   //   });
   // }
 });
+
+// Mitsu's scroll event
+var scaleBy = 1.1;
+stage.on("mousewheel", e => {
+    e.evt.preventDefault();
+    var oldScale = stage.scaleX();
+
+    var mousePointTo = {
+      x: stage.getPointerPosition().x / oldScale - stage.x() / oldScale,
+      y: stage.getPointerPosition().y / oldScale - stage.y() / oldScale
+    };
+
+    var newScale =
+      e.evt.deltaY > 0 ? oldScale * scaleBy : oldScale / scaleBy;
+    stage.scale({ x: newScale, y: newScale });
+
+    var newPos = {
+      x:
+        -(mousePointTo.x - stage.getPointerPosition().x / newScale) *
+        newScale,
+      y:
+        -(mousePointTo.y - stage.getPointerPosition().y / newScale) *
+        newScale
+    };
+    stage.position(newPos);
+    stage.batchDraw();
+
+  currentscale = newScale;
+
+  n = 2; // 小数点以下の桁数
+  newScale_show = Math.floor(newScale*Math.pow(10,n))/Math.pow(10,n);
+  var slider = document.getElementById("myRange");
+  slider.value = newScale_show;
+  $("#zoomlabel").html(""+newScale_show);
+});
+
+
+
 
 function undoPixel() {
   len = idxsequence.length;

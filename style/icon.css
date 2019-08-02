@@ -1,0 +1,40 @@
+.icon-images-1{
+	content:url('../app/icon/brain.png') !important;
+	width: 20px;
+	height: 20px;
+	margin-bottom: -5px;
+}
+.icon-layers-1{
+	content:url('../app/icon/layers.png') !important;
+	width: 12px;
+	height: 12px;
+	margin-bottom: 2px;
+}
+.icon-calendar-1{
+	content:url('../app/icon/tiles-icons.png') !important;
+	width: 12px;
+	height: 12px;
+	margin-bottom: 2px;	
+}
+.download-icon-1{
+	content:url('../app/icon/visible.png') !important;
+	width: 12px;
+	height: 12px;	
+}
+.download-icon-1:hover {
+    cursor: pointer;
+}
+.delete-1{
+	content:url('../app/icon/delete-forever.png') !important;
+	width: 12px;
+	height: 12px;		
+}
+.delete-1:hover {
+    cursor: pointer;
+}
+.icon-section-1{
+	content:url('../app/icon/brain.png') !important;
+	width: 20px;
+	height: 20px;
+	margin-bottom: -5px;	
+}

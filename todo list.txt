@@ -1,3 +1,0 @@
-1. objectification 
-2. object features and relations
-3. lables of objects 
