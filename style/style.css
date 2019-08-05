@@ -91,7 +91,7 @@ input:checked+.slider:before {
 }
 .slider2 {
     -webkit-appearance: none;
-    width: 120px;
+    width: 150px;
     height: 25px;
     background: #d3d3d365;
     outline: none;

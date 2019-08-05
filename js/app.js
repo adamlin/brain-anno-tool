@@ -91,16 +91,42 @@ var slider = document.getElementById("myRange");
 slider.oninput = function() {
   var oldScale = stage.scaleX();
   var newscale = slider.value;
+
   $("#zoomlabel").html(""+newscale)
   // default scale 5 is set by you. Assuming I want the scale to
   // be from 1 to 10
   // var maxScaleStage = 10, minScaleStage = 1;
-  var change = Math.pow(2, newscale); // (slider.value * (maxScaleStage - minScaleStage) / 100) + minScaleStage;
+  // var change = Math.pow(2, newscale); // (slider.value * (maxScaleStage - minScaleStage) / 100) + minScaleStage;
   // var change = newscale;
   // console.log(newscale,change);
-  stage.scale({ x: change, y: change });
+
+  var CenterOfStageX = stage.width()/2;
+  var CenterOfStageY = stage.height()/2;
+
+  // To adjust the center in the actual view. When the window is wide, the zoom-in center will be right end. 
+  var adjustX = -100;
+  var adjustY = 0;
+
+  var ZoomintoX = CenterOfStageX+adjustX;
+  var ZoomintoY = CenterOfStageY+adjustY;
+  
+  var mousePointTo = {
+    x: (ZoomintoX - stage.x() ) / oldScale,
+    y: (ZoomintoY - stage.y() ) / oldScale
+  };
+
+  stage.scale({ x: newscale, y: newscale });
+
+  var newPos = {
+    x: -mousePointTo.x*newscale+ZoomintoX,
+    y: -mousePointTo.y*newscale+ZoomintoY
+  };
+
+  stage.position(newPos);
   stage.batchDraw();
-  currentscale = change;
+
+  currentscale = newscale;
+
 };
 
 var idxarray = []; // for lookup
