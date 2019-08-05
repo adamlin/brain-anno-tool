@@ -359,7 +359,7 @@ stage.on("mouseup", function() {
   // }
 });
 
-// Mitsu's scroll event
+// Mitsu's scroll zooming
 var scaleBy = 1.1;
 stage.on("mousewheel", e => {
     e.evt.preventDefault();
@@ -387,7 +387,7 @@ stage.on("mousewheel", e => {
 
   currentscale = newScale;
 
-  n = 2; // 小数点以下の桁数
+  n = 1; // Num of digits after the decimal point.
   newScale_show = Math.floor(newScale*Math.pow(10,n))/Math.pow(10,n);
   var slider = document.getElementById("myRange");
   slider.value = newScale_show;
