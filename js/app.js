@@ -1,4 +1,3 @@
-
 function jp2pathtranslate_(jp2path) 
 {
     var parts = jp2path.split('/')
