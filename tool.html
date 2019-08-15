@@ -277,11 +277,6 @@
             });
             stage.add(layer);
 
-
-
-            
-            
-
             const nativeCtx = layer.getContext()._context;
             nativeCtx.webkitImageSmoothingEnabled = false;
             nativeCtx.mozImageSmoothingEnabled = false;
@@ -328,7 +323,6 @@
                     layer.add(outimg);
                     layer.draw();
                     // layer_vector.draw();
-                    console.info('hello world');
                 };
             });
         });
