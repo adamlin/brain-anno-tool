@@ -277,32 +277,29 @@
             });
             stage.add(layer);
 
-
-
-            
-            
-
             const nativeCtx = layer.getContext()._context;
             nativeCtx.webkitImageSmoothingEnabled = false;
             nativeCtx.mozImageSmoothingEnabled = false;
             nativeCtx.imageSmoothingEnabled = false;
             nativeCtx.msImageSmoothingEnabled = false;
             bgImage = new Image();
-            xpix = 16000; // 16280.0 + 700;
-            ypix = 7400 ; //11950.0 + 400;
-            xpc = xpix / 24000.0;
-            ypc = ypix / 18000.0;
-            wpc = wid / 24000.0;
-            hpc = hei / 18000.0;
-            rgnstring = xpc + "," + ypc + "," + wpc + "," + hpc;
-            //bgImage.src = "images/resolver_1020701_12800,16640,544,544.jpg";
-            iipbase = "http://braincircuits.org/cgi-bin/iipsrv.fcgi?FIF=";
-            // brainno = "PMD2055";
+
+            // xpix = 16000; // 16280.0 + 700;
+            // ypix = 7400 ; //11950.0 + 400;
+            // xpc = xpix / 24000.0;
+            // ypc = ypix / 18000.0;
+            // wpc = wid / 24000.0;
+            // hpc = hei / 18000.0;
+            // rgnstring = xpc + "," + ypc + "," + wpc + "," + hpc;
+            // //bgImage.src = "images/resolver_1020701_12800,16640,544,544.jpg";
+            // iipbase = "http://braincircuits.org/cgi-bin/iipsrv.fcgi?FIF=";
+            // // brainno = "PMD2055";
             seriesid = '3362';
             sectionid = '691261';
 
             apibase = "http://mitradevel.cshl.org/webtools/seriesbrowser";
 
+            if(false)
             $.getJSON(apibase+'/getsectionjp2path/'+sectionid, function(data) {
 
                 jp2filepath = data['jp2Path'];
@@ -316,20 +313,20 @@
                     "&MINMAX=1:0,255&MINMAX=2:0,255&MINMAX=3:0,255&GAM=1&CVT=jpeg";
 
                 $('#regdetails').html(''+xpix+','+ypix+'; '+wid+'x'+hei);
-                bgImage.onload = function() {
-                    outimg = new Konva.Image({
-                        x: 0,
-                        y: 0,
-                        width: wid,
-                        height: hei,
-                        image: bgImage,
-                        draggable: false
-                    });
-                    layer.add(outimg);
-                    layer.draw();
-                    // layer_vector.draw();
-                    console.info('hello world');
-                };
+               //  bgImage.onload = function() {
+               //      outimg = new Konva.Image({
+               //          x: 0,
+               //          y: 0,
+               //          width: wid,
+               //          height: hei,
+               //          image: bgImage,
+               //          draggable: false
+               //      });
+               //      layer.add(outimg);
+               //      layer.draw();
+               //      // layer_vector.draw();
+               //      console.info('hello world');
+               //  };
             });
         });
       

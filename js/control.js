@@ -8,10 +8,36 @@ function mouseclick(){
 
 function generateTileTable(){
 	var content = '';
-	var imagePath = '';
+	// var imagePath = '';
 
-	for(var i = 0; i <= 33 ; i ++){
-		imagePath = 'http://braincircuits.org/cgi-bin/iipsrv.fcgi?FIF=/PITT001/Marmo_7NA_7_layers_1um_spacing.jp2&GAM=1&MINMAX=1:0,512&MINMAX=2:0,512&MINMAX=3:0,512&JTL=3,' + i;
+	var width= 51968;
+	var height= 43008;
+	//FIXME: get these from http://braincircuits.org/cgi-bin/iipsrv.fcgi?IIIF=/PITT001/Marmo_7NA_7_layers_1um_spacing.jp2/info.json
+
+	var tilesize = 4096;
+
+	var ntiles1 = Math.round(width/tilesize);
+	var ntiles2 = Math.round(height/tilesize);
+
+	wpc = tilesize / width;
+	hpc = tilesize / height;
+
+	// imagePath = 'http://braincircuits.org/cgi-bin/iipsrv.fcgi?FIF=/PITT001/Marmo_7NA_7_layers_1um_spacing.jp2&GAM=1&MINMAX=1:0,512&MINMAX=2:0,512&MINMAX=3:0,512&JTL=3,' + i;
+	iipbase = "http://braincircuits.org/cgi-bin/iipsrv.fcgi?FIF=";
+	jp2path = "/PITT001/Marmo_7NA_7_layers_1um_spacing.jp2";
+
+	for(var row = 0; row < ntiles1 ; row ++) {
+		for(var col = 0; col < ntiles2; col++) {
+
+			xpc = col * tilesize/width;
+			ypc = row * tilesize/height;
+
+			rgnstring = xpc + "," + ypc + "," + wpc + "," + hpc;
+
+			imagePath = iipbase + jp2path + "&WID="+ tilesize/100 + "&RGN=" + rgnstring +
+			 "&MINMAX=1:0,512&MINMAX=2:0,512&MINMAX=3:0,512&GAM=1&CVT=jpeg";
+
+		var i = row * ntiles2 + col;
 		content += 
 		         '<tr id="image-'+ i + '">'+
 		            '<td class="padding"></td>'+
@@ -47,27 +73,57 @@ function generateTileTable(){
 		            '<td class="padding"></td>'+
 		         '</tr>';
 		 imagePath = '';
+		}
 	}
 	$('#listOfTiles').html(content);
 	$('#image-3').addClass('active');
 }
 
 function selectedTile(tile){
-	bgImage.src = 'http://braincircuits.org/cgi-bin/iipsrv.fcgi?FIF=/PITT001/Marmo_7NA_7_layers_1um_spacing.jp2&GAM=1&MINMAX=1:0,512&MINMAX=2:0,512&MINMAX=3:0,512&JTL=3,' + tile;
 
-	$('#regdetails').html(''+xpix+','+ypix+'; '+wid+'x'+hei);
+	var width= 51968;
+	var height= 43008;
+	//FIXME: get these from http://braincircuits.org/cgi-bin/iipsrv.fcgi?IIIF=/PITT001/Marmo_7NA_7_layers_1um_spacing.jp2/info.json
+
+	var tilesize = 4096;
+
+	var ntiles1 = Math.round(width/tilesize);
+	var ntiles2 = Math.round(height/tilesize);
+
+	wpc = tilesize / width;
+	hpc = tilesize / height;
+
+	col = tile % ntiles1;
+	row = (tile - col) / ntiles2;
+
+	xpc = col * tilesize/width;
+	ypc = row * tilesize/height;
+
+	rgnstring = xpc + "," + ypc + "," + wpc + "," + hpc;
+
+	iipbase = "http://braincircuits.org/cgi-bin/iipsrv.fcgi?FIF=";
+	jp2path = "/PITT001/Marmo_7NA_7_layers_1um_spacing.jp2";
+
+	imagePath = iipbase + jp2path + "&WID="+ tilesize + "&RGN=" + rgnstring +
+	"&MINMAX=1:0,512&MINMAX=2:0,512&MINMAX=3:0,512&GAM=1&CVT=jpeg";
+
+	bgImage.src = imagePath;
+	// bgImage.src = 'http://braincircuits.org/cgi-bin/iipsrv.fcgi?FIF=/PITT001/Marmo_7NA_7_layers_1um_spacing.jp2&GAM=1&MINMAX=1:0,512&MINMAX=2:0,512&MINMAX=3:0,512&JTL=3,' + tile;
+
+	// $('#regdetails').html(''+xpix+','+ypix+'; '+wid+'x'+hei);
 	bgImage.onload = function() {
 	    outimg = new Konva.Image({
 	        x: 0,
 	        y: 0,
-	        width: wid,
-	        height: hei,
+	        width: tilesize,
+	        height: tilesize,
 	        image: bgImage,
 	        draggable: false
-	    });
+		});
+		layer.removeChildren();
 	    layer.add(outimg);
 	    layer.draw();
 	    // layer_vector.draw();
-	    console.info('hello world');
+	    console.info('tile ' + tile);
 	};
 }
