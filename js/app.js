@@ -13,7 +13,6 @@ var colorlist = [
   "#ffe86b",
   "#ffffff"
 ];
-
 var indicesWithSaidColor = [];
 var positionForColor = {};
 
@@ -34,16 +33,17 @@ var layer = new Konva.Layer(); // layer for pixel painting
 var mousedown = false;
 
 var idxarray = []; // for lookup
-var flagarray = []; // erased or not
+var flagarray = []; // when write a rect, then 1
 // var undostep = 0;
 
-var lastUndoAction = 0;
+// var lastAction = {undo:0, redo:0};
 
 var UndoOrRedo = 0;
 var undoarray = [];
 var actionarray = [];
 var actioncnt = 1;
-var actioncursor = 1;
+var ActCursorForRedo = 0;
+var lastActIsUndoRedo = 0;
 
 var xyarray = []; // painted locations in image coordinates
 var colorarray = [];
@@ -51,7 +51,6 @@ var colorarray = [];
 var typeOfOperations = [];
 
 var currentvector = undefined;
-
 
 function makeNewLine(isPolygon) {
   return new Konva.Line({
@@ -118,71 +117,65 @@ function mouseevt() {
 }
 
 function paintRect(ImPix_x, ImPix_y, pointerPos) {
-
-  // linearindex = (ImPix_y - 1) * wid + ImPix_x; /////// why does it start from -1st row?
   var linearindex = ImPix_y * wid + ImPix_x; // Left-top is 0.
   var idxloc = idxarray.indexOf(linearindex); // Search the liner index from the idxarray. Search from the end(latest action). Return -1 when can not find it, otherwise return the sequential number from the first paint.
 
   // var existingrect = stage.getIntersection(pointerPos, "Rect");
   // console.log(existingrect);
   // if (existingrect.className == "Image") {  /////////// どういう役割？
-    // console.log(idxloc);
-    if (idxloc != -1 && flagarray[idxloc] == 1) {
-      //already exists
-      console.log('exist');
-    }else if (idxloc != -1 && ((flagarray[idxloc] == 0 && undoarray[idxloc] == 1) || (flagarray[idxloc] == 0 && undoarray[idxloc] == 0))) { //When the pixel is empty by erasing or undo last time.
-      // Overwrite the actionarray
-      var newrect = makeNewRect(ImPix_x, ImPix_y);
-      layer.add(newrect);
-      layer.draw();
-      flagarray[idxloc] = 1;
-      undoarray[idxloc] = 0;
-      actionarray[idxloc] = actioncnt;  // actionarrayを更新
-      // actioncursor = actioncnt;
-      actioncnt = actioncnt + 1;
-      colorarray[idxloc] = currentcoloridx;
-      newrect.on("click tap", checkEraseRect);
-      if (!positionForColor[currentcoloridx]) {  /// need check
-        positionForColor[currentcoloridx] = [];
-      }
-      positionForColor[currentcoloridx].push([ImPix_x, ImPix_y]); /// need check
-      typeOfOperations[idxloc] = {
-        type: "pixel"
-      };
 
-      showstatus();
-    } else {
-      var newrect = makeNewRect(ImPix_x, ImPix_y);
+  if (idxloc != -1 && flagarray[idxloc] == 1) {
+    console.log('already exist');
+  }else if (idxloc != -1 && flagarray[idxloc] == 0) { // When the pixel is empty by erasing or undo/redo at last time.
+    var newrect = makeNewRect(ImPix_x, ImPix_y);
+    newrect.on("click tap", checkEraseRect);
+    layer.add(newrect);
+    layer.draw();
+    // Overwrite to the same id 
+    flagarray[idxloc] = 1;
+    undoarray[idxloc] = 0;
+    actionarray[idxloc] = actioncnt;  // actionarrayを更新
+    actioncnt = actioncnt + 1;
+    lastActIsUndoRedo = 0;
+    showstatus();
 
-      layer.add(newrect);
-      layer.draw();
-      // console.log(newrect);
-      idxarray.push(linearindex);
-      flagarray.push(1); // when write a new rect, then 1
-      xyarray.push([ImPix_x, ImPix_y]);
-
-      // idxsequence.push(idxarray.length - 1);
-      actionarray.push(actioncnt);
-      // actioncursor = actioncnt;
-      actioncnt = actioncnt + 1;
-
-      undoarray.push(0);
-      colorarray.push(currentcoloridx);
-
-      newrect.on("click tap", checkEraseRect);
-      // console.log(positionForColor[currentcoloridx]);
-      if (!positionForColor[currentcoloridx]) {
-        positionForColor[currentcoloridx] = [];
-      }
-      // console.log(positionForColor[currentcoloridx]);
-      positionForColor[currentcoloridx].push([ImPix_x, ImPix_y]);
-
-      typeOfOperations.push({
-        type: "pixel"
-      });
-
-      showstatus();
+    colorarray[idxloc] = currentcoloridx;
+    if (!positionForColor[currentcoloridx]) {  /// need check
+      positionForColor[currentcoloridx] = [];
     }
+    positionForColor[currentcoloridx].push([ImPix_x, ImPix_y]); /// need check
+    typeOfOperations[idxloc] = {
+      type: "pixel"
+    };
+  } else { // Make a new rect at a new pixel
+    var newrect = makeNewRect(ImPix_x, ImPix_y);
+    newrect.on("click tap", checkEraseRect);
+    layer.add(newrect);
+    layer.draw();
+
+    // push a new status to the array.
+    idxarray.push(linearindex);
+    xyarray.push([ImPix_x, ImPix_y]);
+    flagarray.push(1);
+    undoarray.push(0);
+    actionarray.push(actioncnt);
+    actioncnt = actioncnt + 1;
+    lastActIsUndoRedo = 0;
+    showstatus();
+    
+    colorarray.push(currentcoloridx);
+   
+    // console.log(positionForColor[currentcoloridx]);
+    if (!positionForColor[currentcoloridx]) {
+      positionForColor[currentcoloridx] = [];
+    }
+    // console.log(positionForColor[currentcoloridx]);
+    positionForColor[currentcoloridx].push([ImPix_x, ImPix_y]);
+
+    typeOfOperations.push({
+      type: "pixel"
+    });    
+  }
 
   // } else {
   //   //console.log(pointerPos);
@@ -191,79 +184,92 @@ function paintRect(ImPix_x, ImPix_y, pointerPos) {
 
 
 function UndoRedo() {
+  var properActCursor = 0;
+
   if (UndoOrRedo == 'undo'){
-    undoflag = 1;
     newundoflag = 1;
+
+    for (var i = actioncnt-1; i>0 && !(actionarray.indexOf(i) != -1 && undoarray[actionarray.indexOf(i)] == 0); i--){
+      console.log('### Searching a correct action number... ###');  
+      console.log('The action cursor ' + i + ' was not what we want to undo/redo for.');
+      console.log('Next, try a cursor ' + (i-1));
+    }
+    properActCursor = i;
+
   }else if(UndoOrRedo == 'redo'){
-    undoflag = 0;
     newundoflag = 0;
+
+    if (ActCursorForRedo == 0) {
+      console.log('Undo first before redo.');
+      return; 
+    }else if (lastActIsUndoRedo == 0) {
+      console.log('The last action need to be Undo or redo.');
+      return;
+    }else if (undoarray[actionarray.indexOf(ActCursorForRedo)] != 1) { //最後のredoを行ったundoのactionの1個前のactionがundoでなければいけない。
+      console.log('No more redo');
+      return;
+    }
+    properActCursor = ActCursorForRedo;
   }
 
-  // actioncnt is the last action's # plus 1.  i = actioncnt-1 は、最後のaction#.
-  for (var i = actioncnt-1; i>0 && ((actionarray.indexOf(i) == -1) || (undoarray[actionarray.indexOf(i)] == undoflag)); i--){
-    console.log('### Searching a correct actioncursor... ###');
-    console.log('current cursor is ' + i + ', but it was not what we undo for.');
-    console.log('next, try a cursor ' + (i-1));
-  }
-  
-  if (UndoOrRedo == 'redo' && (lastUndoAction - i) > 1){
-    // console.log(undoarray[actionarray.indexOf(i-1)]);
-    console.log('Redo has stopped');
-    return; // redoはundo履歴を遡るが、undoしてpaintやeraseをして、さらにundoした場合のredoは、最後にしたundo郡に対してredoする。
-  }
-
-  console.log('A proper action cursor was ' + i);
-  lastUndoAction = i;
-  
-  var idxloc = actionarray.indexOf(i);
-  // actioncursor = actionarray[idxloc];
+  console.log('Found a proper action cursor to do undo/redo: ' + properActCursor);
+  var idxloc = actionarray.indexOf(properActCursor);
 
   if (typeOfOperations[idxloc].type === "pixel") {
-    // undoidx = idxsequence[len - undostep - 1];
-    // console.log(idxloc);
-    var lastaction = flagarray[idxloc]; //flagarray[len-undostep-1];
-    var Impix = xyarray[idxloc];
-    var ImPix_x = Impix[0];
-    var ImPix_y = Impix[1];
-    if (!lastaction) { // if the last action is 0(erase)  
-      var newrect = makeNewRect(ImPix_x, ImPix_y);
-      newrect.on("click tap", checkEraseRect);
-      // linidx_r = (ImPix_y - 1) * wid + ImPix_x; ////////
-      // idxloc_r = idxarray.indexOf(linidx_r);
-      // idxsequence.push(idxloc_r); //redrawn
-      layer.add(newrect);
-      layer.draw();
-      undoarray[idxloc] = newundoflag;
-      actionarray[idxloc]= actioncnt;
-      actioncnt = actioncnt + 1;
-      // actioncursor = actioncursor -1;
-    } else {
-      var stgposition = stage.position();
-      var RectPos = {
-        // x: (clickpix[0] - stage.offsetX()) * currentscale + currentscale / 2,  ///////
-        // y: (clickpix[1] - stage.offsetY()) * currentscale + currentscale / 2   ///////
-        x: (ImPix_x+0.5)*currentscale + stgposition.x, // Left-top Impix is [0, 0]. So, add 0.5 to point the center of the pixel.
-        y: (ImPix_y+0.5)*currentscale + stgposition.y 
-      };
-      // console.log(pointerPos);
-      var existingrect = stage.getIntersection(RectPos, "Rect");
-      // console.log(existingrect);
-      if (existingrect.className == "Rect") {
-        existingrect.destroy();
-        layer.draw();
-        undoarray[idxloc] = newundoflag;
-        actionarray[idxloc]= actioncnt;
-        actioncnt = actioncnt + 1;
-        // actioncursor = actioncursor -1;
-      }
-    }
-    flagarray[idxloc] = lastaction == 0 ? 1 : 0;  // 0 to 1, 1 to 0.
-    // undostep = undostep + 1;
-    showstatus();
+    undopix(idxloc, newundoflag);  
   }else if(typeOfOperations[idxloc].type === "vec"){
     undovec();
   }
+  
+  // For the next redo.
+  if (UndoOrRedo == 'undo'){
+    ActCursorForRedo = actioncnt-1; // because actioncnt is already 1 added
+  }else if (UndoOrRedo == 'redo') {
+    ActCursorForRedo = ActCursorForRedo -1;
+  }
 }
+
+function undopix(idxloc, newundoflag){
+  var lastaction = flagarray[idxloc];
+  var Impix = xyarray[idxloc];
+  var ImPix_x = Impix[0];
+  var ImPix_y = Impix[1];
+  if (!lastaction) { // if the last action is 0 (erase), then redraw.
+    var newrect = makeNewRect(ImPix_x, ImPix_y);
+    newrect.on("click tap", checkEraseRect);
+    layer.add(newrect);
+    layer.draw();
+    // Overweite to the same id
+    flagarray[idxloc] = 1;
+    undoarray[idxloc] = newundoflag;
+    actionarray[idxloc]= actioncnt;
+    actioncnt = actioncnt + 1;
+    lastActIsUndoRedo = 1;
+    showstatus();
+  } else { // if the last action is 1 (paint), then erase.
+    var stgposition = stage.position();
+    var RectPos = {
+      x: (ImPix_x+0.5)*currentscale + stgposition.x, // Left-top Impix is [0, 0]. So, add 0.5 to point the center of the pixel.
+      y: (ImPix_y+0.5)*currentscale + stgposition.y 
+    };
+    // console.log(pointerPos);
+    var existingrect = stage.getIntersection(RectPos, "Rect");
+    // console.log(existingrect);
+    if (existingrect.className == "Rect") {
+      existingrect.destroy();
+      layer.draw();
+      // Overweite to the same id
+      flagarray[idxloc] = 0;
+      undoarray[idxloc] = newundoflag;
+      actionarray[idxloc]= actioncnt;
+      actioncnt = actioncnt + 1;
+      lastActIsUndoRedo = 1;
+      showstatus();
+    }
+  }
+  // flagarray[idxloc] = lastaction == 0 ? 1 : 0;  // 0 to 1, 1 to 0.
+}
+
 
 function undovec() {
   var vecName = typeOfOperations[typeOfOperations.length - 1].data.name;
@@ -289,16 +295,14 @@ function checkEraseRect(evt) {
     var linearindex = ImPix_y * wid + ImPix_x;
     var idxloc = idxarray.indexOf(linearindex);
     if (idxloc != -1) {
-      // idxsequence.push(idxloc_d);/////
-      // undostep = 0;
-      flagarray[idxloc] = 0;
-      actionarray[idxloc] = actioncnt;
-      // actioncursor = actioncnt;
-      actioncnt = actioncnt + 1;
-      undoarray[idxloc] = 0;
-
       obj.destroy();
       layer.draw();
+
+      flagarray[idxloc] = 0;
+      undoarray[idxloc] = 0;
+      actionarray[idxloc] = actioncnt;
+      actioncnt = actioncnt + 1;
+      lastActIsUndoRedo = 0;
       showstatus();
     }
   }
@@ -319,15 +323,15 @@ function eraseRect(ImPix_x,ImPix_y){
   if (existingrect.className == "Rect") {
     existingrect.destroy();
     layer.draw();
+    
     flagarray[idxloc] = 0;
     undoarray[idxloc] = 0;
     actionarray[idxloc]= actioncnt;
     actioncnt = actioncnt + 1;
+    lastActIsUndoRedo = 0;
     showstatus();
   } 
 }
-
-
 
 var cumulateColorPoints = function(listOfColors) {
   // listOfColors should be of the format ["6", "7", "8"]
@@ -362,6 +366,10 @@ stage.on("touchstart mousedown", function() {
   mouseevt();
 });
 stage.on("mousemove", mouseevt);
+stage.on("mouseleave", function(){
+  mousedown = false;
+  console.log('mouseleft');
+});
 stage.on("mouseup", function() {
   mousedown = false;
   // console.log(positionForColor);
@@ -585,24 +593,10 @@ function showstatus (){
   console.log('idxarray   :' + idxarray);
   console.log('flagarray  :' + flagarray);
   console.log('undoarray  :' + undoarray);
-  // console.log('currentactioncursor:' + actioncursor);
+  console.log('last action is #' + (actioncnt-1));
+  console.log('Next action cursor for redo is ' + ActCursorForRedo);
 }
 
-
-
-
-// Adam's scroll zooming
-// window.addEventListener("wheel", event => {
-//     const delta = Math.sign(event.deltaY);
-//     console.info(delta);
-//     var current_v = $('#zoom_level_image').text();
-//     var newscale = Number(current_v) + Number(delta);
-//     $('#zoom_level_image').text(newscale);
-//     var change = Math.pow(2, newscale); // (slider.value * (maxScaleStage - minScaleStage) / 100) + minScaleStage;
-//     stage.scale({ x: change, y: change });
-//     stage.batchDraw();
-//     currentscale = change;
-// });
 
 
 // For responsive
