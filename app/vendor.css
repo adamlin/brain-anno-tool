@@ -485,7 +485,7 @@ template {
  */
 @font-face {
   font-family: 'Material-Design-Iconic-Font';
-  src: url(/annotool_current/app/fonts/Material-Design-Iconic-Font.woff) format('woff2'), url(/annotool_current/app/fonts/Material-Design-Iconic-Font.woff) format('woff');
+  src: url(/annotation_tool/app/fonts/Material-Design-Iconic-Font.woff) format('woff2'), url(/annotation_tool/app/fonts/Material-Design-Iconic-Font.woff) format('woff');
   font-weight: normal;
   font-style: normal;
 }
@@ -5648,11 +5648,11 @@ template {
 
 @font-face {
 	font-family: 'entypo-plus';
-	src:url(/annotool_current/app/fonts/entypo-plus.eot);
-	src:url(/annotool_current/app/fonts/entypo-plus.eot?#iefix-w0y2sr) format('embedded-opentype'),
-		url(/annotool_current/app/fonts/entypo-plus.woff) format('woff'),
-		url(/annotool_current/app/fonts/entypo-plus.ttf) format('truetype'),
-		url(/annotool_current/app/img/entypo-plus.svg#entypo-plus) format('svg');
+	src:url(/annotation_tool/app/fonts/entypo-plus.eot);
+	src:url(/annotation_tool/app/fonts/entypo-plus.eot?#iefix-w0y2sr) format('embedded-opentype'),
+		url(/annotation_tool/app/fonts/entypo-plus.woff) format('woff'),
+		url(/annotation_tool/app/fonts/entypo-plus.ttf) format('truetype'),
+		url(/annotation_tool/app/img/entypo-plus.svg#entypo-plus) format('svg');
 	font-weight: normal;
 	font-style: normal;
 }

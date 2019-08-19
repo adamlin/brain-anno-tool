@@ -185,23 +185,23 @@
                          </div>
                       </div>
                    </div>
-                   <div class="toolBitmapOptions tool-options2">
-                      <button class="el-tooltip tool-button active">
+                   <div id="controlTool" class="toolBitmapOptions tool-options" style="    margin-top: 8px;">
+                      <button class="el-tooltip tool-button" id="pixel_active">
                          <!----> <!----> <i class="icon-round-brush"></i> <!---->
                       </button>
-                      <button class="el-tooltip tool-button disabled">
+                      <button class="el-tooltip tool-button" id="erase_active">
                          <!----> <!----> <i class="icon-eraser"></i> <!---->
                       </button>
-                      <button class="el-tooltip tool-button disabled">
+                      <button class="el-tooltip tool-button" id="fillcolor_active">
                          <!----> <!----> <i class="zmdi zmdi-format-color-fill"></i> <!---->
                       </button>
-                      <button class="el-tooltip tool-button disabled">
+                      <button class="el-tooltip tool-button" id="crop_active">
                          <!----> <!----> <i class="zmdi zmdi-crop"></i> <!---->
                       </button>
-                      <button class="el-tooltip tool-button">
+                      <button class="el-tooltip tool-button" id="align_active">
                          <!----> <!----> <i class="icon-align-bottom"></i> <!---->
                       </button>
-                      <span data-v-88aaed5c="" class="el-tooltip brush-size el-tooltip">
+                      <span class="el-tooltip brush-size el-tooltip">
                          <div class="el-popover" style="width: 250px; display: none;">
                             <!----> 
                             <div data-v-88aaed5c="" class="el-slider">
@@ -214,27 +214,43 @@
                                </div>
                             </div>
                          </div>
-                         <div data-v-88aaed5c="" style="display: flex; align-items: center;"><input data-v-88aaed5c="" class="mr5"> <small data-v-88aaed5c="">px</small></div>
+                         <div style="display: flex; align-items: center;">
+                            <input class="mr5"> <small style="margin-top: 10px;">px</small>
+                         </div>
                       </span>
+                      <div class="magnify_style" style="width: 270px;margin-left: 30px; margin-top: 10px;">
+                        <p style="position: absolute; font-size: 80%; font-weight: 400;">Magnify (x<label id="zoomlabel">1</label>)</p>
+                        <input style="margin-top: -6px;" type="range" min="1" max="20" value="1" class="slider2" id="myRange"/>
+                      </div>
                    </div>
                 </div>
              </div>
              <div class="navigator-wrapper">
                 <div class="images-navigator" style="">
-                   <div class="inline-block"><a class="btn el-tooltip"><i class="icon-chevron-left"></i></a></div>
+                   <div class="inline-block">
+                    <a class="btn el-tooltip">
+                      <i class="icon-chevron-left" style="position: absolute;margin-top: 2px;margin-left: -5px;"></i>
+                    </a>
+                   </div>
                    <div class="inline-block progress-wrapper">
                       <div class="progress-line"><b style="width: 0%;"></b></div>
                       <b class="image-name el-tooltip">
                       Brain PMD940_0180
                       </b> 
-                      <div class="info"><span class="titles el-tooltip"><a href="https://app.supervise.ly/projects/36431" class="project-title">
-                        annotation
-                         </a> <i class="icon-chevron-small-right chevron"></i> <span class="dataset-title">
-                         001
-                         </span></span>
+                      <div class="info">
+                        <span class="titles el-tooltip">
+                          <a href="https://app.supervise.ly/projects/36431" class="project-title">annotation
+                          </a> 
+                          <i class="icon-chevron-small-right chevron"></i>
+                          <span class="dataset-title">001</span>
+                        </span>
                       </div>
                    </div>
-                   <div class="inline-block"><a class="btn el-tooltip"><i class="icon-chevron-right"></i></a></div>
+                   <div class="inline-block">
+                    <a class="btn el-tooltip">
+                      <i class="icon-chevron-right" style="position: absolute;margin-top: 2px;margin-left: -5px;"></i>
+                    </a>
+                  </div>
                    <!---->
                    <div class="el-loading-mask" style="display: none;">
                       <div class="el-loading-spinner">
@@ -248,7 +264,7 @@
              </div>
           </div>
           <!-- end of header -->
-
+            
           <p style="background-color: antiquewhite">Region <span id="regdetails"></span> (1/8 mm)</p>
           
           <div class="btn-toolbar mb-2 mb-md-0" style="padding-bottom:10px">
@@ -288,13 +304,11 @@
                   <div  id="container"></div>
               </div>
               <div class="col-md-2">
-                      <table>
-                              <tr><td></td><td> &nbsp;&nbsp;<a id="upbutton"><i class="fas fa-arrow-up"></i></a> </td><td></td></tr>
-                              <tr><td><a id="leftbutton"><i class="fas fa-arrow-left"></i></a> </td><td>&nbsp;&nbsp;<a id="centerbutton"><i class="fas fa-map-marker-alt"></i></a>&nbsp;</td><td>&nbsp;<a id="rightbutton"><i class="fas fa-arrow-right"></i></a> </td></tr>
-                              <tr><td></td><td> &nbsp;&nbsp;<a id="downbutton"><i class="fas fa-arrow-down"></i></a> </td><td></td></tr>
-                          </table>
-                          Magnify (x<label id="zoomlabel">1</label>)
-                          <input type="range" min="1" max="4" value="1" class="slider2" id="myRange"/>
+<!--                       <table>
+                          <tr><td></td><td> &nbsp;&nbsp;<a id="upbutton"><i class="fas fa-arrow-up"></i></a> </td><td></td></tr>
+                          <tr><td><a id="leftbutton"><i class="fas fa-arrow-left"></i></a> </td><td>&nbsp;&nbsp;<a id="centerbutton"><i class="fas fa-map-marker-alt"></i></a>&nbsp;</td><td>&nbsp;<a id="rightbutton"><i class="fas fa-arrow-right"></i></a> </td></tr>
+                          <tr><td></td><td> &nbsp;&nbsp;<a id="downbutton"><i class="fas fa-arrow-down"></i></a> </td><td></td></tr>
+                      </table> -->
   
                       <form style="border:solid 1px;padding:5px">
                               <h5>Add object</h5>
@@ -408,6 +422,7 @@
         generateTileTable();
         var imageaddress = "http://braincircuits.org/cgi-bin/iipsrv.fcgi?FIF=/PITT001/Marmo_7NA_7_layers_1um_spacing.jp2&WID="+nagImagesize + "&QLT=130&CNT=1&CVT=jpeg";
         $('#navImageSection').attr("src",imageaddress);
+        selectedToolBtn();
       </script>
 
       <script>

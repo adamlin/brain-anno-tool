@@ -162,7 +162,8 @@ function makeNewRect(clickX, clickY) {
 }
 function checkEraseRect(evt) {
   obj = evt.target;
-  if ($("#erase_check").is(":checked")) {
+  // Adam Lin - add for header uses
+  if ($("#erase_check").is(":checked") || $("#erase_active").hasClass("active")) {
     pos = obj.getPosition();
     clickX_d = Math.floor(pos.x); //currentscale;
     clickY_d = Math.floor(pos.y); //currentscale;
