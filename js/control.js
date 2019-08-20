@@ -1,9 +1,21 @@
 function mouseclick(){
-	$("#gutter-vertical-control").mouseup(function(){
-	    console.info('mouse up');
-	}).mousedown(function(){
-	    console.info('mouse down');
-	})	
+	let e = window.event;
+	let innerHeight = window.innerHeight;
+	let adjustTool = $("#gutter-vertical-control");
+	adjustTool.mousedown(function(e){
+		function onMouseMove(e) {
+			let moving = e.clientY/innerHeight*100 + '%';
+			$('#panel-top').height(moving);
+		}
+		document.addEventListener('mousemove', onMouseMove);
+		adjustTool.onmouseup = function() {
+		    document.removeEventListener('mousemove', onMouseMove);
+		    adjustTool.onmouseup = null;
+	  	};
+	  	adjustTool.ondragstart = function() {
+		  return false;
+		};
+	})
 }
 
 function generateTileTable(){
@@ -50,11 +62,11 @@ function generateTileTable(){
 		               '</div>'+
 		               '<div><span class="img-info">'+
 		               		'<img class="icon-layers-1"></img> '+
-		               			'<b>layer 1</b>'+
+		               			'<b>(1/8 mm)</b>'+
 		               		'</span> '+
 		               		'<span class="img-info">'+
 		               			'<img class="icon-calendar-1"></img> '+
-		               			'<b>tile ' + i + '</b>'+
+		               			'<b>tile: ' + '4096x4096' + '</b>'+
 		               		'</span>'+
 		               	'</div>'+
 		            '</td>'+
@@ -126,4 +138,13 @@ function selectedTile(tile){
 	    // layer_vector.draw();
 	    // console.info('tile ' + tile);
 	};
+}
+
+function selectedToolBtn(){
+	$('#controlTool .tool-button').each(function(){
+	    $(this).click(function(){
+	        $(this).siblings().removeClass('active'); // if you want to remove class from all sibling buttons
+	        $(this).toggleClass('active');
+	    });
+	});
 }
