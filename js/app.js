@@ -34,7 +34,7 @@ var mousedown = false;
 var UndoOrRedo = 0;
 
 var actionarray = {}; //Associative array. Key is a action count.
-var idxaction = {}; //Associative array. Key is a linerindex.
+var idxaction = {}; //Associative array. Key is a linearindex.
 
 // var idxarray = []; // for lookup
 // var flagarray = []; // when write a rect, then 1
@@ -48,6 +48,7 @@ var idxaction = {}; //Associative array. Key is a linerindex.
 var actioncnt = 1;
 var ActCursorForRedo = undefined;
 var lastActIsUndoRedo = 0;
+var lastActIsEraseOrPaint = 0;
 
 // var xyarray = []; // painted locations in image coordinates
 // var colorarray = [];
@@ -56,8 +57,11 @@ var lastActIsUndoRedo = 0;
 
 var currentvector = undefined;
 
-var brushsize = 9; ///// Need be [1, 9, 25, 49...]
+var brushsize = 25; ///// Need be [1, 9, 25, 49...]
 var calcnt = (Math.sqrt(brushsize) -1)/2;
+
+var age = 20;
+var output = [];
 
 function makeNewLine(isPolygon) {
   return new Konva.Line({
@@ -168,6 +172,7 @@ function paintRect(ImPix_x, ImPix_y, pointerPos) {
     }
 
     lastActIsUndoRedo = 0;
+    lastActIsEraseOrPaint = 1;
 
     // if (!positionForColor[currentcoloridx]) {  /// need check
     //   positionForColor[currentcoloridx] = [];
@@ -196,6 +201,7 @@ function paintRect(ImPix_x, ImPix_y, pointerPos) {
     idxaction[linearindex] = actioncnt;
 
     lastActIsUndoRedo = 0;
+    lastActIsEraseOrPaint = 1;
 
     // if (!positionForColor[currentcoloridx]) {  /// need check
     //   positionForColor[currentcoloridx] = [];
@@ -218,6 +224,12 @@ function UndoRedo() {
       // console.log('The action cursor ' + i + ' was not what we want to undo/redo for.');
       // console.log('Next, try a cursor ' + (i-1));
     }
+
+    if ((lastActIsEraseOrPaint == 0 && actionarray[i][Object.keys(actionarray[i])[0]]['flag'] == 1) || (lastActIsEraseOrPaint == 1 && actionarray[i][Object.keys(actionarray[i])[0]]['flag'] == 0)) {
+      console.log('No more undo');
+      return //Eraseを一旦したら、そのErase郡以前のものをUndoできないようにする。同様に一旦Paintをしたら、そのPaint郡以前のものをUndoできないようにする。ただし、過去にEraseしたところをすべてPaintした場合は、undo=0かつflag=0の場所が無くなるので、eraseがそもそも無かったことになり、すべて１つのPaint郡として捉えられる。
+    }
+
     properActCursor = i;
     var keys = Object.keys(actionarray[properActCursor]);
 
@@ -388,6 +400,7 @@ function eraseRect(ImPix_x,ImPix_y){
         }
 
         lastActIsUndoRedo = 0;
+        lastActIsEraseOrPaint = 0;
 
         idxaction[linearindex] = actioncnt; //action countの更新
 			} 
@@ -397,6 +410,37 @@ function eraseRect(ImPix_x,ImPix_y){
   // console.log('[[ The last action(erasing) done ]]');
   // showstatus();
 }
+
+function minimizehistory(){ // To reduce memory use.
+  var actiokeys = Object.keys(actionarray); //Key(action number) is supposed to be in order from small to big.
+  if (actiokeys.length < age+1) {return}
+
+  for (var i = 0; i<(actiokeys.length - age); i++) {
+    var action = actiokeys[i];
+    var linearindexkeys = Object.keys(actionarray[action])
+    if (actionarray[action][linearindexkeys[0]]['flag'] == 0) {
+      delete actionarray[action];
+      console.log('action deleted');
+      for (var j = 0; j<linearindexkeys.length; j++) {
+        delete idxaction[linearindexkeys[j]];
+      }
+    }else{
+      // for (var k = 0; k<linearindexkeys.length; k++) {
+      //   var outtemp = actionarray[action][linearindexkeys[k]];
+      //   delete outtemp['flag'];
+      //   delete outtemp['undo']; 
+      //   output.push(outtemp);
+      //   delete actionarray[action][linearindexkeys[k]];
+      //   delete idxaction[linearindexkeys[k]];
+      // }
+      // delete actionarray[action];
+    }
+  }
+  showstatus();
+}
+
+
+
 
 var cumulateColorPoints = function(listOfColors) {
   // listOfColors should be of the format ["6", "7", "8"]
@@ -463,6 +507,8 @@ stage.on("mouseup", function() {
   //     type: "pixel"
   //   });
   // }
+
+  minimizehistory();
 });
 
 
@@ -663,8 +709,10 @@ function showstatus (){
   console.log('1) Current actionarray is');
   console.log(actionarray);
   console.log('2) The last action # is ' + (actioncnt-1));
-  console.log('3) The latest linerindex vs action # array is');
+  console.log('3) The latest linearindex vs action # array is');
   console.log(idxaction);
+  // console.log('4) The final output is');
+  // console.log(output);
 }
 
 
