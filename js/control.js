@@ -124,6 +124,6 @@ function selectedTile(tile){
 	    layer.add(outimg);
 	    layer.draw();
 	    // layer_vector.draw();
-	    console.info('tile ' + tile);
+	    // console.info('tile ' + tile);
 	};
 }
