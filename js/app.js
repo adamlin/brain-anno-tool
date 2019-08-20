@@ -113,6 +113,7 @@ function mouseevt() {
       	// console.log('[[ Start painting ]]');
         for (var x = -calcnt; x<calcnt+1; x++){
           for (var y = -calcnt; y<calcnt+1; y++) {
+            if (calcnt > 0 && Math.pow(x*y,2) == Math.pow(calcnt,4)) {continue} // To make brush circle.
 				    paintRect(ImPix_x+x, ImPix_y+y, pointerPos);
           }
 		    }
