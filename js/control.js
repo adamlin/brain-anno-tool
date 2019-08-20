@@ -1,9 +1,21 @@
 function mouseclick(){
-	$("#gutter-vertical-control").mouseup(function(){
-	    console.info('mouse up');
-	}).mousedown(function(){
-	    console.info('mouse down');
-	})	
+	let e = window.event;
+	let innerHeight = window.innerHeight;
+	let adjustTool = $("#gutter-vertical-control");
+	adjustTool.mousedown(function(e){
+		function onMouseMove(e) {
+			let moving = e.clientY/innerHeight*100 + '%';
+			$('#panel-top').height(moving);
+		}
+		document.addEventListener('mousemove', onMouseMove);
+		adjustTool.onmouseup = function() {
+		    document.removeEventListener('mousemove', onMouseMove);
+		    adjustTool.onmouseup = null;
+	  	};
+	  	adjustTool.ondragstart = function() {
+		  return false;
+		};
+	})
 }
 
 function generateTileTable(){

@@ -25,19 +25,17 @@
         <script src="js/bootstrap.min.js" type="text/javascript"></script>
         <script src="js/evol-colorpicker.min.js" type="text/javascript"></script>
         <script src="js/control.js" type="text/javascript"></script>
-
         <script type="text/javascript">
             var nagImagesize = $(window).width() * 0.20 - 3;
         </script>
-
     </head>
     <body>
 
       <!-- toolbar for drawing-->
+      <!--
       <div class="toolbar">
          <div class="btn-group">
             <button class="el-tooltip btn active">
-               <!----> 
                <span class="svg-icon">
                   <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="32" height="32" viewBox="0 0 24 24" fill="">
                      <path d="M13,6V11H18V7.75L22.25,12L18,16.25V13H13V18H16.25L12,22.25L7.75,18H11V13H6V16.25L1.75,12L6,7.75V11H11V6H7.75L12,1.75L16.25,6H13Z"></path>
@@ -45,7 +43,6 @@
                </span>
             </button>
             <button class="el-tooltip btn">
-               <!----> 
                <span class="svg-icon">
                   <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="32" height="32" viewBox="0 0 24 24" fill="">
                      <path d="M13.64,21.97C13.14,22.21 12.54,22 12.31,21.5L10.13,16.76L7.62,18.78C7.45,18.92 7.24,19 7,19C6.45,19 6,18.55 6,18V3C6,2.45 6.45,2 7,2C7.24,2 7.47,2.09 7.64,2.23L7.65,2.22L19.14,11.86C19.57,12.22 19.62,12.85 19.27,13.27C19.12,13.45 18.91,13.57 18.7,13.61L15.54,14.23L17.74,18.96C18,19.46 17.76,20.05 17.26,20.28L13.64,21.97Z"></path>
@@ -53,10 +50,10 @@
                </span>
             </button>
             <button class="el-tooltip btn">
-               <!----> <i class="zmdi zmdi-arrows"></i>
+              <i class="zmdi zmdi-arrows"></i>
             </button>
             <button class="el-tooltip btn">
-               <!----> <i class="icon-price-tag"></i>
+             <i class="icon-price-tag"></i>
             </button>
             <button class="el-tooltip btn">
                <span class="add-icon">+</span> 
@@ -102,7 +99,6 @@
             <button class="el-tooltip btn">
                <span class="add-icon">+</span> 
                <span class="svg-icon">
-                  <!--?xml version="1.0" standalone="no"?-->
                   <svg class="icon" height="512" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg">
                      <path d="M384 128v256h31.146667l-168.106667 298.666667H85.333333v256h256v-85.333334h341.333334v85.333334h256v-256h-161.706667l-168.106667-298.666667H640V128m-170.666667 85.333333h85.333334v85.333334h-85.333334m42.666667 87.04l170.666667 303.36V768H341.333333v-78.933333M170.666667 768h85.333333v85.333333H170.666667m597.333333-85.333333h85.333333v85.333333h-85.333333" fill=""></path>
                   </svg>
@@ -110,20 +106,58 @@
             </button>
          </div>
       </div>
+    -->
       <!-- end toolbar -->
 
-
-
       <!-- main annotation  -->
-      <div class="scene" style="width: calc(75% - 3px);">
+      <div class="scene" style="width: calc(80%);">
 
           <!-- header -->
           <div class="headbar">
+            <!-- header left group -->
              <div class="left-group">
+                <div class="images-navigator" style="">
+                   <div class="inline-block">
+                    <a class="btn el-tooltip">
+                      <i class="icon-chevron-left" style="position: absolute;margin-top: 2px;margin-left: -5px;"></i>
+                    </a>
+                   </div>
+                   <div class="inline-block progress-wrapper">
+                      <div class="progress-line"><b style="width: 0%;"></b></div>
+                      <b class="image-name el-tooltip">
+                      Brain PMD940_0180
+                      </b> 
+                      <div class="info">
+                        <span class="titles el-tooltip">
+                          <a href="https://app.supervise.ly/projects/36431" class="project-title">annotation
+                          </a> 
+                          <i class="icon-chevron-small-right chevron"></i>
+                          <span class="dataset-title">001</span>
+                        </span>
+                      </div>
+                   </div>
+                   <div class="inline-block">
+                    <a class="btn el-tooltip">
+                      <i class="icon-chevron-right" style="position: absolute;margin-top: 2px;margin-left: -5px;"></i>
+                    </a>
+                  </div>
+                   <!---->
+                   <div class="el-loading-mask" style="display: none;">
+                      <div class="el-loading-spinner">
+                         <svg viewBox="25 25 50 50" class="circular">
+                            <circle cx="50" cy="50" r="20" fill="none" class="path"></circle>
+                         </svg>
+                         <!---->
+                      </div>
+                   </div>
+                </div>
+             </div>
+             <!-- header middle group -->
+             <div class="navigator-wrapper">
                 <div class="tool-options">
                    <div class="toolCreateOptions tool-options">
-                      <div data-v-6ec31c1d="" class="toolCreateAndEditOptions">
-                         <div data-v-6ec31c1d="">
+                      <div class="toolCreateAndEditOptions">
+                         <div>
                             <div class="el-select class-select-input">
                                <!---->
                                <div class="el-input el-input--small" style="margin-top: 8px;">
@@ -185,7 +219,11 @@
                          </div>
                       </div>
                    </div>
-                   <div id="controlTool" class="toolBitmapOptions tool-options" style="    margin-top: 8px;">
+
+                   <div id="controlTool" class="toolBitmapOptions tool-options" style="margin-top: 8px;">
+                      <button class="el-tooltip tool-button" id="pointer_active">
+                         <!----> <!----> <i class="icon-plus"></i> <!---->
+                      </button>
                       <button class="el-tooltip tool-button" id="pixel_active">
                          <!----> <!----> <i class="icon-round-brush"></i> <!---->
                       </button>
@@ -220,52 +258,13 @@
                       </span>
                       <div class="magnify_style" style="width: 270px;margin-left: 30px; margin-top: 10px;">
                         <p style="position: absolute; font-size: 80%; font-weight: 400;">Magnify (x<label id="zoomlabel">1</label>)</p>
-                        <input style="margin-top: -6px;" type="range" min="1" max="20" value="1" class="slider2" id="myRange"/>
-                      </div>
-                   </div>
-                </div>
-             </div>
-             <div class="navigator-wrapper">
-                <div class="images-navigator" style="">
-                   <div class="inline-block">
-                    <a class="btn el-tooltip">
-                      <i class="icon-chevron-left" style="position: absolute;margin-top: 2px;margin-left: -5px;"></i>
-                    </a>
-                   </div>
-                   <div class="inline-block progress-wrapper">
-                      <div class="progress-line"><b style="width: 0%;"></b></div>
-                      <b class="image-name el-tooltip">
-                      Brain PMD940_0180
-                      </b> 
-                      <div class="info">
-                        <span class="titles el-tooltip">
-                          <a href="https://app.supervise.ly/projects/36431" class="project-title">annotation
-                          </a> 
-                          <i class="icon-chevron-small-right chevron"></i>
-                          <span class="dataset-title">001</span>
-                        </span>
-                      </div>
-                   </div>
-                   <div class="inline-block">
-                    <a class="btn el-tooltip">
-                      <i class="icon-chevron-right" style="position: absolute;margin-top: 2px;margin-left: -5px;"></i>
-                    </a>
-                  </div>
-                   <!---->
-                   <div class="el-loading-mask" style="display: none;">
-                      <div class="el-loading-spinner">
-                         <svg viewBox="25 25 50 50" class="circular">
-                            <circle cx="50" cy="50" r="20" fill="none" class="path"></circle>
-                         </svg>
-                         <!---->
+                        <input style="margin-top: -6px; margin-left: 15px;" type="range" min="1" max="20" value="1" class="slider2" id="myRange"/>
                       </div>
                    </div>
                 </div>
              </div>
           </div>
           <!-- end of header -->
-            
-          <p style="background-color: antiquewhite">Region <span id="regdetails"></span> (1/8 mm)</p>
           
           <div class="btn-toolbar mb-2 mb-md-0" style="padding-bottom:10px">
                   
@@ -299,17 +298,12 @@
                           <button id="exportbutton" class="btn btn-sm btn-outline-secondary">Export</button>
                       </div>
           </div>
+        
           <div class="row">
               <div id="stage-parent" class="col-md-10" style="">
                   <div  id="container"></div>
               </div>
-              <div class="col-md-2">
-<!--                       <table>
-                          <tr><td></td><td> &nbsp;&nbsp;<a id="upbutton"><i class="fas fa-arrow-up"></i></a> </td><td></td></tr>
-                          <tr><td><a id="leftbutton"><i class="fas fa-arrow-left"></i></a> </td><td>&nbsp;&nbsp;<a id="centerbutton"><i class="fas fa-map-marker-alt"></i></a>&nbsp;</td><td>&nbsp;<a id="rightbutton"><i class="fas fa-arrow-right"></i></a> </td></tr>
-                          <tr><td></td><td> &nbsp;&nbsp;<a id="downbutton"><i class="fas fa-arrow-down"></i></a> </td><td></td></tr>
-                      </table> -->
-  
+<!--               <div class="col-md-2"> 
                       <form style="border:solid 1px;padding:5px">
                               <h5>Add object</h5>
                           
@@ -324,14 +318,14 @@
                           </div>
                           <button id="start">Start</button><button id="end">End</button>
                       </form>
-              </div>
+              </div> -->
           </div>
         </div>
 
         <!-- end main annotation -->
 
         <!-- sidebar tile images -->
-        <div class="sidebar" style="width: calc(20% - 3px);">
+        <div class="sidebar" style="width: calc(20%);">
            <div class="split split">
               <div id="panel-top" class="panel" style="height: calc(60% - 2px);">
                  <div class="disabled-overlay" style="display: none;"></div>
