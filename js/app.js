@@ -23,8 +23,11 @@ var stage = new Konva.Stage({
   container: "container",
   width: stageWidth, //window.innerWidth,
   height: stageHeight, //window.innerHeight - 45,
-  scale: { x: currentscale, y: currentscale },
-  draggable: false // if this is changed, then stage offset should be considered while recording points
+	container: "container",
+	width: stageWidth, //window.innerWidth,
+	height: stageHeight, //window.innerHeight - 45,
+	scale: { x: currentscale, y: currentscale },
+	draggable: false // if this is changed, then stage offset should be considered while recording points
 });
 
 var layer = new Konva.Layer(); // layer for pixel painting
@@ -57,11 +60,13 @@ var lastActIsEraseOrPaint = 0;
 
 var currentvector = undefined;
 
-var brushsize = 25; ///// Need be [1, 9, 25, 49...]
-var calcnt = (Math.sqrt(brushsize) -1)/2;
+var calcnt = calBrushsize();
 
 var age = 20;
 var output = [];
+
+var scaleBy = 1.1;
+var scrolldir = -1; //-1: scroll down goes to zoon-in. 1:-1: scroll down goes to zoon-out.
 
 function makeNewLine(isPolygon) {
   return new Konva.Line({
@@ -118,9 +123,9 @@ function mouseevt() {
         for (var x = -calcnt; x<calcnt+1; x++){
           for (var y = -calcnt; y<calcnt+1; y++) {
             if (calcnt > 0 && Math.pow(x*y,2) == Math.pow(calcnt,4)) {continue} // To make brush circle.
-				    paintRect(ImPix_x+x, ImPix_y+y, pointerPos);
+			paintRect(ImPix_x+x, ImPix_y+y, pointerPos);
           }
-		    }
+		}
         actioncnt = actioncnt + 1;  // paintしなくてもactionが加算されることに注意
         // console.log('[[ The last action(painting) done ]]');
         showstatus();
@@ -365,6 +370,7 @@ function eraseRect(ImPix_x,ImPix_y){
   // console.log('[[ Start erasing ]]');
 	for (var x = -calcnt; x<calcnt+1; x++){
 		for (var y = -calcnt; y<calcnt+1; y++) {
+			if (calcnt > 0 && Math.pow(x*y,2) == Math.pow(calcnt,4)) {continue}
 			var linearindex = (ImPix_y+y) * wid + (ImPix_x+x);
       var action = idxaction[linearindex];
       // console.log(action);
@@ -412,15 +418,16 @@ function eraseRect(ImPix_x,ImPix_y){
 }
 
 function minimizehistory(){ // To reduce memory use.
+  var count = 0;
   var actiokeys = Object.keys(actionarray); //Key(action number) is supposed to be in order from small to big.
   if (actiokeys.length < age+1) {return}
 
   for (var i = 0; i<(actiokeys.length - age); i++) {
     var action = actiokeys[i];
-    var linearindexkeys = Object.keys(actionarray[action])
+    var linearindexkeys = Object.keys(actionarray[action]);
     if (actionarray[action][linearindexkeys[0]]['flag'] == 0) {
       delete actionarray[action];
-      console.log('action deleted');
+      count++;
       for (var j = 0; j<linearindexkeys.length; j++) {
         delete idxaction[linearindexkeys[j]];
       }
@@ -436,11 +443,9 @@ function minimizehistory(){ // To reduce memory use.
       // delete actionarray[action];
     }
   }
+  console.log('Total '+ count +' old undo record were deleted.');
   showstatus();
 }
-
-
-
 
 var cumulateColorPoints = function(listOfColors) {
   // listOfColors should be of the format ["6", "7", "8"]
@@ -470,47 +475,64 @@ var cumulateColorPoints = function(listOfColors) {
 };
 
 
-stage.on("touchstart mousedown", function() {
-  mousedown = true;
-  mouseevt();
+stage.on("touchstart mousedown", function(e) {
+	var click = e.evt.button; //0 if it's left click. 2 if it's right click. 1 if it's middle click. 
+	if (click == 0) {
+		mousedown = true;
+		mouseevt();
+	}else if (click == 2) {
+		// e.evt.preventDefault(true);
+		// e.evt.stopPropagation(true);
+	}
+
 });
+
 stage.on("mousemove", mouseevt);
 stage.on("mouseleave", function(){
   mousedown = false;
   // console.log('mouseleft');
 });
-stage.on("mouseup", function() {
-  mousedown = false;
-  // console.log(positionForColor);
+stage.on("mouseup", function(e) {
+	var click = e.evt.button; //0 if it's left click. 2 if it's right click. 1 if it's middle click. 
+	if (click == 0) {
+		mousedown = false;
+		// console.log(positionForColor);
 
-  var selection = $("input[name=drawingtype]:checked").val();
-  if (selection == "vector_polygon" && currentvector != undefined) {
-    currentvector.closed(true);
-    layer.draw();
-  }
-  //TODO: push to array of drawn objects (for erase/undo), before undefining
-  // erase/undo will require a filter array (0/1)
-  // separate array for polygon and linestring required
-  // in save, iterate through these two object arrays and add to geojson msg
-  currentvector = undefined;
+		var selection = $("input[name=drawingtype]:checked").val();
+		if (selection == "vector_polygon" && currentvector != undefined) {
+		currentvector.closed(true);
+		layer.draw();
+		}
+		//TODO: push to array of drawn objects (for erase/undo), before undefining
+		// erase/undo will require a filter array (0/1)
+		// separate array for polygon and linestring required
+		// in save, iterate through these two object arrays and add to geojson msg
+		currentvector = undefined;
 
-  if (selection == "vector_linestring" || selection == "vector_polygon") {
-    var vecname = "hopefully-unique-" + typeOfOperations.length;
-    // taking note of the type. Will be handy when we undo
-    typeOfOperations.push({
-      type: "vec",
-      data: { name: vecname }
-    });
-  }
-  // } else if (selection == "raster_pixel") {
-  //   typeOfOperations.push({
-  //     type: "pixel"
-  //   });
-  // }
+		if (selection == "vector_linestring" || selection == "vector_polygon") {
+		var vecname = "hopefully-unique-" + typeOfOperations.length;
+		// taking note of the type. Will be handy when we undo
+		typeOfOperations.push({
+		  type: "vec",
+		  data: { name: vecname }
+		});
+		}
+		// } else if (selection == "raster_pixel") {
+		//   typeOfOperations.push({
+		//     type: "pixel"
+		//   });
+		// }
 
-  minimizehistory();
+		minimizehistory();
+	}else if (click == 2) {
+		// e.evt.preventDefault();
+		// e.evt.stopPropagation();
+	}
 });
 
+stage.on('contentContextmenu', (e) => {  /// Does not work with Chrome.
+  e.evt.preventDefault();
+});
 
 // $("#leftbutton").click(function() {
 //   currentoffset = stage.getOffset();
@@ -618,9 +640,15 @@ $("#clearbutton").click(function() {
   typeOfOperations = [];
 });
 
+$("#BrushSize").change(function(){calBrushsize()}); ///// Brush size need to be either of [1, 9, 25, 49]
+
+function calBrushsize() {
+	var brushsize = $("#BrushSize").val();
+	calcnt = (Math.sqrt(brushsize) -1)/2;
+	return calcnt
+}
 
 // Mitsu's scroll zooming
-var scaleBy = 1.1;
 stage.on("mousewheel", e => {
     e.evt.preventDefault();
     var oldScale = stage.scaleX();
