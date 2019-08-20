@@ -630,9 +630,18 @@ stage.on("mousewheel", e => {
       y: stage.getPointerPosition().y / oldScale - stage.y() / oldScale
     };
 
-    var newScale =
-      e.evt.deltaY > 0 ? oldScale * scaleBy : oldScale / scaleBy;
-    stage.scale({ x: newScale, y: newScale });
+    if (scrolldir == -1) {
+	    var newScale =
+	      e.evt.deltaY > 0 ? oldScale * scaleBy : oldScale / scaleBy;
+	    stage.scale({ x: newScale, y: newScale });
+	}else if (scrolldir == 1) {
+		var newScale =
+	      e.evt.deltaY < 0 ? oldScale * scaleBy : oldScale / scaleBy;
+	    stage.scale({ x: newScale, y: newScale });
+	}else{
+		console.log('Choose a proper scroll direction');
+		return
+	}
 
     var newPos = {
       x:
@@ -647,7 +656,7 @@ stage.on("mousewheel", e => {
 
   currentscale = newScale;
 
-  n = 1; // Num of digits after the decimal point.
+  var n = 1; // Num of digits after the decimal point.
   newScale_show = Math.floor(newScale*Math.pow(10,n))/Math.pow(10,n);
   var slider = document.getElementById("myRange");
   slider.value = newScale_show;
