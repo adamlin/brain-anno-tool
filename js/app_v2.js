@@ -20,9 +20,6 @@ var stageWidth = $(window).width();
 var stageHeight = $(window).height() - 125;
 
 var stage = new Konva.Stage({
-  container: "container",
-  width: stageWidth, //window.innerWidth,
-  height: stageHeight, //window.innerHeight - 45,
 	container: "container",
 	width: stageWidth, //window.innerWidth,
 	height: stageHeight, //window.innerHeight - 45,
