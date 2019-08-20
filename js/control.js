@@ -18,13 +18,18 @@ function mouseclick(){
 	})
 }
 
-function generateTileTable(){
+function generateTileTable(size){
 	var content = '';
 	// var imagePath = '';
 
-	var width= 51968;
-	var height= 43008;
+	var width = size[0];
+	var height = size[1];
 	//FIXME: get these from http://braincircuits.org/cgi-bin/iipsrv.fcgi?IIIF=/PITT001/Marmo_7NA_7_layers_1um_spacing.jp2/info.json
+	
+	// $.getJSON('http://braincircuits.org/cgi-bin/iipsrv.fcgi?IIIF=/PITT001/Marmo_7NA_7_layers_1um_spacing.jp2/info.json', function(data) {
+ //        width = `${data.width}`
+ //        height = `${data.height}`
+ //    });
 
 	var tilesize = 4096;
 
@@ -91,11 +96,13 @@ function generateTileTable(){
 	$('#image-3').addClass('active');
 }
 
-function selectedTile(tile){
+function selectedTile(tile, section_image_size){
 
-	var width= 51968;
-	var height= 43008;
+	var width = section_image_size[0];
+	var height = section_image_size[1];
 	//FIXME: get these from http://braincircuits.org/cgi-bin/iipsrv.fcgi?IIIF=/PITT001/Marmo_7NA_7_layers_1um_spacing.jp2/info.json
+
+
 
 	var tilesize = 4096;
 
