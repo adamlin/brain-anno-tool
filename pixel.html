@@ -30,85 +30,6 @@
         </script>
     </head>
     <body>
-
-      <!-- toolbar for drawing-->
-      <!--
-      <div class="toolbar">
-         <div class="btn-group">
-            <button class="el-tooltip btn active">
-               <span class="svg-icon">
-                  <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="32" height="32" viewBox="0 0 24 24" fill="">
-                     <path d="M13,6V11H18V7.75L22.25,12L18,16.25V13H13V18H16.25L12,22.25L7.75,18H11V13H6V16.25L1.75,12L6,7.75V11H11V6H7.75L12,1.75L16.25,6H13Z"></path>
-                  </svg>
-               </span>
-            </button>
-            <button class="el-tooltip btn">
-               <span class="svg-icon">
-                  <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="32" height="32" viewBox="0 0 24 24" fill="">
-                     <path d="M13.64,21.97C13.14,22.21 12.54,22 12.31,21.5L10.13,16.76L7.62,18.78C7.45,18.92 7.24,19 7,19C6.45,19 6,18.55 6,18V3C6,2.45 6.45,2 7,2C7.24,2 7.47,2.09 7.64,2.23L7.65,2.22L19.14,11.86C19.57,12.22 19.62,12.85 19.27,13.27C19.12,13.45 18.91,13.57 18.7,13.61L15.54,14.23L17.74,18.96C18,19.46 17.76,20.05 17.26,20.28L13.64,21.97Z"></path>
-                  </svg>
-               </span>
-            </button>
-            <button class="el-tooltip btn">
-              <i class="zmdi zmdi-arrows"></i>
-            </button>
-            <button class="el-tooltip btn">
-             <i class="icon-price-tag"></i>
-            </button>
-            <button class="el-tooltip btn">
-               <span class="add-icon">+</span> 
-               <span class="svg-icon">
-                  <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="32" height="32" viewBox="0 0 24 24" fill="">
-                     <path d="M12,20L7,22L12,11L17,22L12,20M8,2H16V5H22V7H16V10H8V7H2V5H8V2M10,4V8H14V4H10Z"></path>
-                  </svg>
-               </span>
-            </button>
-            <button class="el-tooltip btn">
-               <span class="add-icon">+</span> 
-               <span class="svg-icon">
-                  <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="32" height="32" viewBox="0 0 24 24" fill="">
-                     <path d="M2,4H8V6H16V4H22V10H20V14H22V20H16V18H8V20H2V14H4V10H2V4M16,10V8H8V10H6V14H8V16H16V14H18V10H16M4,6V8H6V6H4M18,6V8H20V6H18M4,16V18H6V16H4M18,16V18H20V16H18Z"></path>
-                  </svg>
-               </span>
-            </button>
-            <button class="el-tooltip btn">
-               <span class="add-icon">+</span> 
-               <span class="svg-icon">
-                  <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="32" height="32" viewBox="0 0 24 24" fill="">
-                     <path d="M16,2V8H17.08L14.95,13H14.26L12,9.97V5H6V11H6.91L4.88,16H2V22H8V16H7.04L9.07,11H10.27L12,13.32V19H18V13H17.12L19.25,8H22V2M18,4H20V6H18M8,7H10V9H8M14,15H16V17H14M4,18H6V20H4"></path>
-                  </svg>
-               </span>
-            </button>
-            <button class="el-tooltip btn">
-               <span class="add-icon">+</span> 
-               <span class="svg-icon">
-                  <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="32" height="32" viewBox="0 0 24 24" fill="">
-                     <path d="M2,2V8H4.28L5.57,16H4V22H10V20.06L15,20.05V22H21V16H19.17L20,9H22V3H16V6.53L14.8,8H9.59L8,5.82V2M4,4H6V6H4M18,5H20V7H18M6.31,8H7.11L9,10.59V14H15V10.91L16.57,9H18L17.16,16H15V18.06H10V16H7.6M11,10H13V12H11M6,18H8V20H6M17,18H19V20H17"></path>
-                  </svg>
-               </span>
-            </button>
-            <button class="el-tooltip btn"><span class="add-icon">+</span> <i class="icon-round-brush"></i></button>
-            <button class="el-tooltip btn">
-               <span class="add-icon">+</span> 
-               <span class="svg-icon">
-                  <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="32" height="32" viewBox="0 0 24 24" fill="">
-                     <path d="M7.5,5.6L5,7L6.4,4.5L5,2L7.5,3.4L10,2L8.6,4.5L10,7L7.5,5.6M19.5,15.4L22,14L20.6,16.5L22,19L19.5,17.6L17,19L18.4,16.5L17,14L19.5,15.4M22,2L20.6,4.5L22,7L19.5,5.6L17,7L18.4,4.5L17,2L19.5,3.4L22,2M13.34,12.78L15.78,10.34L13.66,8.22L11.22,10.66L13.34,12.78M14.37,7.29L16.71,9.63C17.1,10 17.1,10.65 16.71,11.04L5.04,22.71C4.65,23.1 4,23.1 3.63,22.71L1.29,20.37C0.9,20 0.9,19.35 1.29,18.96L12.96,7.29C13.35,6.9 14,6.9 14.37,7.29Z"></path>
-                  </svg>
-               </span>
-            </button>
-            <button class="el-tooltip btn">
-               <span class="add-icon">+</span> 
-               <span class="svg-icon">
-                  <svg class="icon" height="512" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg">
-                     <path d="M384 128v256h31.146667l-168.106667 298.666667H85.333333v256h256v-85.333334h341.333334v85.333334h256v-256h-161.706667l-168.106667-298.666667H640V128m-170.666667 85.333333h85.333334v85.333334h-85.333334m42.666667 87.04l170.666667 303.36V768H341.333333v-78.933333M170.666667 768h85.333333v85.333333H170.666667m597.333333-85.333333h85.333333v85.333333h-85.333333" fill=""></path>
-                  </svg>
-               </span>
-            </button>
-         </div>
-      </div>
-    -->
-      <!-- end toolbar -->
-
       <!-- main annotation  -->
       <div class="scene" style="width: calc(80%);">
 
@@ -258,7 +179,7 @@
                       </span>
                       <div class="magnify_style" style="width: 270px;margin-left: 30px; margin-top: 10px;">
                         <p style="position: absolute; font-size: 80%; font-weight: 400;">Magnify (x<label id="zoomlabel">1</label>)</p>
-                        <input style="margin-top: -6px; margin-left: 15px;" type="range" min="1" max="20" value="1" class="slider2" id="myRange"/>
+                        <input style="margin-top: -6px; margin-left: 15px;" type="range" min="0.1" max="40" value="1" step="0.1" class="slider2" id="myRange"/>
                       </div>
                    </div>
                 </div>
@@ -295,8 +216,18 @@
 
                   <div class="btn-group mr-2">
                           <button id="savebutton" class="btn btn-sm btn-outline-secondary">Save</button>
-                          <button id="exportbutton" class="btn btn-sm btn-outline-secondary">Export</button>
-                      </div>
+                          <button id="exportbutton" class="btn btn-sm btn-outline-secondary">Export
+                          </button>
+                  </div>
+                  <div class="btn-group mr-2">
+                  <span id="modelabel" class="label" style="padding-left:10px" >Brush size</span>
+                    <select id="BrushSize">
+                      <option value="1">1 pixel</option>
+                      <option value="9" selected="selected">small</option>
+                      <option value="25">medium</option>
+                      <option value="49">large</option>
+                    </select>
+                  </div>
           </div>
         
           <div class="row">
@@ -405,7 +336,7 @@
       </div>
       <!-- end sidebar control -->
 
-      <script src="js/app.js">
+      <script src="js/app_v2.js">
           fitStageIntoParentContainer();
           // adapt the stage on any window resize
           window.addEventListener('resize', fitStageIntoParentContainer);        
@@ -481,11 +412,12 @@
                 };
             });
         });
+
         $(document).on("click", "#listTableTiles tbody tr", function() {
             imageid = $(this).closest('tr').attr('id');
             $('#' + imageid).click(function() {
                res = imageid.split('-');
-               selectedTile(res[1]);
+               selectedTile(res[1],section_image_size);
             });
         });
       </script>
