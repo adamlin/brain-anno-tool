@@ -30,7 +30,8 @@ var stage = new Konva.Stage({
 var layer = new Konva.Layer(); // layer for pixel painting
 // var layer_vector = new Konva.Layer(); // layer for vector drawings
 
-var mousedown = false;
+var mouseLeftDown = false;
+var mouseRightDown = false;
 var UndoOrRedo = 0;
 
 var actionarray = {}; //Associative array. Key is a action count.
@@ -78,7 +79,7 @@ function makeNewLine(isPolygon) {
 }
 
 function makeNewRect(ImPix_x, ImPix_y, color) {
-  console.log(color);
+  // console.log(color);
   return new Konva.Rect({
     x: ImPix_x + 0.1,
     y: ImPix_y + 0.1,
@@ -97,7 +98,7 @@ function mouseevt() {
   var ImPix_y = Math.floor((pointerPos.y - stgposition.y) / currentscale);
 
   var selection = $("input[name=drawingtype]:checked").val();
-  if (mousedown == true) {
+  if (mouseLeftDown == true) {
     if (selection == "pointer") {
       stage.draggable(true);
     }else if (selection == "vector_linestring" || selection == "vector_polygon") {
@@ -120,23 +121,15 @@ function mouseevt() {
         for (var x = -calcnt; x<calcnt+1; x++){
           for (var y = -calcnt; y<calcnt+1; y++) {
             if (calcnt > 0 && Math.pow(x*y,2) == Math.pow(calcnt,4)) {continue} // To make brush circle.
-			paintRect(ImPix_x+x, ImPix_y+y, pointerPos);
+            paintRect(ImPix_x+x, ImPix_y+y, pointerPos);
           }
-		}
+		    }
         actioncnt = actioncnt + 1;  // paintしなくてもactionが加算されることに注意
         // console.log('[[ The last action(painting) done ]]');
-        showstatus();
-        addnewannotation();
+        // showstatus();
+        addnewannotation(); // For object tracking by Adam
       }
     }
-  }
-
-  // For cursor type Mitsu
-  var selection = $("input[name=drawingtype]:checked").val();
-  if (selection == "pointer") {
-    stage.container().style.cursor = 'pointer';
-  }else{
-    stage.container().style.cursor = 'default';
   }
 }
 
@@ -442,7 +435,7 @@ function minimizehistory(){ // To reduce memory use.
     }
   }
   console.log('Total '+ count +' old undo record were deleted.');
-  showstatus();
+  // showstatus();
 }
 
 var cumulateColorPoints = function(listOfColors) {
@@ -476,24 +469,36 @@ var cumulateColorPoints = function(listOfColors) {
 stage.on("touchstart mousedown", function(e) {
 	var click = e.evt.button; //0 if it's left click. 2 if it's right click. 1 if it's middle click. 
 	if (click == 0) {
-		mousedown = true;
+		mouseLeftDown = true;
 		mouseevt();
 	}else if (click == 2) {
-		// e.evt.preventDefault(true);
+    mouseRightDown = true;
+		// e.evt.preventDefault();
 		// e.evt.stopPropagation(true);
+    // stage.container().style.cursor = 'pointer';
+    stage.draggable(true);
 	}
-
 });
 
-stage.on("mousemove", mouseevt);
+stage.on("touchmove mousemove", function(){
+  // For cursor type Mitsu
+  var selection = $("input[name=drawingtype]:checked").val();
+  if (selection == "pointer" || mouseRightDown == true) {
+    stage.container().style.cursor = 'pointer';
+  }else{
+    stage.container().style.cursor = 'default';
+  }
+  mouseevt();
+});
+
 stage.on("mouseleave", function(){
-  mousedown = false;
+  mouseLeftDown = false;
   // console.log('mouseleft');
 });
 stage.on("mouseup", function(e) {
 	var click = e.evt.button; //0 if it's left click. 2 if it's right click. 1 if it's middle click. 
 	if (click == 0) {
-		mousedown = false;
+		mouseLeftDown = false;
 		// console.log(positionForColor);
 
 		var selection = $("input[name=drawingtype]:checked").val();
@@ -523,13 +528,12 @@ stage.on("mouseup", function(e) {
 
 		minimizehistory();
 	}else if (click == 2) {
-		// e.evt.preventDefault();
+    mouseRightDown = false;
+    console.log('To Do: disable the context menu pop up.');
+    // stage.preventDefault(true);
+		// e.evt.preventDefault();  /// Does not work
 		// e.evt.stopPropagation();
 	}
-});
-
-stage.on('contentContextmenu', (e) => {  /// Does not work with Chrome.
-  e.evt.preventDefault();
 });
 
 // $("#leftbutton").click(function() {
