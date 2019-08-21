@@ -220,3 +220,24 @@ function addnewannotation(){
 			'</tr>';
 	$('#listOfAnnotation').html(content2);
 }
+
+function selectedpixel(){
+	$("#brushsize_pixel a").click(function(e){
+	    e.preventDefault(); // cancel the link behaviour
+	    var selText = $(this).text();
+	    $('#selected-class').text(selText);
+	});
+
+	//$("#classTree").DropDownTree(options);
+}
+
+function selectedclasses(){
+	$("#annotated_class a").click(function(e){
+	    e.preventDefault(); // cancel the link behaviour
+	    var selText = $(this).text();
+	    console.info(selText);
+	    $('#dropdownClasses').text('class: ' + selText);
+	});
+
+	//$("#classTree").DropDownTree(options);
+}
