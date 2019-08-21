@@ -116,7 +116,7 @@ function mouseevt() {
       currentvector.name(vecname);
     }else if (selection == "raster_pixel") {
       stage.draggable(false);
-      if ($("#erase_check").is(":checked")) {
+      if ($('#erase_active').hasClass('active')) {
         eraseRect(ImPix_x,ImPix_y); 
       }else{
       	// console.log('[[ Start painting ]]');
@@ -568,32 +568,15 @@ stage.on("mouseup", function(e) {
 $("#picker").change(function() {
   currentcoloridx = this.value;
 });
-$("#undobutton").click(function() {
+
+$("#undo_draw").click(function() {
   UndoOrRedo = 'undo';
   UndoRedo();
-  // if (typeOfOperations[typeOfOperations.length - 1].type === "pixel") {
-  //   UndoOrRedo = 1;
-  //   UndoRedo();
-  // } else if (typeOfOperations[typeOfOperations.length - 1].type === "vec") {
-  //   undovec();
-  // }
-  // if (typeOfOperations.length > 0) {
-  //   typeOfOperations.pop();
-  // }
 });
 
-$("#redobutton").click(function() {
+$("#redo_draw").click(function() {
   UndoOrRedo = 'redo';
   UndoRedo();
-  // if (typeOfOperations[typeOfOperations.length - 1].type === "pixel") {
-  //   UndoOrRedo = 2;
-  //   UndoRedo();
-  // } else if (typeOfOperations[typeOfOperations.length - 1].type === "vec") {
-  //   redovec();
-  // }
-  // if (typeOfOperations.length > 0) {
-  //   typeOfOperations.pop();
-  // }
 });
 
 $("#savebutton").click(function() {
