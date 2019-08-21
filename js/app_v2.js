@@ -58,13 +58,15 @@ var lastActIsEraseOrPaint = 0;
 
 var currentvector = undefined;
 
-var calcnt = calBrushsize();
+var brushmatrix = calBrushsize();
 
 var age = 20;
 var output = [];
 
 var scaleBy = 1.1;
 var scrolldir = -1; //-1: scroll down goes to zoon-in. 1:-1: scroll down goes to zoon-out.
+
+
 
 function makeNewLine(isPolygon) {
   return new Konva.Line({
@@ -118,12 +120,9 @@ function mouseevt() {
         eraseRect(ImPix_x,ImPix_y); 
       }else{
       	// console.log('[[ Start painting ]]');
-        for (var x = -calcnt; x<calcnt+1; x++){
-          for (var y = -calcnt; y<calcnt+1; y++) {
-            if (calcnt > 0 && Math.pow(x*y,2) == Math.pow(calcnt,4)) {continue} // To make brush circle.
-            paintRect(ImPix_x+x, ImPix_y+y, pointerPos);
-          }
-		    }
+        for (var i = 0; i < brushmatrix.length; i++) {
+          paintRect(ImPix_x+brushmatrix[i][0], ImPix_y+brushmatrix[i][1], pointerPos);
+        }
         layer.draw();
         actioncnt = actioncnt + 1;  // paintしなくてもactionが加算されることに注意
         // console.log('[[ The last action(painting) done ]]');
@@ -144,7 +143,7 @@ function paintRect(ImPix_x, ImPix_y, pointerPos) {
 	// if (existingrect.className == "Image") {  /////////// どういう役割？
 
   if (action != undefined && actionarray[action][linearindex]['flag'] == 1) {
-    console.log('already exist');
+    // console.log('already exist');
   }else if (action != undefined && actionarray[action][linearindex]['flag'] == 0){ // When the pixel is empty by erasing or undo/redo at last time.
     var newrect = makeNewRect(ImPix_x, ImPix_y);
     // newrect.on("click tap", checkEraseRect);
@@ -263,7 +262,7 @@ function UndoRedo() {
     ActCursorForRedo = ActCursorForRedo -1;
   }
   actioncnt = actioncnt + 1;
-  showstatus();
+  // showstatus();
 }
 
 function undopix(properActCursor, keys, newundo){
@@ -360,49 +359,51 @@ function checkEraseRect(evt) {   //// eraseRectと融合できる？ いらな�
 
 function eraseRect(ImPix_x,ImPix_y){
   // console.log('[[ Start erasing ]]');
-	for (var x = -calcnt; x<calcnt+1; x++){
-		for (var y = -calcnt; y<calcnt+1; y++) {
-			if (calcnt > 0 && Math.pow(x*y,2) == Math.pow(calcnt,4)) {continue}
-			var linearindex = (ImPix_y+y) * wid + (ImPix_x+x);
-      var action = idxaction[linearindex];
-      // console.log(action);
-      if (action == undefined) {
-        // console.log('No action history for liner id: ' + linearindex);
-        continue
+  for (var i = 0; i < brushmatrix.length; i++) {
+    var x = brushmatrix[i][0];
+    var y = brushmatrix[i][1];
+
+    var linearindex = (ImPix_y+y) * wid + (ImPix_x+x);
+    var action = idxaction[linearindex];
+    // console.log(action);
+    if (action == undefined) {
+      // console.log('No action history for liner id: ' + linearindex);
+      continue
+    }
+
+    var stgposition = stage.position();
+    var RectPos = {
+    	x: (ImPix_x+x+0.5)*currentscale + stgposition.x, // Left-top Impix is [0, 0]. So, add 0.5 to point the center of the pixel.
+    	y: (ImPix_y+y+0.5)*currentscale + stgposition.y 
+    };
+
+    var existingrect = stage.getIntersection(RectPos, "Rect");
+
+    if (existingrect.className == "Rect") {
+    	existingrect.destroy();
+    	// layer.draw();
+
+      if (actionarray[actioncnt] == undefined) {
+        actionarray[actioncnt] = {}; // 新しくactionを作る. Use associative array not to make a unnecessary empties.
       }
 
-			var stgposition = stage.position();
-			var RectPos = {
-				x: (ImPix_x+x+0.5)*currentscale + stgposition.x, // Left-top Impix is [0, 0]. So, add 0.5 to point the center of the pixel.
-				y: (ImPix_y+y+0.5)*currentscale + stgposition.y 
-			};
+      actionarray[actioncnt][linearindex] = actionarray[action][linearindex]; //元のstatusを新しいactionにコピー
+      // console.log(actionarray[action]);
+      actionarray[actioncnt][linearindex]['flag'] = 0;
+      actionarray[actioncnt][linearindex]['undo'] = 0;
 
-			var existingrect = stage.getIntersection(RectPos, "Rect");
+      delete actionarray[action][linearindex]; // 元のactionを削除する
+      if (Object.keys(actionarray[action]).length == 0) {
+        delete actionarray[action]; // To reduce memory usage.
+      }
 
-			if (existingrect.className == "Rect") {
-				existingrect.destroy();
-				// layer.draw();
+      lastActIsUndoRedo = 0;
+      lastActIsEraseOrPaint = 0;
 
-        if (actionarray[actioncnt] == undefined) {
-          actionarray[actioncnt] = {}; // 新しくactionを作る. Use associative array not to make a unnecessary empties.
-        }
-
-        actionarray[actioncnt][linearindex] = actionarray[action][linearindex]; //元のstatusを新しいactionにコピー
-        // console.log(actionarray[action]);
-        actionarray[actioncnt][linearindex]['flag'] = 0;
-        actionarray[actioncnt][linearindex]['undo'] = 0;
-
-        delete actionarray[action][linearindex]; // 元のactionを削除する
-        if (Object.keys(actionarray[action]).length == 0) {
-          delete actionarray[action]; // To reduce memory usage.
-        }
-
-        lastActIsUndoRedo = 0;
-        lastActIsEraseOrPaint = 0;
-
-        idxaction[linearindex] = actioncnt; //action countの更新
-			} 
-		}
+      idxaction[linearindex] = actioncnt; //action countの更新
+		// } 
+		// }
+    }
 	}
   layer.draw();
   actioncnt = actioncnt + 1;
@@ -645,11 +646,20 @@ $("#clearbutton").click(function() {
 });
 
 $("#BrushSize").change(function(){calBrushsize()}); ///// Brush size need to be either of [1, 9, 25, 49]
-
 function calBrushsize() {
+  brushmatrix = [];
 	var brushsize = $("#BrushSize").val();
 	calcnt = (Math.sqrt(brushsize) -1)/2;
-	return calcnt
+
+  // To make brush circle.
+  for (var x = -calcnt; x<calcnt+1; x++){ 
+    for (var y = -calcnt; y<calcnt+1; y++) {
+      if (calcnt == 1 && (x==-1 || y==-1)) {continue}
+      if (calcnt > 1 && Math.pow(x*y,2) == Math.pow(calcnt,4)) {continue}
+      brushmatrix.push([x,y]);
+    }
+  }
+	return brushmatrix
 }
 
 // Mitsu's scroll zooming
