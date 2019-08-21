@@ -126,6 +126,7 @@ function mouseevt() {
         actioncnt = actioncnt + 1;  // paintしなくてもactionが加算されることに注意
         // console.log('[[ The last action(painting) done ]]');
         showstatus();
+        addnewannotation();
       }
     }
   }

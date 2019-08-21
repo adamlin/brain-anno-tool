@@ -1,21 +1,46 @@
 function mouseclick(){
 	let e = window.event;
 	let innerHeight = window.innerHeight;
-	let adjustTool = $("#gutter-vertical-control");
+	let adjustTool = $("#gutter-vertical-control-top");
+	let adjustToolbt = $("#gutter-vertical-control-bottom");
+
+	function onMouseMove(e) {
+		//let panelbtmheight = $('#panel-bottom').height();
+		let moving = (e.clientY/innerHeight)*100 + '%';
+		$('#panel-top').height(moving);
+	}
+
+	function onMouseMoveBtm(e) {
+		//let panelbtmheight = $('#panel-bottom').height();
+		let topheight = $('#panel-top').height();
+		let middlemoving = ((e.clientY - topheight)/innerHeight)*100 + '%';
+
+		$('#panel-middle').height(middlemoving);
+	}
+
 	adjustTool.mousedown(function(e){
-		function onMouseMove(e) {
-			let moving = e.clientY/innerHeight*100 + '%';
-			$('#panel-top').height(moving);
-		}
 		document.addEventListener('mousemove', onMouseMove);
-		adjustTool.onmouseup = function() {
-		    document.removeEventListener('mousemove', onMouseMove);
-		    adjustTool.onmouseup = null;
-	  	};
 	  	adjustTool.ondragstart = function() {
 		  return false;
 		};
 	})
+
+	adjustTool.mouseup(function(e){
+	    document.removeEventListener('mousemove', onMouseMove);
+	    adjustTool.onmouseup = null;
+  	});
+
+	adjustToolbt.mousedown(function(e){
+		document.addEventListener('mousemove', onMouseMoveBtm);
+	  	adjustToolbt.ondragstart = function() {
+		  return false;
+		};
+	})
+
+	adjustToolbt.mouseup(function(e){
+	    document.removeEventListener('mousemove', onMouseMoveBtm);
+	    adjustToolbt.onmouseup = null;
+  	});
 }
 
 function generateTileTable(size){
@@ -154,4 +179,44 @@ function selectedToolBtn(){
 	        $(this).toggleClass('active');
 	    });
 	});
+}
+
+function addnewannotation(){
+	var content2 = '';
+	content2 += 
+			'<tr>'+
+			   '<td class="padding"></td>'+
+			   '<td class="icn">'+
+			   '</td>'+
+			   '<td title="Priority" class="priority">'+
+			      '<div ><span >#</span>1'+
+			      '</div>'+
+			   '</td>'+
+			   '<td class="cnt icn clickable">'+
+			      '<div class="circle" style="background-color: rgb(236, 9, 130);"></div>'+
+			   '</td>'+
+			   '<td class="class-name clickable"><span title="test">'+
+			      'test'+
+			      '</span>'+
+			   '</td>'+
+			   '<td class="area"><span>'+
+			      '2%'+
+			      '</span>'+
+			   '</td>'+
+			   '<td class="icn">'+
+			      '<span >'+
+			         '<button type="button" class="el-button show-on-hover icon-btn black el-button--text">'+
+			            '<span><i title="Bind" class="icon-link"></i></span>'+
+			         '</button>'+
+			      '</span>'+
+			   '</td>'+
+			   '<td class="icn">'+
+			      '<button type="button" class="el-button show-on-hover icon-btn black el-button--text">'+
+			         '<span><i title="Delete object 16292- 16292" class="icon-trash"></i></span>'+
+			      '</button>'+
+			   '</td>'+
+			   '<td class="icn show-hide"><a title="Hide"><i class="icon-eye"></i></a> <i class="icon-edit show-on-active"></i></td>'+
+			   '<td class="padding"></td>'+
+			'</tr>';
+	$('#listOfAnnotation').html(content2);
 }
