@@ -124,6 +124,7 @@ function mouseevt() {
             paintRect(ImPix_x+x, ImPix_y+y, pointerPos);
           }
 		    }
+        layer.draw();
         actioncnt = actioncnt + 1;  // paintしなくてもactionが加算されることに注意
         // console.log('[[ The last action(painting) done ]]');
         // showstatus();
@@ -148,7 +149,7 @@ function paintRect(ImPix_x, ImPix_y, pointerPos) {
     var newrect = makeNewRect(ImPix_x, ImPix_y);
     // newrect.on("click tap", checkEraseRect);
     layer.add(newrect);
-    layer.draw();
+    // layer.draw();
 
     if (actionarray[actioncnt] == undefined) {
       actionarray[actioncnt] = {}; // 新しくactionを作る. Use associative array not to make a unnecessary empties.
@@ -179,7 +180,7 @@ function paintRect(ImPix_x, ImPix_y, pointerPos) {
     var newrect = makeNewRect(ImPix_x, ImPix_y);
     // newrect.on("click tap", checkEraseRect);
     layer.add(newrect);
-    layer.draw(); 
+    // layer.draw();
     
     if (actionarray[actioncnt] == undefined) {
       actionarray[actioncnt] = {}; // 新しくactionを作る. Use associative array not to make a unnecessary empties.
@@ -279,7 +280,7 @@ function undopix(properActCursor, keys, newundo){
       var newrect = makeNewRect(ImPix_x, ImPix_y, color);  /////////////color needs to match to the original
       // newrect.on("click tap", checkEraseRect);
       layer.add(newrect);
-      layer.draw();
+      // layer.draw();
     } else { // if the last action is 1 (paint), then erase.
       newflag = 0;
       var stgposition = stage.position();
@@ -293,9 +294,8 @@ function undopix(properActCursor, keys, newundo){
       if (existingrect.className != "Rect") {      
         continue
       }
-
       existingrect.destroy();
-      layer.draw();
+      // layer.draw();
     }
 
     // Make a new action
@@ -316,6 +316,7 @@ function undopix(properActCursor, keys, newundo){
     lastActIsUndoRedo = 1;
     // showstatus();
   }
+  layer.draw();
 }
 
 function undovec() {
@@ -380,7 +381,7 @@ function eraseRect(ImPix_x,ImPix_y){
 
 			if (existingrect.className == "Rect") {
 				existingrect.destroy();
-				layer.draw();
+				// layer.draw();
 
         if (actionarray[actioncnt] == undefined) {
           actionarray[actioncnt] = {}; // 新しくactionを作る. Use associative array not to make a unnecessary empties.
@@ -403,6 +404,7 @@ function eraseRect(ImPix_x,ImPix_y){
 			} 
 		}
 	}
+  layer.draw();
   actioncnt = actioncnt + 1;
   // console.log('[[ The last action(erasing) done ]]');
   // showstatus();
@@ -774,8 +776,6 @@ function fitStageIntoParentContainer() {
   stage.scale({ x: scale, y: scale });
   stage.draw();
 }
-
-
 
 function jp2pathtranslate_(jp2path) 
 {
