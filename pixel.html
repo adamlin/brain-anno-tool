@@ -7,7 +7,7 @@
 
         <script src="js/konva.js" type="text/javascript"></script>
 
-        <link rel = "stylesheet" type = "text/css" href = "style/style.css" />
+        <link rel ="stylesheet" type = "text/css" href = "style/style.css" />
         <link href="style/dashboard.css" rel="stylesheet"/>
         <link href="app/app.css" rel="stylesheet"/>
         <link href="app/vendor.css" rel="stylesheet"/>
@@ -25,6 +25,7 @@
         <link href="style/dropdowntree.css" rel="stylesheet"/>
         
         <script src="js/evol-colorpicker.min.js" type="text/javascript"></script>
+        <script src="js/app_v2.js" type="text/javascript"></script>
         <script src="js/control.js" type="text/javascript"></script>
         <script src="js/popper.min.js" type="text/javascript"></script>
         <script src="js/bootstrap.min.js" type="text/javascript"></script>
@@ -160,10 +161,10 @@
                           </button> 
                             
                           <div id="brushsize_pixel" class="dropdown-menu"> 
-                              <a class="dropdown-item" href="#" >1</a> 
-                              <a class="dropdown-item" href="#" >9</a> 
+                              <a class="dropdown-item" href="#" >1</a>
+                              <a class="dropdown-item" href="#" >9</a>
                               <a class="dropdown-item" href="#" >25</a> 
-                              <a class="dropdown-item" href="#" >49</a> 
+                              <a class="dropdown-item" href="#" >49</a>
                           </div> 
                       </div>                      
                       <div class="magnify_style" style="width: 270px;margin-left: 30px; margin-top: 10px;">
@@ -204,7 +205,7 @@
         
           <div class="row">
             <div id="stage-parent" class="col-md-10" style="">
-              <div  id="container"></div>
+              <div id="container"></div>
             </div>
           </div>
         </div>
@@ -332,12 +333,6 @@
       </div>
       <!-- end sidebar control -->
 
-      <script src="js/app_v2.js">
-          fitStageIntoParentContainer();
-          // adapt the stage on any window resize
-          window.addEventListener('resize', fitStageIntoParentContainer);        
-      </script>
-
       <script type="text/javascript">
         var section_image_size;
         var fullurl;
@@ -356,69 +351,84 @@
         selectedToolBtn();
         selectedpixel();
         selectedclasses();
-      </script>
-      <script>
-        // to be removed //
-      $(document).ready(function() {
-            $('#picker').colorpicker({
-                color:'#ff9800',
-                initialHistory: ['#ff0000','#000000','red', 'purple']
-            });
-            stage.add(layer);
-            const nativeCtx = layer.getContext()._context;
-            nativeCtx.webkitImageSmoothingEnabled = false;
-            nativeCtx.mozImageSmoothingEnabled = false;
-            nativeCtx.imageSmoothingEnabled = false;
-            nativeCtx.msImageSmoothingEnabled = false;
-            bgImage = new Image();
-            xpix = 16000; // 16280.0 + 700;
-            ypix = 7400 ; //11950.0 + 400;
-            xpc = xpix / 24000.0;
-            ypc = ypix / 18000.0;
-            wpc = wid / 24000.0;
-            hpc = hei / 18000.0;
-            rgnstring = xpc + "," + ypc + "," + wpc + "," + hpc;
-            //bgImage.src = "images/resolver_1020701_12800,16640,544,544.jpg";
-            iipbase = "http://braincircuits.org/cgi-bin/iipsrv.fcgi?FIF=";
-            // brainno = "PMD2055";
-            seriesid = '3362';
-            sectionid = '691261';
-            apibase = "http://mitradevel.cshl.org/webtools/seriesbrowser";
-            $.getJSON(apibase+'/getsectionjp2path/'+sectionid, function(data) {
-                jp2filepath = data['jp2Path'];
-                
-                jp2pathdescribe(jp2filepath);
-                bgImage.src =
-                    iipbase+jp2pathtranslate_(jp2filepath) +
-                    "&WID="+ wid +
-                    "&RGN=" + rgnstring +
-                    "&MINMAX=1:0,255&MINMAX=2:0,255&MINMAX=3:0,255&GAM=1&CVT=jpeg";
-                
-                $('#regdetails').html(''+xpix+','+ypix+'; '+wid+'x'+hei);
-                bgImage.onload = function() {
-                    outimg = new Konva.Image({
-                        x: 0,
-                        y: 0,
-                        width: wid,
-                        height: hei,
-                        image: bgImage,
-                        draggable: false
-                    });
-                    layer.add(outimg);
-                    layer.draw();
-                    // layer_vector.draw();
-                    console.info('hello world');
-                };
-            });
-        });
 
         $(document).on("click", "#listTableTiles tbody tr", function() {
-            imageid = $(this).closest('tr').attr('id');
-            $('#' + imageid).click(function() {
-               res = imageid.split('-');
-               selectedTile(res[1],section_image_size);
-            });
+          imageid = $(this).closest('tr').attr('id');
+          $('#' + imageid).click(function() {
+            res = imageid.split('-');
+            selectedTile(res[1],section_image_size);
+          });
         });
+      </script>
+      
+      <script type="text/javascript">
+        $(document).ready(function() {
+          setInitValue();
+          initializeStage();
+          setMouseEvt();
+          setElementAct();
+
+          // fitStageIntoParentContainer();
+          // adapt the stage on any window resize
+          // window.addEventListener('resize', fitStageIntoParentContainer);        
+        });
+
+
+      // // to be removed //
+      // $(document).ready(function() {
+      //   $('#picker').colorpicker({
+      //       color:'#ff9800',
+      //       // initialHistory: ['#ff0000','#000000','red', 'purple']
+      //   });
+      //   stage.add(layer);
+
+      //   const nativeCtx = layer.getContext()._context;
+      //   nativeCtx.webkitImageSmoothingEnabled = false;
+      //   nativeCtx.mozImageSmoothingEnabled = false;
+      //   nativeCtx.imageSmoothingEnabled = false;
+      //   nativeCtx.msImageSmoothingEnabled = false;
+      //   bgImage = new Image();
+
+      //   xpix = 16000; // 16280.0 + 700;
+      //   ypix = 7400 ; //11950.0 + 400;
+      //   xpc = xpix / 24000.0;
+      //   ypc = ypix / 18000.0;
+      //   wpc = wid / 24000.0;
+      //   hpc = hei / 18000.0;
+      //   rgnstring = xpc + "," + ypc + "," + wpc + "," + hpc;
+      //   //bgImage.src = "images/resolver_1020701_12800,16640,544,544.jpg";
+      //   iipbase = "http://braincircuits.org/cgi-bin/iipsrv.fcgi?FIF=";
+      //   // brainno = "PMD2055";
+      //   seriesid = '3362';
+      //   sectionid = '691261';
+      //   apibase = "http://mitradevel.cshl.org/webtools/seriesbrowser";
+      //   $.getJSON(apibase+'/getsectionjp2path/'+sectionid, function(data) {
+      //       jp2filepath = data['jp2Path'];
+            
+      //       jp2pathdescribe(jp2filepath);
+      //       bgImage.src =
+      //           iipbase+jp2pathtranslate_(jp2filepath) +
+      //           "&WID="+ wid +
+      //           "&RGN=" + rgnstring +
+      //           "&MINMAX=1:0,255&MINMAX=2:0,255&MINMAX=3:0,255&GAM=1&CVT=jpeg";
+            
+      //       $('#regdetails').html(''+xpix+','+ypix+'; '+wid+'x'+hei);
+      //       bgImage.onload = function() {
+      //           outimg = new Konva.Image({
+      //               x: 0,
+      //               y: 0,
+      //               width: wid,
+      //               height: hei,
+      //               image: bgImage,
+      //               draggable: false
+      //           });
+      //           layer.add(outimg);
+      //           layer.draw();
+      //           // layer_vector.draw();
+      //           console.info('hello world');
+      //       };
+      //   });
+      // });
       </script>
     </body>
 </html>
