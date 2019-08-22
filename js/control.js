@@ -118,7 +118,7 @@ function generateTileTable(size){
 		}
 	}
 	$('#listOfTiles').html(content);
-	$('#image-3').addClass('active');
+	// $('#image-3').addClass('active');
 }
 
 function selectedTile(tile, section_image_size){
@@ -168,7 +168,7 @@ function selectedTile(tile, section_image_size){
 	    layer.add(outimg);
 	    layer.draw();
 	    // layer_vector.draw();
-	    // console.info('tile ' + tile);
+	    console.info('tile ' + tile);
 	};
 }
 
@@ -240,4 +240,110 @@ function selectedclasses(){
 	});
 
 	//$("#classTree").DropDownTree(options);
+}
+
+function generatesectiontils(brain_id){
+	var content = '';
+	var brain_id = 2160;
+
+	let width;
+	let height;
+	let nissl, fluor, ctb;
+	let listOfsections;
+	let jp2path;
+	iipbase = 'http://braincircuits.org/cgi-bin/iipsrv.fcgi?FIF=';
+	iipinfo = 'http://braincircuits.org/cgi-bin/iipsrv.fcgi?IIIF='
+	apibase = 'http://mitradevel.cshl.org/webtools/seriesbrowser';
+
+	$.getJSON(apibase+'/getseriesid/'+brain_id, function(data) {
+        nissl = `${data.N}`
+        fluor = `${data.F}`
+    });
+
+	$.getJSON(apibase+'/getsectionids/'+nissl, function(data) {
+        listOfsections = `${data}`
+    });
+
+    $.getJSON(apibase+'/getsectionjp2path/'+listOfsections, function(data) {
+        jp2path = `${data.jp2path}`
+    });
+
+	var section_image_size;
+	var fullurl;
+	$.getJSON(iipinfo + jp2path + '/info.json', function(data) {
+	    width = `${data.width}`
+	    height = `${data.height}`
+	    let dect = [width, height];
+	    section_image_size = dect;
+
+
+		var tilesize = 4096;
+
+		var ntiles1 = Math.round(width/tilesize);
+		var ntiles2 = Math.round(height/tilesize);
+
+		wpc = tilesize / width;
+		hpc = tilesize / height;
+
+		for(var row = 0; row < ntiles1 ; row ++) {
+			for(var col = 0; col < ntiles2; col++) {
+
+				xpc = col * tilesize/width;
+				ypc = row * tilesize/height;
+
+				rgnstring = xpc + "," + ypc + "," + wpc + "," + hpc;
+
+				imagePath = iipbase + jp2path + "&WID="+ tilesize/100 + "&RGN=" + rgnstring +
+				 "&MINMAX=1:0,512&MINMAX=2:0,512&MINMAX=3:0,512&GAM=1&CVT=jpeg";
+
+			var i = row * ntiles2 + col;
+			content += 
+			         '<tr id="image-'+ i + '">'+
+			            '<td class="padding"></td>'+
+			            '<td class="preview clickable">'+
+			               '<div class="preview-pic" lazy="loaded" style="background-image: url(' + imagePath + ');"></div>'+
+			            '</td>'+
+			            '<td class="w100">'+
+			               '<div class="title">'+
+			                  'section on tile ' + i +
+			               '</div>'+
+			               '<div><span class="img-info">'+
+			               		'<img class="icon-layers-1"></img> '+
+			               			'<b>(1/8 mm)</b>'+
+			               		'</span> '+
+			               		'<span class="img-info">'+
+			               			'<img class="icon-calendar-1"></img> '+
+			               			'<b>tile: ' + '4096x4096' + '</b>'+
+			               		'</span>'+
+			               	'</div>'+
+			            '</td>'+
+			            '<td class="icn">'+
+			               '<div class="show-on-hover el-dropdown">'+
+			               		'<span class="el-dropdown-link">'+
+			               			'<img class="zmdi zmdi-download download-icon-1"></img>'+
+			               		'</span> '+
+			               	'</div>'+
+			            '</td>'+
+			            '<td class="icn">'+
+			               '<button type="button" class="el-button show-on-hover icon-btn black el-button--text" title="Delete image" disabled="disabled">'+
+			                  '<span><img class="icon-trash delete-1"></img></span>'+
+			               '</button>'+
+			            '</td>'+
+			            '<td class="padding"></td>'+
+			         '</tr>';
+			 imagePath = '';
+			}
+		}
+
+	});
+
+	$('#listOfTiles').html(content);	
+}
+
+function getUrlVars() {
+    var vars = {};
+    var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m,key,value) {
+        vars[key] = value;
+    });
+    return vars;
 }
