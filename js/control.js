@@ -181,7 +181,7 @@ function selectedToolBtn(){
 	});
 }
 
-function addnewannotation(){
+function addnewannotation(category,color){
 	var content2 = '';
 	content2 += 
 			'<tr>'+
@@ -193,10 +193,10 @@ function addnewannotation(){
 			      '</div>'+
 			   '</td>'+
 			   '<td class="cnt icn clickable">'+
-			      '<div class="circle" style="background-color: rgb(236, 9, 130);"></div>'+
+			      '<div class="circle" style="background-color: '+color+';"></div>'+
 			   '</td>'+
 			   '<td class="class-name clickable"><span title="test">'+
-			      'test'+
+			      category+
 			      '</span>'+
 			   '</td>'+
 			   '<td class="area"><span>'+
