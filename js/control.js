@@ -181,7 +181,7 @@ function selectedToolBtn(){
 	});
 }
 
-function addnewannotation(){
+function addnewannotation(category,color,numOfPix){
 	var content2 = '';
 	content2 += 
 			'<tr>'+
@@ -193,14 +193,14 @@ function addnewannotation(){
 			      '</div>'+
 			   '</td>'+
 			   '<td class="cnt icn clickable">'+
-			      '<div class="circle" style="background-color: rgb(236, 9, 130);"></div>'+
+			      '<div class="circle" style="background-color: '+color+';"></div>'+
 			   '</td>'+
 			   '<td class="class-name clickable"><span title="test">'+
-			      'test'+
+			      category+
 			      '</span>'+
 			   '</td>'+
 			   '<td class="area"><span>'+
-			      '2%'+
+			      numOfPix+ ' pixels'+
 			      '</span>'+
 			   '</td>'+
 			   '<td class="icn">'+

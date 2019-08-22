@@ -61,12 +61,10 @@ var currentvector = undefined;
 var brushmatrix = calBrushsize();
 
 var age = 20;
-var output = [];
+var outObj = {};
 
 var scaleBy = 1.1;
 var scrolldir = -1; //-1: scroll down goes to zoon-in. 1:-1: scroll down goes to zoon-out.
-
-
 
 function makeNewLine(isPolygon) {
   return new Konva.Line({
@@ -127,7 +125,6 @@ function mouseevt() {
         actioncnt = actioncnt + 1;  // paintしなくてもactionが加算されることに注意
         // console.log('[[ The last action(painting) done ]]');
         // showstatus();
-        addnewannotation(); // For object tracking by Adam
       }
     }
   }
@@ -153,7 +150,7 @@ function paintRect(ImPix_x, ImPix_y, pointerPos) {
     if (actionarray[actioncnt] == undefined) {
       actionarray[actioncnt] = {}; // 新しくactionを作る. Use associative array not to make a unnecessary empties.
     }
-    actionarray[actioncnt][linearindex] = actionarray[action][linearindex]; //元のstatusを新しいactionにコピー
+    actionarray[actioncnt][linearindex] = JSON.parse(JSON.stringify(actionarray[action][linearindex])); //元のstatusを新しいactionにコピー(deep copy)
     // console.log(actionarray[action]);
     actionarray[actioncnt][linearindex]['flag'] = 1;
     actionarray[actioncnt][linearindex]['undo'] = 0;
@@ -290,9 +287,7 @@ function undopix(properActCursor, keys, newundo){
       // console.log(pointerPos);
       var existingrect = stage.getIntersection(RectPos, "Rect");
       // console.log(existingrect);
-      if (existingrect.className != "Rect") {      
-        continue
-      }
+      if (existingrect.className != "Rect") {continue}
       existingrect.destroy();
       // layer.draw();
     }
@@ -301,7 +296,7 @@ function undopix(properActCursor, keys, newundo){
     if (actionarray[actioncnt] == undefined) {
       actionarray[actioncnt] = {}; // 新しくactionを作る. Use associative array not to make a unnecessary empties.
     }
-    actionarray[actioncnt][keys[i]] = actionarray[properActCursor][keys[i]]; //元のstatusを新しいactionにコピー
+    actionarray[actioncnt][keys[i]] = JSON.parse(JSON.stringify(actionarray[properActCursor][keys[i]])); //元のstatusを新しいactionにコピー(deep copy)
     actionarray[actioncnt][keys[i]]['flag'] = newflag;
     actionarray[actioncnt][keys[i]]['undo'] = newundo;
 
@@ -387,7 +382,7 @@ function eraseRect(ImPix_x,ImPix_y){
         actionarray[actioncnt] = {}; // 新しくactionを作る. Use associative array not to make a unnecessary empties.
       }
 
-      actionarray[actioncnt][linearindex] = actionarray[action][linearindex]; //元のstatusを新しいactionにコピー
+      actionarray[actioncnt][linearindex] = JSON.parse(JSON.stringify(actionarray[action][linearindex])); //元のstatusを新しいactionにコピー (deep copy)
       // console.log(actionarray[action]);
       actionarray[actioncnt][linearindex]['flag'] = 0;
       actionarray[actioncnt][linearindex]['undo'] = 0;
@@ -419,7 +414,7 @@ function minimizehistory(){ // To reduce memory use.
   for (var i = 0; i<(actiokeys.length - age); i++) {
     var action = actiokeys[i];
     var linearindexkeys = Object.keys(actionarray[action]);
-    if (actionarray[action][linearindexkeys[0]]['flag'] == 0) {
+    if (actionarray[action][linearindexkeys[0]]['flag'] == 0) { //同じaction内はすべて同じだと仮定してはじめのひとつだけ確認する
       delete actionarray[action];
       count++;
       for (var j = 0; j<linearindexkeys.length; j++) {
@@ -430,7 +425,7 @@ function minimizehistory(){ // To reduce memory use.
       //   var outtemp = actionarray[action][linearindexkeys[k]];
       //   delete outtemp['flag'];
       //   delete outtemp['undo']; 
-      //   output.push(outtemp);
+      //   outObj.push(outtemp);
       //   delete actionarray[action][linearindexkeys[k]];
       //   delete idxaction[linearindexkeys[k]];
       // }
@@ -438,7 +433,42 @@ function minimizehistory(){ // To reduce memory use.
     }
   }
   console.log('Total '+ count +' old undo record were deleted.');
-  // showstatus();
+  showstatus();
+}
+
+function storeObj(){
+  // Temporally. Later, get value from selector.
+  var tileNo = '7_10';
+  var Imagename = 'Marmoset_0001';
+  var category = 'Cell body';
+  var color = undefined;
+
+  outObj = { //初期化
+    imagename: Imagename,
+    tileNo: tileNo,
+    category: category,
+    pixObj: []
+  };
+
+  var actiokeys = Object.keys(actionarray); //Key(action number) is supposed to be in order from small to big.
+
+  for (var i = 0; i<actiokeys.length; i++) {
+    var action = actiokeys[i];
+    var linearindexkeys = Object.keys(actionarray[action]);
+    if (actionarray[action][linearindexkeys[0]]['flag'] == 1) { //同じaction内はすべて同じだと仮定してはじめのひとつだけ確認する
+      color = actionarray[action][linearindexkeys[0]]['color'];
+      for (var k = 0; k<linearindexkeys.length; k++) {
+        var outtemp = JSON.parse(JSON.stringify(actionarray[action][linearindexkeys[k]])); //元のオブジェクトをコピー (deep copy), 注意点あり。 https://leben.mobi/blog/copy_arrays_and_objects_without_loop/javascript/
+        delete outtemp['flag'];
+        delete outtemp['undo'];
+        delete outtemp['type'];
+        outObj['pixObj'].push(outtemp);
+      }
+    }
+  }
+  var numOfPix = outObj['pixObj'].length;
+  addnewannotation(category,color,numOfPix); // For object tracking by Adam
+  console.log(outObj);
 }
 
 var cumulateColorPoints = function(listOfColors) {
@@ -506,8 +536,8 @@ stage.on("mouseup", function(e) {
 
 		var selection = $("input[name=drawingtype]:checked").val();
 		if (selection == "vector_polygon" && currentvector != undefined) {
-		currentvector.closed(true);
-		layer.draw();
+      currentvector.closed(true);
+      layer.draw();
 		}
 		//TODO: push to array of drawn objects (for erase/undo), before undefining
 		// erase/undo will require a filter array (0/1)
@@ -516,20 +546,20 @@ stage.on("mouseup", function(e) {
 		currentvector = undefined;
 
 		if (selection == "vector_linestring" || selection == "vector_polygon") {
-		var vecname = "hopefully-unique-" + typeOfOperations.length;
-		// taking note of the type. Will be handy when we undo
-		typeOfOperations.push({
-		  type: "vec",
-		  data: { name: vecname }
-		});
+		  var vecname = "hopefully-unique-" + typeOfOperations.length;
+		  // taking note of the type. Will be handy when we undo
+      typeOfOperations.push({
+        type: "vec",
+        data: { name: vecname }
+      });
 		}
 		// } else if (selection == "raster_pixel") {
 		//   typeOfOperations.push({
 		//     type: "pixel"
 		//   });
 		// }
-
 		minimizehistory();
+    storeObj();
 	}else if (click == 2) {
     mouseRightDown = false;
     console.log('To Do: disable the context menu pop up.');
@@ -635,7 +665,7 @@ function calBrushsize() {
 	calcnt = (Math.sqrt(brushsize) -1)/2;
 
   // To make brush circle.
-  for (var x = -calcnt; x<calcnt+1; x++){ 
+  for (var x = -calcnt; x<calcnt+1; x++){
     for (var y = -calcnt; y<calcnt+1; y++) {
       if (calcnt == 1 && (x==-1 || y==-1)) {continue}
       if (calcnt > 1 && Math.pow(x*y,2) == Math.pow(calcnt,4)) {continue}
@@ -647,37 +677,33 @@ function calBrushsize() {
 
 // Mitsu's scroll zooming
 stage.on("mousewheel", e => {
-    e.evt.preventDefault();
-    var oldScale = stage.scaleX();
+  e.evt.preventDefault();
+  var oldScale = stage.scaleX();
 
-    var mousePointTo = {
-      x: stage.getPointerPosition().x / oldScale - stage.x() / oldScale,
-      y: stage.getPointerPosition().y / oldScale - stage.y() / oldScale
-    };
+  var mousePointTo = {
+    x: stage.getPointerPosition().x / oldScale - stage.x() / oldScale,
+    y: stage.getPointerPosition().y / oldScale - stage.y() / oldScale
+  };
 
-    if (scrolldir == -1) {
-	    var newScale =
-	      e.evt.deltaY > 0 ? oldScale * scaleBy : oldScale / scaleBy;
-	    stage.scale({ x: newScale, y: newScale });
+  if (scrolldir == -1) {
+    var newScale =
+    e.evt.deltaY > 0 ? oldScale * scaleBy : oldScale / scaleBy;
+    stage.scale({ x: newScale, y: newScale });
 	}else if (scrolldir == 1) {
 		var newScale =
-	      e.evt.deltaY < 0 ? oldScale * scaleBy : oldScale / scaleBy;
-	    stage.scale({ x: newScale, y: newScale });
+    e.evt.deltaY < 0 ? oldScale * scaleBy : oldScale / scaleBy;
+    stage.scale({ x: newScale, y: newScale });
 	}else{
 		console.log('Choose a proper scroll direction');
 		return
 	}
 
-    var newPos = {
-      x:
-        -(mousePointTo.x - stage.getPointerPosition().x / newScale) *
-        newScale,
-      y:
-        -(mousePointTo.y - stage.getPointerPosition().y / newScale) *
-        newScale
-    };
-    stage.position(newPos);
-    stage.batchDraw();
+  var newPos = {
+    x: -(mousePointTo.x - stage.getPointerPosition().x / newScale) * newScale,
+    y: -(mousePointTo.y - stage.getPointerPosition().y / newScale) * newScale
+  };
+  stage.position(newPos);
+  stage.batchDraw();
 
   currentscale = newScale;
 
@@ -685,7 +711,7 @@ stage.on("mousewheel", e => {
   newScale_show = Math.floor(newScale*Math.pow(10,n))/Math.pow(10,n);
   var slider = document.getElementById("myRange");
   slider.value = newScale_show;
-  $("#zoomlabel").html(""+newScale_show);
+  $("#zoomlabel").html(""+newScale_show);  //"" for what?
 });
 
 
@@ -695,7 +721,7 @@ slider.oninput = function() {
   var oldScale = stage.scaleX();
   var newscale = slider.value;
 
-  $("#zoomlabel").html(""+newscale)
+  $("#zoomlabel").html(""+newscale) //"" for what?
   // default scale 5 is set by you. Assuming I want the scale to
   // be from 1 to 10
   // var maxScaleStage = 10, minScaleStage = 1;
@@ -747,28 +773,28 @@ function showstatus (){
   console.log('3) The latest linearindex vs action # array is');
   console.log(idxaction);
   
-  // console.log('4) The final output is');
-  // console.log(output);
+  // console.log('4) The final outObj is');
+  // console.log(outObj);
 }
 
 
 
 // For responsive
 //https://konvajs.org/docs/sandbox/Responsive_Canvas.html
-function fitStageIntoParentContainer() {
-  var container = document.querySelector('#stage-parent');
+// function fitStageIntoParentContainer() {
+//   var container = document.querySelector('#stage-parent');
 
-  // now we need to fit stage into parent
-  var containerWidth = container.offsetWidth;
-  // to do this we need to scale the stage
-  var scale = containerWidth / stageWidth;
+//   // now we need to fit stage into parent
+//   var containerWidth = container.offsetWidth;
+//   // to do this we need to scale the stage
+//   var scale = containerWidth / stageWidth;
 
 
-  stage.width(stageWidth * scale);
-  stage.height(stageHeight * scale);
-  stage.scale({ x: scale, y: scale });
-  stage.draw();
-}
+//   stage.width(stageWidth * scale);
+//   stage.height(stageHeight * scale);
+//   stage.scale({ x: scale, y: scale });
+//   stage.draw();
+// }
 
 function jp2pathtranslate_(jp2path) 
 {
