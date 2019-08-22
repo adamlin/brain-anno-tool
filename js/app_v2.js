@@ -458,7 +458,7 @@ function storeObj(){
     if (actionarray[action][linearindexkeys[0]]['flag'] == 1) { //同じaction内はすべて同じだと仮定してはじめのひとつだけ確認する
       color = actionarray[action][linearindexkeys[0]]['color'];
       for (var k = 0; k<linearindexkeys.length; k++) {
-        var outtemp = JSON.parse(JSON.stringify(actionarray[action][linearindexkeys[k]])); //元のオブジェクトをコピー (deep copy)
+        var outtemp = JSON.parse(JSON.stringify(actionarray[action][linearindexkeys[k]])); //元のオブジェクトをコピー (deep copy), 注意点あり。 https://leben.mobi/blog/copy_arrays_and_objects_without_loop/javascript/
         delete outtemp['flag'];
         delete outtemp['undo'];
         delete outtemp['type'];
@@ -466,7 +466,8 @@ function storeObj(){
       }
     }
   }
-  addnewannotation(category,color); // For object tracking by Adam
+  var numOfPix = outObj['pixObj'].length;
+  addnewannotation(category,color,numOfPix); // For object tracking by Adam
   console.log(outObj);
 }
 

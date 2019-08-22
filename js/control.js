@@ -181,7 +181,7 @@ function selectedToolBtn(){
 	});
 }
 
-function addnewannotation(category,color){
+function addnewannotation(category,color,numOfPix){
 	var content2 = '';
 	content2 += 
 			'<tr>'+
@@ -200,7 +200,7 @@ function addnewannotation(category,color){
 			      '</span>'+
 			   '</td>'+
 			   '<td class="area"><span>'+
-			      '2%'+
+			      numOfPix+ ' pixels'+
 			      '</span>'+
 			   '</td>'+
 			   '<td class="icn">'+
