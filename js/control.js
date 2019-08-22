@@ -256,19 +256,18 @@ function generatesectiontils(brain_id){
 	iipbase = 'http://braincircuits.org/cgi-bin/iipsrv.fcgi?FIF=';
 	iipinfo = 'http://braincircuits.org/cgi-bin/iipsrv.fcgi?IIIF='
 	apibase = 'http://mitradevel.cshl.org/webtools/seriesbrowser';
-
-
-    
-
+   
 	$.getJSON(apibase+'/getseriesid/'+brain_id, function(data) {
         nissl = `${data.N}`
         fluor = `${data.F}`
         $.getJSON(apibase+'/getsectionids/'+nissl, function(data2) {
 	    	listOfsections = `${data2[10]}`
 
+	    	
 		    $.getJSON(apibase+'/getsectionjp2path/'+listOfsections, function(data3) {
 		        jp2path = `${data3.jp2Path}`
-
+		        jp2path = jp2path.replace('&', '%26');
+		        jp2path = jp2path.replace('/brainimg', '');
 				$.getJSON(iipinfo + jp2path + '/info.json', function(data4) {
 				    width = `${data4.width}`
 				    height = `${data4.height}`
