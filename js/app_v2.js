@@ -1,23 +1,12 @@
-var wid = 512;
-var hei = 512;
+var wid = 4096;
+var hei = 4096;
 var currentscale = 0.2;
 var scaleBy = 1.1;
 var scrolldir = -1; //-1: scroll down goes to zoon-in. 1:-1: scroll down goes to zoon-out.
 
-var currentcoloridx = undefined;
-// var colorlist = [
-//   "#ff0000",
-//   "#00ff00",
-//   "#ff00ff",
-//   "#ffff00",
-//   "#414141",
-//   "#00ffff",
-//   "#8f8f8f",
-//   "#ffe86b",
-//   "#ffffff"
-// ];
-var indicesWithSaidColor = [];
-var positionForColor = {};
+var currentcolor = undefined;
+// var indicesWithSaidColor = [];
+// var positionForColor = {};
 
 var mouseLeftDown = false;
 var mouseRightDown = false;
@@ -31,31 +20,36 @@ var ActCursorForRedo = undefined;
 var lastActIsUndoRedo = 0;
 var lastActIsEraseOrPaint = 0;
 
-var currentvector = undefined;
+// var currentvector = undefined;
 
 var brushmatrix = undefined;
 
 var age = 20;
 var outObj = {};
 
+var category = undefined;
 
 function setInitValue (){
+  // color picker
   $('#picker').colorpicker({
     color:'#ff9800',
     // initialHistory: ['#ff0000','#000000','red', 'purple']
   });
-  currentcoloridx = $('#picker').colorpicker("val");
+  currentcolor = $('#picker').colorpicker("val");
 
+  // magnify slider
   var slider = document.getElementById("myRange");
   slider.value = currentscale;
   $("#zoomlabel").html(currentscale);
 
+  // paint brush 
   brushmatrix = calBrushsize();
 }
 
 function initializeStage (){
   var stageWidth = $(window).width();
-  var stageHeight = $(window).height() - 125;
+  // var stageHeight = $(window).height() - 125;
+  var stageHeight = $(window).height();
 
   stage = new Konva.Stage({
     container: "container",
@@ -95,26 +89,26 @@ function initializeStage (){
 }
 
 function makeNewLine(isPolygon) {
-  return new Konva.Line({
-    points: [],
-    closed: isPolygon,
-    stroke: $('#picker').colorpicker("val"),
-    strokeWidth: 0.2, //TODO: smooth lines?
-    visible: true,
-    opacity: 1,
-    tension: 0
-  });
+  // return new Konva.Line({
+  //   points: [],
+  //   closed: isPolygon,
+  //   stroke: $('#picker').colorpicker("val"),
+  //   strokeWidth: 0.2, //TODO: smooth lines?
+  //   visible: true,
+  //   opacity: 1,
+  //   tension: 0
+  // });
 }
 
-function makeNewRect(ImPix_x, ImPix_y, color) {
-  // console.log(color);
+function makeNewRect(ImPix_x, ImPix_y, color, linearindex) {
   return new Konva.Rect({
+    id: linearindex,
     x: ImPix_x + 0.1,
     y: ImPix_y + 0.1,
     width: 0.8,
     height: 0.8,
-    // fill: colorlist[currentcoloridx - 1], //'#4b26df',
-    fill: color == undefined ? $('#picker').colorpicker("val") : color,
+    // fill: color == undefined ? $('#picker').colorpicker("val") : color,
+    fill: color,
     draggable: false
   });
 }
@@ -124,22 +118,23 @@ function mouseevt() {
   var stgposition = stage.position(); // The distance of the stage from the left-top of the container.
   var ImPix_x = Math.floor((pointerPos.x - stgposition.x) / currentscale); // X coordinate of the pixel of the image where the cursor is on. Top-left is 0.
   var ImPix_y = Math.floor((pointerPos.y - stgposition.y) / currentscale);
+  // console.log(ImPix_y);
 
   var selection = $("input[name=drawingtype]:checked").val();
   if (mouseLeftDown == true) {
     if (selection == "pointer") {
       stage.draggable(true);
     }else if (selection == "vector_linestring" || selection == "vector_polygon") {
-      stage.draggable(false);
-      var vecname = "hopefully-unique-" + typeOfOperations.length; ///
-      if (currentvector == undefined) {
-          currentvector = makeNewLine(false);
-          layer.add(currentvector);
-      }
-      currentvector.points(currentvector.points().concat([ImPix_x, ImPix_y]));
-      currentvector.stroke($('#picker').colorpicker("val")); //colorlist[currentcoloridx - 1]);
-      currentvector.draw();
-      currentvector.name(vecname);
+      // stage.draggable(false);
+      // var vecname = "hopefully-unique-" + typeOfOperations.length; ///
+      // if (currentvector == undefined) {
+      //     currentvector = makeNewLine(false);
+      //     layer.add(currentvector);
+      // }
+      // currentvector.points(currentvector.points().concat([ImPix_x, ImPix_y]));
+      // currentvector.stroke($('#picker').colorpicker("val")); //colorlist[currentcolor - 1]);
+      // currentvector.draw();
+      // currentvector.name(vecname);
     }else if (selection == "raster_pixel") {
       stage.draggable(false);
       if ($('#erase_active').hasClass('active')) {
@@ -152,7 +147,7 @@ function mouseevt() {
         layer.batchDraw();
         actioncnt = actioncnt + 1;  // paintしなくてもactionが加算されることに注意
         // console.log('[[ The last action(painting) done ]]');
-        // showstatus();
+        showstatus();
       }
     }
   }
@@ -167,56 +162,70 @@ function paintRect(ImPix_x, ImPix_y, pointerPos) {
 	// var existingrect = stage.getIntersection(pointerPos, "Rect");
 	// if (existingrect.className == "Image") {  /////////// どういう役割？
 
-  if (action != undefined && actionarray[action][linearindex]['flag'] == 1) {
-    // console.log('already exist');
-  }else if (action != undefined && actionarray[action][linearindex]['flag'] == 0){ // When the pixel is empty by erasing or undo/redo at last time.
-    var newrect = makeNewRect(ImPix_x, ImPix_y);
+  if (action != undefined && actionarray[action]['flag'] == 1) {
+    console.log('already exist');
+  }else if (action != undefined && actionarray[action]['flag'] == 0){ // When the pixel is empty by erasing or undo/redo at last time.
+    var newrect = makeNewRect(ImPix_x, ImPix_y,currentcolor,linearindex);
     // newrect.on("click tap", checkEraseRect);
     layer.add(newrect);
     // layer.draw();
 
     if (actionarray[actioncnt] == undefined) {
-      actionarray[actioncnt] = {}; // 新しくactionを作る. Use associative array not to make a unnecessary empties.
+      actionarray[actioncnt] = {
+        category: category,
+        color: currentcolor,
+        flag: 1,
+        undo: 0,
+        type: "pixel",
+        lindex: {}
+      }; // 新しくactionを作る. Use associative array not to make a unnecessary empties.
     }
-    actionarray[actioncnt][linearindex] = JSON.parse(JSON.stringify(actionarray[action][linearindex])); //元のstatusを新しいactionにコピー(deep copy)
+    actionarray[actioncnt]['lindex'][linearindex] = JSON.parse(JSON.stringify(actionarray[action]['lindex'][linearindex])); //元のstatusを新しいactionにコピー(deep copy)
     // console.log(actionarray[action]);
-    actionarray[actioncnt][linearindex]['flag'] = 1;
-    actionarray[actioncnt][linearindex]['undo'] = 0;
-    actionarray[actioncnt][linearindex]['color'] = currentcoloridx;
-    actionarray[actioncnt][linearindex]['type'] = "pixel";
+    // actionarray[actioncnt][linearindex]['flag'] = 1;
+    // actionarray[actioncnt][linearindex]['undo'] = 0;
+    // actionarray[actioncnt][linearindex]['color'] = currentcolor;
+    // actionarray[actioncnt][linearindex]['type'] = "pixel";
 
     idxaction[linearindex] = actioncnt; //action countの更新
 
-    delete actionarray[action][linearindex]; // 元のactionを削除する
-    if (Object.keys(actionarray[action]).length == 0) {
+    delete actionarray[action]['lindex'][linearindex]; // 元のactionを削除する
+    if (Object.keys(actionarray[action]['lindex']).length == 0) {
       delete actionarray[action]; // To reduce memory usage.
     }
 
     lastActIsUndoRedo = 0;
     lastActIsEraseOrPaint = 1;
 
-    // if (!positionForColor[currentcoloridx]) {  /// need check
-    //   positionForColor[currentcoloridx] = [];
+    // if (!positionForColor[currentcolor]) {  /// need check
+    //   positionForColor[currentcolor] = [];
     // }
-    // positionForColor[currentcoloridx].push([ImPix_x, ImPix_y]); /// need check
+    // positionForColor[currentcolor].push([ImPix_x, ImPix_y]); /// need check
     
   }else{ // Make a new rect at a new pixel
-    var newrect = makeNewRect(ImPix_x, ImPix_y);
+    var newrect = makeNewRect(ImPix_x, ImPix_y,currentcolor,linearindex);
     // newrect.on("click tap", checkEraseRect);
     layer.add(newrect);
     // layer.draw();
     
     if (actionarray[actioncnt] == undefined) {
-      actionarray[actioncnt] = {}; // 新しくactionを作る. Use associative array not to make a unnecessary empties.
+      actionarray[actioncnt] = {
+        category: category,
+        color: currentcolor,
+        flag: 1,
+        undo: 0,
+        type: "pixel",
+        lindex: {}
+      }; // 新しくactionを作る. Use associative array not to make a unnecessary empties.
     }
 
     // push a new status to the array.
-    actionarray[actioncnt][linearindex] = {
+    actionarray[actioncnt]['lindex'][linearindex] = {
       xy: [ImPix_x, ImPix_y],
-      flag: 1,
-      undo: 0,
-      color: currentcoloridx,
-      type: "pixel"
+      // flag: 1,
+      // undo: 0,
+      // color: currentcolor,
+      // type: "pixel"
     };
     
     idxaction[linearindex] = actioncnt;
@@ -224,10 +233,10 @@ function paintRect(ImPix_x, ImPix_y, pointerPos) {
     lastActIsUndoRedo = 0;
     lastActIsEraseOrPaint = 1;
 
-    // if (!positionForColor[currentcoloridx]) {  /// need check
-    //   positionForColor[currentcoloridx] = [];
+    // if (!positionForColor[currentcolor]) {  /// need check
+    //   positionForColor[currentcolor] = [];
     // }
-    // positionForColor[currentcoloridx].push([ImPix_x, ImPix_y]); /// need check
+    // positionForColor[currentcolor].push([ImPix_x, ImPix_y]); /// need check
 
   }
 }
@@ -240,19 +249,19 @@ function UndoRedo() {
   if (UndoOrRedo == 'undo'){
     newundo = 1;
 
-    for (var i = actioncnt-1; i>0 && !(actionarray[i] != undefined && actionarray[i][Object.keys(actionarray[i])[0]]['undo'] == 0); i--){ // 同じaction内でundoはすべて同じだと仮定して、一番始めのlinerindexのundoだけ調べる。
+    for (var i = actioncnt-1; i>0 && !(actionarray[i] != undefined && actionarray[i]['undo'] == 0); i--){
       // console.log('### Searching a correct action number... ###');  
       // console.log('The action cursor ' + i + ' was not what we want to undo/redo for.');
       // console.log('Next, try a cursor ' + (i-1));
     }
 
-    if ((lastActIsEraseOrPaint == 0 && actionarray[i][Object.keys(actionarray[i])[0]]['flag'] == 1) || (lastActIsEraseOrPaint == 1 && actionarray[i][Object.keys(actionarray[i])[0]]['flag'] == 0)) {
+    if ((lastActIsEraseOrPaint == 0 && actionarray[i]['flag'] == 1) || (lastActIsEraseOrPaint == 1 && actionarray[i]['flag'] == 0)) {
       console.log('No more undo');
       return //Eraseを一旦したら、そのErase郡以前のものをUndoできないようにする。同様に一旦Paintをしたら、そのPaint郡以前のものをUndoできないようにする。ただし、過去にEraseしたところをすべてPaintした場合は、undo=0かつflag=0の場所が無くなるので、eraseがそもそも無かったことになり、すべて１つのPaint郡として捉えられる。
     }
 
     properActCursor = i;
-    var keys = Object.keys(actionarray[properActCursor]);
+    var keys = Object.keys(actionarray[properActCursor]['lindex']);
 
   }else if(UndoOrRedo == 'redo'){
     newundo = 0;
@@ -263,20 +272,20 @@ function UndoRedo() {
     }else if (lastActIsUndoRedo == 0) {
       console.log('The last action need to be Undo or redo.');
       return;
-    }else if (actionarray[ActCursorForRedo][Object.keys(actionarray[ActCursorForRedo])[0]]['undo'] != 1) { //最後のredoを行ったundoのactionの1個前のactionがundoでなければいけない。 同じaction内でundoはすべて同じだと仮定して、一番始めのlinerindexのundoだけ調べる。
+    }else if (actionarray[ActCursorForRedo]['undo'] != 1) { //最後のredoを行ったundoのactionの1個前のactionがundoでなければいけない。 
       console.log('No more redo');
       return;
     }
 
     properActCursor = ActCursorForRedo;
-    var keys = Object.keys(actionarray[properActCursor]);
+    var keys = Object.keys(actionarray[properActCursor]['lindex']);
   }
 
   // console.log('Found a proper action cursor to do undo/redo: ' + properActCursor);
   
-  if (actionarray[properActCursor][keys[0]]['type'] === "pixel") { // 同じaction内でtypeはすべて同じだと仮定して、一番始めのlinerindexのtypeだけ調べる。
+  if (actionarray[properActCursor]['type'] === "pixel") {
     undopix(properActCursor, keys, newundo);
-  }else if(actionarray[properActCursor][keys[0]]['type'] === "vec"){
+  }else if(actionarray[properActCursor]['type'] === "vec"){
     undovec();
   }
 
@@ -291,17 +300,17 @@ function UndoRedo() {
 }
 
 function undopix(properActCursor, keys, newundo){
-  var lastaction = actionarray[properActCursor][keys[0]]['flag']; // 同じaction内でflagはすべて同じだと仮定して、一番始めのlinerindexのglagだけ調べる。
+  var lastaction = actionarray[properActCursor]['flag'];
   var newflag = undefined;
 
   for (var i = 0; i < keys.length; i++) {
-    var Impix = actionarray[properActCursor][keys[i]]['xy'];
+    var Impix = actionarray[properActCursor]['lindex'][keys[i]]['xy'];
     var ImPix_x = Impix[0];
     var ImPix_y = Impix[1];
     if (!lastaction) { // if the last action is 0 (erase), then redraw.
       newflag = 1;
-      var color = actionarray[properActCursor][keys[i]]['color'];
-      var newrect = makeNewRect(ImPix_x, ImPix_y, color);  /////////////color needs to match to the original
+      var color = actionarray[properActCursor]['color'];
+      var newrect = makeNewRect(ImPix_x, ImPix_y, color, keys[i]);  /////////////color needs to match to the original
       // newrect.on("click tap", checkEraseRect);
       layer.add(newrect);
       // layer.draw();
@@ -322,16 +331,23 @@ function undopix(properActCursor, keys, newundo){
 
     // Make a new action
     if (actionarray[actioncnt] == undefined) {
-      actionarray[actioncnt] = {}; // 新しくactionを作る. Use associative array not to make a unnecessary empties.
+      actionarray[actioncnt] = {
+        category: actionarray[properActCursor]['category'],
+        color: actionarray[properActCursor]['color'],
+        flag: newflag,
+        undo: newundo,
+        type: "pixel",
+        lindex: {}
+      }; // 新しくactionを作る. Use associative array not to make a unnecessary empties.
     }
-    actionarray[actioncnt][keys[i]] = JSON.parse(JSON.stringify(actionarray[properActCursor][keys[i]])); //元のstatusを新しいactionにコピー(deep copy)
-    actionarray[actioncnt][keys[i]]['flag'] = newflag;
-    actionarray[actioncnt][keys[i]]['undo'] = newundo;
+    actionarray[actioncnt]['lindex'][keys[i]] = JSON.parse(JSON.stringify(actionarray[properActCursor]['lindex'][keys[i]])); //元のstatusを新しいactionにコピー(deep copy)
+    // actionarray[actioncnt][keys[i]]['flag'] = newflag;
+    // actionarray[actioncnt][keys[i]]['undo'] = newundo;
 
     idxaction[keys[i]] = actioncnt; //action countの更新
 
-    delete actionarray[properActCursor][keys[i]]; // 元のactionを削除する
-    if (Object.keys(actionarray[properActCursor]).length == 0) {
+    delete actionarray[properActCursor]['lindex'][keys[i]]; // 元のactionを削除する
+    if (Object.keys(actionarray[properActCursor]['lindex']).length == 0) {
       delete actionarray[properActCursor]; // To reduce memory usage.
     }
 
@@ -342,16 +358,16 @@ function undopix(properActCursor, keys, newundo){
 }
 
 function undovec() {
-  var vecName = typeOfOperations[typeOfOperations.length - 1].data.name;
-  console.log(vecName);
-  var foundvec = layer.getChildren(function(node) {
-    return node.name() === vecName;
-  });
-  var foundarray = foundvec.toArray();
-  //foundarray[0]
-  console.log(foundarray);
-  foundarray[0].destroy();
-  layer.draw();
+  // var vecName = typeOfOperations[typeOfOperations.length - 1].data.name;
+  // console.log(vecName);
+  // var foundvec = layer.getChildren(function(node) {
+  //   return node.name() === vecName;
+  // });
+  // var foundarray = foundvec.toArray();
+  // //foundarray[0]
+  // console.log(foundarray);
+  // foundarray[0].destroy();
+  // layer.draw();
 }
 
 
@@ -407,16 +423,23 @@ function eraseRect(ImPix_x,ImPix_y){
     	// layer.draw();
 
       if (actionarray[actioncnt] == undefined) {
-        actionarray[actioncnt] = {}; // 新しくactionを作る. Use associative array not to make a unnecessary empties.
+        actionarray[actioncnt] = {
+          category: actionarray[action]['category'],
+          color: actionarray[action]['color'],
+          flag: 0,
+          undo: 0,
+          type: actionarray[action]['type'],
+          lindex: {}
+        }; // 新しくactionを作る. Use associative array not to make a unnecessary empties.
       }
 
-      actionarray[actioncnt][linearindex] = JSON.parse(JSON.stringify(actionarray[action][linearindex])); //元のstatusを新しいactionにコピー (deep copy)
+      actionarray[actioncnt]['lindex'][linearindex] = JSON.parse(JSON.stringify(actionarray[action]['lindex'][linearindex])); //元のstatusを新しいactionにコピー (deep copy)
       // console.log(actionarray[action]);
-      actionarray[actioncnt][linearindex]['flag'] = 0;
-      actionarray[actioncnt][linearindex]['undo'] = 0;
+      // actionarray[actioncnt][linearindex]['flag'] = 0;
+      // actionarray[actioncnt][linearindex]['undo'] = 0;
 
-      delete actionarray[action][linearindex]; // 元のactionを削除する
-      if (Object.keys(actionarray[action]).length == 0) {
+      delete actionarray[action]['lindex'][linearindex]; // 元のactionを削除する
+      if (Object.keys(actionarray[action]['lindex']).length == 0) {
         delete actionarray[action]; // To reduce memory usage.
       }
 
@@ -424,8 +447,6 @@ function eraseRect(ImPix_x,ImPix_y){
       lastActIsEraseOrPaint = 0;
 
       idxaction[linearindex] = actioncnt; //action countの更新
-		// } 
-		// }
     }
 	}
   // layer.batchDraw();
@@ -442,8 +463,8 @@ function minimizehistory(){ // To reduce memory use.
 
   for (var i = 0; i<(actiokeys.length - age); i++) {
     var action = actiokeys[i];
-    var linearindexkeys = Object.keys(actionarray[action]);
-    if (actionarray[action][linearindexkeys[0]]['flag'] == 0) { //同じaction内はすべて同じだと仮定してはじめのひとつだけ確認する
+    var linearindexkeys = Object.keys(actionarray[action]['lindex']);
+    if (actionarray[action]['flag'] == 0) {
       delete actionarray[action];
       count++;
       for (var j = 0; j<linearindexkeys.length; j++) {
@@ -469,13 +490,13 @@ function storeObj(){
   // Temporally. Later, get value from selector.
   var tileNo = '7_10';
   var Imagename = 'Marmoset_0001';
-  var category = 'Cell body';
+  // var category = 'Cell body';
   var color = undefined;
 
   outObj = { //初期化
     imagename: Imagename,
     tileNo: tileNo,
-    category: category,
+    category: '',
     pixObj: []
   };
 
@@ -483,14 +504,15 @@ function storeObj(){
 
   for (var i = 0; i<actiokeys.length; i++) {
     var action = actiokeys[i];
-    var linearindexkeys = Object.keys(actionarray[action]);
-    if (actionarray[action][linearindexkeys[0]]['flag'] == 1) { //同じaction内はすべて同じだと仮定してはじめのひとつだけ確認する
-      color = actionarray[action][linearindexkeys[0]]['color'];
+    var linearindexkeys = Object.keys(actionarray[action]['lindex']);
+    if (actionarray[action]['flag'] == 1) {
+      color = actionarray[action]['color'];
       for (var k = 0; k<linearindexkeys.length; k++) {
-        var outtemp = JSON.parse(JSON.stringify(actionarray[action][linearindexkeys[k]])); //元のオブジェクトをコピー (deep copy), 注意点あり。 https://leben.mobi/blog/copy_arrays_and_objects_without_loop/javascript/
-        delete outtemp['flag'];
-        delete outtemp['undo'];
-        delete outtemp['type'];
+        var outtemp = JSON.parse(JSON.stringify(actionarray[action]['lindex'][linearindexkeys[k]])); //元のオブジェクトをコピー (deep copy), 注意点あり。 https://leben.mobi/blog/copy_arrays_and_objects_without_loop/javascript/
+        // delete outtemp['flag'];
+        // delete outtemp['undo'];
+        // delete outtemp['type'];
+        outObj['category'] = actionarray[action]['category'];
         outObj['pixObj'].push(outtemp);
       }
     }
@@ -501,30 +523,30 @@ function storeObj(){
 }
 
 var cumulateColorPoints = function(listOfColors) {
-  // listOfColors should be of the format ["6", "7", "8"]
-  var finalResult = {};
-  $.each(listOfColors, function(index, color) {
-    finalResult[color] = {
-      idxarray: [],
-      xyarray: []
-      // can put more here if you want
-    };
-    // took the reduce from
-    // https://stackoverflow.com/a/20798754
-    // https://stackoverflow.com/questions/966225/how-can-i-create-a-two-dimensional-array-in-javascript/966234#966234
-    var indicesWithSaidColor = colorarray.reduce(function(a, e, i) {
-      if (e === color) {
-        a.push(i);
-      }
-      return a;
-    }, []);
-    $.each(indicesWithSaidColor, function(_, actualIndex) {
-      // include more data that you want
-      finalResult[color]["idxarray"].push(idxarray[actualIndex]);
-      finalResult[color]["xyarray"].push(xyarray[actualIndex]);
-    });
-  });
-  return finalResult;
+  // // listOfColors should be of the format ["6", "7", "8"]
+  // var finalResult = {};
+  // $.each(listOfColors, function(index, color) {
+  //   finalResult[color] = {
+  //     idxarray: [],
+  //     xyarray: []
+  //     // can put more here if you want
+  //   };
+  //   // took the reduce from
+  //   // https://stackoverflow.com/a/20798754
+  //   // https://stackoverflow.com/questions/966225/how-can-i-create-a-two-dimensional-array-in-javascript/966234#966234
+  //   var indicesWithSaidColor = colorarray.reduce(function(a, e, i) {
+  //     if (e === color) {
+  //       a.push(i);
+  //     }
+  //     return a;
+  //   }, []);
+  //   $.each(indicesWithSaidColor, function(_, actualIndex) {
+  //     // include more data that you want
+  //     finalResult[color]["idxarray"].push(idxarray[actualIndex]);
+  //     finalResult[color]["xyarray"].push(xyarray[actualIndex]);
+  //   });
+  // });
+  // return finalResult;
 };
 
 function calBrushsize() {
@@ -580,25 +602,25 @@ function setMouseEvt(){
       mouseLeftDown = false;
       // console.log(positionForColor);
 
-      var selection = $("input[name=drawingtype]:checked").val();
-      if (selection == "vector_polygon" && currentvector != undefined) {
-        currentvector.closed(true);
-        layer.draw();
-      }
+      // var selection = $("input[name=drawingtype]:checked").val();
+      // if (selection == "vector_polygon" && currentvector != undefined) {
+        // currentvector.closed(true);
+        // layer.draw();
+      // }
       //TODO: push to array of drawn objects (for erase/undo), before undefining
       // erase/undo will require a filter array (0/1)
       // separate array for polygon and linestring required
       // in save, iterate through these two object arrays and add to geojson msg
-      currentvector = undefined;
+      // currentvector = undefined;
 
-      if (selection == "vector_linestring" || selection == "vector_polygon") {
-        var vecname = "hopefully-unique-" + typeOfOperations.length;
-        // taking note of the type. Will be handy when we undo
-        typeOfOperations.push({
-          type: "vec",
-          data: { name: vecname }
-        });
-      }
+      // if (selection == "vector_linestring" || selection == "vector_polygon") {
+        // var vecname = "hopefully-unique-" + typeOfOperations.length;
+        // // taking note of the type. Will be handy when we undo
+        // typeOfOperations.push({
+        //   type: "vec",
+        //   data: { name: vecname }
+        // });
+      // }
       // } else if (selection == "raster_pixel") {
       //   typeOfOperations.push({
       //     type: "pixel"
@@ -658,7 +680,7 @@ function setMouseEvt(){
 
 function setElementAct(){
   $("#picker").change(function() {
-    currentcoloridx = this.value;
+    currentcolor = this.value;
   });
 
   $("#undo_draw").click(function() {
@@ -672,52 +694,52 @@ function setElementAct(){
   });
 
   $("#savebutton").click(function() {
-    xyarray_filt = [];
-    for (ii = 0; ii < xyarray.length; ++ii) {
-      if (flagarray[ii] == 1) xyarray_filt.push(xyarray[ii]);
-    }
-    msg =
-      '{"type":"MultiPoint", "coordinates":' + JSON.stringify(xyarray_filt) + "}";
-    //need to standardize export format of independant operation type.
-    alert(msg);
+    // xyarray_filt = [];
+    // for (ii = 0; ii < xyarray.length; ++ii) {
+    //   if (flagarray[ii] == 1) xyarray_filt.push(xyarray[ii]);
+    // }
+    // msg =
+    //   '{"type":"MultiPoint", "coordinates":' + JSON.stringify(xyarray_filt) + "}";
+    // //need to standardize export format of independant operation type.
+    // alert(msg);
 
-    var children = layer.getChildren();
+    // var children = layer.getChildren();
 
-    // get only lines
-    var lines = layer.getChildren(function(node){
-      return node.getClassName() === 'Line';
-    });
+    // // get only lines
+    // var lines = layer.getChildren(function(node){
+    //   return node.getClassName() === 'Line';
+    // });
 
-    //https://stackoverflow.com/questions/22464605/convert-a-1d-array-to-2d-array
-    for(ii=0;ii<lines.length;ii++){
-      points = lines[ii].points();
-      points_copy = points.slice();
-      var coordinates = [];
-      while(points_copy.length)
-        coordinates.push(points_copy.splice(0,2));
+    // //https://stackoverflow.com/questions/22464605/convert-a-1d-array-to-2d-array
+    // for(ii=0;ii<lines.length;ii++){
+    //   points = lines[ii].points();
+    //   points_copy = points.slice();
+    //   var coordinates = [];
+    //   while(points_copy.length)
+    //     coordinates.push(points_copy.splice(0,2));
       
-      if(coordinates.length>0) {
-        msg = '{"type":"Polygon","coordinates":'+JSON.stringify(coordinates)+'}';
-        alert(msg);
-      }
-    }
+    //   if(coordinates.length>0) {
+    //     msg = '{"type":"Polygon","coordinates":'+JSON.stringify(coordinates)+'}';
+    //     alert(msg);
+    //   }
+    // }
   });
 
   $("#clearbutton").click(function() {
-    var shapes = stage.find("Rect");
-    // var shapes = stage.find();
-    for (var i = 0; i < shapes.length; i++) {
-      shapes[i].destroy();
-      layer.draw();
-    }
+    // var shapes = stage.find("Rect");
+    // // var shapes = stage.find();
+    // for (var i = 0; i < shapes.length; i++) {
+    //   shapes[i].destroy();
+    //   layer.draw();
+    // }
 
-    var lines = stage.find("Line");
-    for (var i = 0; i < lines.length; i++) {
-      lines[i].destroy();
-      layer.draw();
-    }
+    // var lines = stage.find("Line");
+    // for (var i = 0; i < lines.length; i++) {
+    //   lines[i].destroy();
+    //   layer.draw();
+    // }
 
-    typeOfOperations = [];
+    // typeOfOperations = [];
   });
 
   $("#BrushSize").change(function(){calBrushsize()}); ///// Brush size need to be either of [1, 9, 25, 49]

@@ -235,6 +235,7 @@ function selectedclasses(){
 	$("#annotated_class a").click(function(e){
 	    e.preventDefault(); // cancel the link behaviour
 	    var selText = $(this).text();
+	    category = selText; // by Mitsu for obj output.
 	    console.info(selText);
 	    $('#dropdownClasses').text('class: ' + selText);
 	});
