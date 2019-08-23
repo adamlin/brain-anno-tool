@@ -22,12 +22,15 @@ var lastActIsEraseOrPaint = 0;
 
 // var currentvector = undefined;
 
+// var brushsize = undefined;
 var brushmatrix = undefined;
 
 var age = 20;
 var outObj = {};
 
 var category = undefined;
+
+var rectMargin = 0.1;
 
 function setInitValue (){
   // color picker
@@ -103,13 +106,14 @@ function makeNewLine(isPolygon) {
 function makeNewRect(ImPix_x, ImPix_y, color, linearindex) {
   return new Konva.Rect({
     id: linearindex,
-    x: ImPix_x + 0.1,
-    y: ImPix_y + 0.1,
-    width: 0.8,
-    height: 0.8,
+    x: ImPix_x+rectMargin, //0.1 -> 0.1 + 0.8 + 0.1 = 1
+    y: ImPix_y+rectMargin,
+    width: 1-2*rectMargin, //0.8
+    height: 1-2*rectMargin,
     // fill: color == undefined ? $('#picker').colorpicker("val") : color,
     fill: color,
-    draggable: false
+    draggable: false,
+    category: 'kategori-'
   });
 }
 
@@ -170,7 +174,7 @@ function paintRect(ImPix_x, ImPix_y, pointerPos) {
     layer.add(newrect);
     // layer.draw();
 
-    if (actionarray[actioncnt] == undefined) {
+    if (actionarray[actioncnt] == undefined) { // 新しくactionを作る. Use associative array not to make a unnecessary empties.
       actionarray[actioncnt] = {
         category: category,
         color: currentcolor,
@@ -178,7 +182,7 @@ function paintRect(ImPix_x, ImPix_y, pointerPos) {
         undo: 0,
         type: "pixel",
         lindex: {}
-      }; // 新しくactionを作る. Use associative array not to make a unnecessary empties.
+      };
     }
     actionarray[actioncnt]['lindex'][linearindex] = JSON.parse(JSON.stringify(actionarray[action]['lindex'][linearindex])); //元のstatusを新しいactionにコピー(deep copy)
     // console.log(actionarray[action]);
@@ -208,7 +212,7 @@ function paintRect(ImPix_x, ImPix_y, pointerPos) {
     layer.add(newrect);
     // layer.draw();
     
-    if (actionarray[actioncnt] == undefined) {
+    if (actionarray[actioncnt] == undefined) { // 新しくactionを作る. Use associative array not to make a unnecessary empties.
       actionarray[actioncnt] = {
         category: category,
         color: currentcolor,
@@ -216,7 +220,7 @@ function paintRect(ImPix_x, ImPix_y, pointerPos) {
         undo: 0,
         type: "pixel",
         lindex: {}
-      }; // 新しくactionを作る. Use associative array not to make a unnecessary empties.
+      };
     }
 
     // push a new status to the array.
@@ -296,7 +300,7 @@ function UndoRedo() {
     ActCursorForRedo = ActCursorForRedo -1;
   }
   actioncnt = actioncnt + 1;
-  // showstatus();
+  showstatus();
 }
 
 function undopix(properActCursor, keys, newundo){
@@ -309,8 +313,8 @@ function undopix(properActCursor, keys, newundo){
     var ImPix_y = Impix[1];
     if (!lastaction) { // if the last action is 0 (erase), then redraw.
       newflag = 1;
-      var color = actionarray[properActCursor]['color'];
-      var newrect = makeNewRect(ImPix_x, ImPix_y, color, keys[i]);  /////////////color needs to match to the original
+      var orgColor = actionarray[properActCursor]['color'];
+      var newrect = makeNewRect(ImPix_x, ImPix_y, orgColor, keys[i]);  /////////////color needs to match to the original
       // newrect.on("click tap", checkEraseRect);
       layer.add(newrect);
       // layer.draw();
@@ -330,7 +334,7 @@ function undopix(properActCursor, keys, newundo){
     }
 
     // Make a new action
-    if (actionarray[actioncnt] == undefined) {
+    if (actionarray[actioncnt] == undefined) { // 新しくactionを作る. Use associative array not to make a unnecessary empties.
       actionarray[actioncnt] = {
         category: actionarray[properActCursor]['category'],
         color: actionarray[properActCursor]['color'],
@@ -338,7 +342,7 @@ function undopix(properActCursor, keys, newundo){
         undo: newundo,
         type: "pixel",
         lindex: {}
-      }; // 新しくactionを作る. Use associative array not to make a unnecessary empties.
+      };
     }
     actionarray[actioncnt]['lindex'][keys[i]] = JSON.parse(JSON.stringify(actionarray[properActCursor]['lindex'][keys[i]])); //元のstatusを新しいactionにコピー(deep copy)
     // actionarray[actioncnt][keys[i]]['flag'] = newflag;
@@ -453,7 +457,7 @@ function eraseRect(ImPix_x,ImPix_y){
   layer.draw(); // draw is faster than batchdraw for erase?
   actioncnt = actioncnt + 1;
   // console.log('[[ The last action(erasing) done ]]');
-  // showstatus();
+  showstatus();
 }
 
 function minimizehistory(){ // To reduce memory use.
@@ -824,9 +828,9 @@ function showstatus (){
   
   console.log('1) Current actionarray is');
   console.log(actionarray);
-  console.log('2) The last action # is ' + (actioncnt-1));
-  console.log('3) The latest linearindex vs action # array is');
-  console.log(idxaction);
+  // console.log('2) The last action # is ' + (actioncnt-1));
+  // console.log('3) The latest linearindex vs action # array is');
+  // console.log(idxaction);
   
   // console.log('4) The final outObj is');
   // console.log(outObj);
