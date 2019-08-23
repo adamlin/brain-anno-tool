@@ -161,18 +161,21 @@
                           </button> 
                             
                           <div id="brushsize_pixel" class="dropdown-menu"> 
-                              <a class="dropdown-item" href="#" >1</a>
-                              <a class="dropdown-item" href="#" >9</a>
-                              <a class="dropdown-item" href="#" >25</a> 
-                              <a class="dropdown-item" href="#" >49</a>
+                              <a class="dropdown-item" href="#" data-value="1">1</a>
+                              <a class="dropdown-item" href="#" data-value="9">small</a>
+                              <a class="dropdown-item" href="#" data-value="25">midium</a> 
+                              <a class="dropdown-item" href="#" data-value="49">large</a>
                           </div> 
                       </div>                      
-                      <div class="magnify_style" style="width: 270px;margin-left: 30px; margin-top: 10px;">
-                        <p style="position: absolute; font-size: 80%; font-weight: 400;">Magnify (x<label id="zoomlabel">1</label>)</p>
+                      <div class="magnify_style" style="margin-left: 30px; margin-top: 10px;">
+                        <p style="position: absolute; font-size: 80%; font-weight: 400; margin-left: 60px;">Magnify (x<label id="zoomlabel">1</label>)</p>
                         <input style="margin-top: -6px; margin-left: 15px;" type="range" min="0.1" max="40" step="0.1" class="slider2" id="myRange"/>
                       </div>
                    </div>
                    <div class="divider"></div>
+                   <a id="setting_draw" class="btn">
+                       <i class="zmdi zmdi-settings"></i><div>setting</div>
+                   </a>
                 </div>
              </div>
         </div>
@@ -180,17 +183,20 @@
           
           <div class="btn-toolbar mb-2 mb-md-0" style="padding-bottom:10px">
                   <div class="btn-group mr-2">
-                      <div class="radio" style="padding-right:10px"><label><input type="radio" name="drawingtype" value="vector_linestring">Curve</label></div>
-                      <div class="radio" style="padding-right:10px"><label><input type="radio" name="drawingtype" value="vector_polygon">Polygon</label></div>
+                     <!--  <div class="radio" style="padding-right:10px"><label><input type="radio" name="drawingtype" value="vector_linestring">Curve</label></div>
+                      <div class="radio" style="padding-right:10px"><label><input type="radio" name="drawingtype" value="vector_polygon">Polygon</label></div> -->
                       <div class="radio" style="padding-right:10px"><label><input type="radio" name="drawingtype" value="raster_pixel" checked>Pixel</label></div> <!-- Mitsu -->
                       <div class="radio"><label><input type="radio" name="drawingtype" value="pointer" checked>Pointer</label></div> <!-- Mitsu -->
                   </div>
-                  <div class="btn-group mr-2">
+                  <!--
+                   <div class="btn-group mr-2">
                           <button id="savebutton" class="btn btn-sm btn-outline-secondary">Save</button>
                           <button id="exportbutton" class="btn btn-sm btn-outline-secondary">Export
                           </button>
-                  </div>
-                  <div class="btn-group mr-2">
+                  </div> 
+                  -->
+                 <!--  
+                 <div class="btn-group mr-2">
                   <span id="modelabel" class="label" style="padding-left:10px" >Brush size</span>
                     <select id="BrushSize">
                       <option value="1">1 pixel</option>
@@ -198,8 +204,8 @@
                       <option value="25">medium</option>
                       <option value="49">large</option>
                     </select>
-                  </div>
-                  <label for="picker">Color</label>
+                  </div> -->
+                  <!-- <label for="picker">Color</label> -->
                   <input id="picker" style="width:100px"/>
           </div>
         
