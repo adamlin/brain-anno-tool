@@ -1,3 +1,9 @@
+var imagecurrentPath = '';
+var section_image_size;
+var brain_name ='';
+var countTiles = 0;
+var section_number_init = 30;
+
 function mouseclick(){
 	let e = window.event;
 	let innerHeight = window.innerHeight;
@@ -121,8 +127,8 @@ function generateTileTable(size){
 	// $('#image-3').addClass('active');
 }
 
-function selectedTile(tile, section_image_size){
-
+function selectedTile(tile, section_image_size, imageurl){
+	$('#image_loading_selected').css("display", "block");
 	var width = section_image_size[0];
 	var height = section_image_size[1];
 	//FIXME: get these from http://braincircuits.org/cgi-bin/iipsrv.fcgi?IIIF=/PITT001/Marmo_7NA_7_layers_1um_spacing.jp2/info.json
@@ -144,18 +150,23 @@ function selectedTile(tile, section_image_size){
 	ypc = row * tilesize/height;
 
 	rgnstring = xpc + "," + ypc + "," + wpc + "," + hpc;
-
 	iipbase = "http://braincircuits.org/cgi-bin/iipsrv.fcgi?FIF=";
-	jp2path = "/PITT001/Marmo_7NA_7_layers_1um_spacing.jp2";
+
+	if(imageurl == ''){
+		jp2path = "/PITT001/Marmo_7NA_7_layers_1um_spacing.jp2";
+		
+	}else{
+		jp2path = imageurl;
+	}
 
 	imagePath = iipbase + jp2path + "&WID="+ tilesize + "&RGN=" + rgnstring +
-	"&MINMAX=1:0,512&MINMAX=2:0,512&MINMAX=3:0,512&GAM=1&CVT=jpeg";
+		"&MINMAX=1:0,512&MINMAX=2:0,512&MINMAX=3:0,512&GAM=1&CVT=jpeg";
 
 	bgImage.src = imagePath;
 	// bgImage.src = 'http://braincircuits.org/cgi-bin/iipsrv.fcgi?FIF=/PITT001/Marmo_7NA_7_layers_1um_spacing.jp2&GAM=1&MINMAX=1:0,512&MINMAX=2:0,512&MINMAX=3:0,512&JTL=3,' + tile;
-
 	// $('#regdetails').html(''+xpix+','+ypix+'; '+wid+'x'+hei);
 	bgImage.onload = function() {
+
 	    outimg = new Konva.Image({
 	        x: 0,
 	        y: 0,
@@ -169,6 +180,7 @@ function selectedTile(tile, section_image_size){
 	    layer.draw();
 	    // layer_vector.draw();
 	    console.info('tile ' + tile);
+	    $('#image_loading_selected').css("display", "none");
 	};
 }
 
@@ -244,8 +256,7 @@ function selectedclasses(){
 
 function generatesectiontils(brain_id){
 	var content = '';
-
-	var section_image_size;
+	var count = 0;
 	var fullurl;
 
 	let width;
@@ -253,6 +264,8 @@ function generatesectiontils(brain_id){
 	let nissl, fluor, ctb;
 	let listOfsections;
 	let jp2path;
+	let typeused;
+
 	iipbase = 'http://braincircuits.org/cgi-bin/iipsrv.fcgi?FIF=';
 	iipinfo = 'http://braincircuits.org/cgi-bin/iipsrv.fcgi?IIIF='
 	apibase = 'http://mitradevel.cshl.org/webtools/seriesbrowser';
@@ -260,14 +273,23 @@ function generatesectiontils(brain_id){
 	$.getJSON(apibase+'/getseriesid/'+brain_id, function(data) {
         nissl = `${data.N}`
         fluor = `${data.F}`
-        $.getJSON(apibase+'/getsectionids/'+nissl, function(data2) {
-	    	listOfsections = `${data2[10]}`
+        if(type == 'F'){
+        	typeused = fluor;
+        }else if (type == 'N'){
+        	typeused = nissl;
+        }
+
+        $.getJSON(apibase+'/getsectionids/'+typeused, function(data2) {
+	    	listOfsections = `${data2[230]}`
 
 	    	
 		    $.getJSON(apibase+'/getsectionjp2path/'+listOfsections, function(data3) {
 		        jp2path = `${data3.jp2Path}`
 		        jp2path = jp2path.replace('&', '%26');
 		        jp2path = jp2path.replace('/brainimg', '');
+
+		        imagecurrentPath = jp2path; //for gobel uses.
+
 				$.getJSON(iipinfo + jp2path + '/info.json', function(data4) {
 				    width = `${data4.width}`
 				    height = `${data4.height}`
@@ -294,49 +316,57 @@ function generatesectiontils(brain_id){
 							imagePath = iipbase + jp2path + "&WID="+ tilesize/100 + "&RGN=" + rgnstring +
 							 "&MINMAX=1:0,512&MINMAX=2:0,512&MINMAX=3:0,512&GAM=1&CVT=jpeg";
 
-						var i = row * ntiles2 + col;
-						content += 
-						         '<tr id="image-'+ i + '">'+
-						            '<td class="padding"></td>'+
-						            '<td class="preview clickable">'+
-						               '<div class="preview-pic" lazy="loaded" style="background-image: url(' + imagePath + ');"></div>'+
-						            '</td>'+
-						            '<td class="w100">'+
-						               '<div class="title">'+
-						                  'section on tile ' + i +
-						               '</div>'+
-						               '<div><span class="img-info">'+
-						               		'<img class="icon-layers-1"></img> '+
-						               			'<b>(1/8 mm)</b>'+
-						               		'</span> '+
-						               		'<span class="img-info">'+
-						               			'<img class="icon-calendar-1"></img> '+
-						               			'<b>tile: ' + '4096x4096' + '</b>'+
-						               		'</span>'+
-						               	'</div>'+
-						            '</td>'+
-						            '<td class="icn">'+
-						               '<div class="show-on-hover el-dropdown">'+
-						               		'<span class="el-dropdown-link">'+
-						               			'<img class="zmdi zmdi-download download-icon-1"></img>'+
-						               		'</span> '+
-						               	'</div>'+
-						            '</td>'+
-						            '<td class="icn">'+
-						               '<button type="button" class="el-button show-on-hover icon-btn black el-button--text" title="Delete image" disabled="disabled">'+
-						                  '<span><img class="icon-trash delete-1"></img></span>'+
-						               '</button>'+
-						            '</td>'+
-						            '<td class="padding"></td>'+
-						         '</tr>';
-						 imagePath = '';
+							var i = row * ntiles2 + col;
+							content += 
+							         '<tr id="image-'+ i + '">'+
+							            '<td class="padding"></td>'+
+							            '<td class="preview clickable">'+
+							               '<div class="preview-pic" lazy="loaded" style="background-image: url(' + imagePath + ');"></div>'+
+							            '</td>'+
+							            '<td class="w100">'+
+							               '<div class="title">'+
+							                  'section on tile ' + i +
+							               '</div>'+
+							               '<div><span class="img-info">'+
+							               		'<img class="icon-layers-1"></img> '+
+							               			'<b>(1/8 mm)</b>'+
+							               		'</span> '+
+							               		'<span class="img-info">'+
+							               			'<img class="icon-calendar-1"></img> '+
+							               			'<b>tile: ' + '4096x4096' + '</b>'+
+							               		'</span>'+
+							               	'</div>'+
+							            '</td>'+
+							            '<td class="icn">'+
+							               '<div class="show-on-hover el-dropdown">'+
+							               		'<span class="el-dropdown-link">'+
+							               			'<img class="zmdi zmdi-download download-icon-1"></img>'+
+							               		'</span> '+
+							               	'</div>'+
+							            '</td>'+
+							            '<td class="icn">'+
+							               '<button type="button" class="el-button show-on-hover icon-btn black el-button--text" title="Delete image" disabled="disabled">'+
+							                  '<span><img class="icon-trash delete-1"></img></span>'+
+							               '</button>'+
+							            '</td>'+
+							            '<td class="padding"></td>'+
+							         '</tr>';
+							 imagePath = '';
+							 count = count + 1;
 						}
 					}
-					$('#listOfTiles').html(content);	
+					$('#listOfTiles').html(content);
+
+					countTiles = count;
+					var nagImagesize = $(window).width() * 0.20 - 3;
+					var imageaddress = iipbase + imagecurrentPath + "&WID=" + nagImagesize + "&QLT=130&CNT=1&CVT=jpeg";
+          			$('#navImageSection').attr("src",imageaddress);	
+          			updateallinfo();
 				});
 		    });
 		});
     });
+
 }
 
 function getUrlVars() {
@@ -345,4 +375,22 @@ function getUrlVars() {
         vars[key] = value;
     });
     return vars;
+}
+
+function updateallinfo(){
+	$('#total_tiles').html('Total Tiles: ' + countTiles);
+	$('#full_image_file_name').html(imagecurrentPath);
+
+	let brain_name = getUrlVars()["brain_id"];
+	if(typeof brain_name == 'number'){
+		brain_name = 'PMD' + brain_name;
+	}
+
+	let section_number = imagecurrentPath.replace('.jp2','');
+	section_number = section_number.split('_');
+	section_number = section_number.slice(-1).pop();
+
+	section_number_init = section_number;
+
+	$('#header_info_brainname_section').html('Brain: ' + brain_name + ' | Section: ' + section_number ); 
 }

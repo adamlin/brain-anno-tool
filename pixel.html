@@ -41,18 +41,18 @@
              <div class="left-group">
                 <div class="images-navigator" style="">
                    <div class="inline-block">
-                    <a class="btn el-tooltip">
+                    <a id="btn_section_left" class="btn el-tooltip">
                       <i class="icon-chevron-left" style="position: absolute;margin-top: 2px;margin-left: -5px;"></i>
                     </a>
                    </div>
                    <div class="inline-block progress-wrapper">
                       <div class="progress-line"><b style="width: 0%;"></b></div>
-                      <b class="image-name el-tooltip">
+                      <b id='header_info_brainname_section' class="image-name el-tooltip">
                       Brain PMD940_0180
                       </b> 
                       <div class="info">
                         <span class="titles el-tooltip">
-                          <a href="https://app.supervise.ly/projects/36431" class="project-title">annotation
+                          <a href="" class="project-title">annotation
                           </a> 
                           <i class="icon-chevron-small-right chevron"></i>
                           <span class="dataset-title">001</span>
@@ -60,7 +60,7 @@
                       </div>
                    </div>
                    <div class="inline-block">
-                    <a class="btn el-tooltip">
+                    <a id="btn_section_right" class="btn el-tooltip">
                       <i class="icon-chevron-right" style="position: absolute;margin-top: 2px;margin-left: -5px;"></i>
                     </a>
                   </div>
@@ -205,7 +205,9 @@
         
           <div class="row">
             <div id="stage-parent" class="col-md-10" style="">
-              <div id="container"></div>
+              <div id="image_loading_selected" class="lds-dual-ring"></div>
+              <div id="container">
+              </div>
             </div>
           </div>
         </div>
@@ -222,7 +224,7 @@
                     <span class="title-text"><i class="panel-icon icon-images"></i>
                     Brain Tiles
                     </span> 
-                    <i class="numbers">
+                    <i id="total_tiles" class="numbers">
                        <span>
                           total: 33
                        </span>
@@ -317,7 +319,7 @@
                     <span class="title-text"><i class="panel-icon icon-section-1"></i>
                     Full Section
                     </span> 
-                    <i class="numbers">
+                    <i id="full_image_file_name" class="numbers">
                        <span>
                           01
                        </span>
@@ -336,18 +338,24 @@
       <script type="text/javascript">
         var section_image_size;
         var fullurl;
-        $.getJSON('http://braincircuits.org/cgi-bin/iipsrv.fcgi?IIIF=/PITT001/Marmo_7NA_7_layers_1um_spacing.jp2/info.json', function(data) {
-            width = `${data.width}`
-            height = `${data.height}`
-            let dect = [width, height];
-            section_image_size = dect;
-            generateTileTable(dect);
-        });
+        var brain_id = getUrlVars()["brain_id"];
+        var type = getUrlVars()["type"];
+
+        if(brain_id == undefined){
+          $.getJSON('http://braincircuits.org/cgi-bin/iipsrv.fcgi?IIIF=/PITT001/Marmo_7NA_7_layers_1um_spacing.jp2/info.json', function(data) {
+              width = `${data.width}`
+              height = `${data.height}`
+              let dect = [width, height];
+              section_image_size = dect;
+              generateTileTable(dect);
+          });
+        }else{
+          generatesectiontils(brain_id);
+        }
 
         mouseclick();
         var nagImagesize = $(window).width() * 0.20 - 3;
-        var imageaddress = "http://braincircuits.org/cgi-bin/iipsrv.fcgi?FIF=/PITT001/Marmo_7NA_7_layers_1um_spacing.jp2&WID="+nagImagesize + "&QLT=130&CNT=1&CVT=jpeg";
-        $('#navImageSection').attr("src",imageaddress);
+  
         selectedToolBtn();
         selectedpixel();
         selectedclasses();
@@ -358,11 +366,15 @@
                $(this).addClass('active');
                $(this).siblings().removeClass('active');
                res = imageid.split('-');
-               selectedTile(res[1],section_image_size);
+               selectedTile(res[1],section_image_size, imagecurrentPath);
             });
         });
-        var brain_id = getUrlVars()["brain_id"];
-        generatesectiontils(brain_id);
+        
+        if(brain_id == undefined){
+          var imageaddress = "http://braincircuits.org/cgi-bin/iipsrv.fcgi?FIF=/PITT001/Marmo_7NA_7_layers_1um_spacing.jp2&WID="+nagImagesize + "&QLT=130&CNT=1&CVT=jpeg";
+          $('#navImageSection').attr("src",imageaddress);
+        }
+
       </script>
       
       <script type="text/javascript">
@@ -371,67 +383,11 @@
           initializeStage();
           setMouseEvt();
           setElementAct();
-
+          
           // fitStageIntoParentContainer();
           // adapt the stage on any window resize
           // window.addEventListener('resize', fitStageIntoParentContainer);        
         });
-
-      // // to be removed //
-      // $(document).ready(function() {
-      //   $('#picker').colorpicker({
-      //       color:'#ff9800',
-      //       // initialHistory: ['#ff0000','#000000','red', 'purple']
-      //   });
-      //   stage.add(layer);
-
-      //   const nativeCtx = layer.getContext()._context;
-      //   nativeCtx.webkitImageSmoothingEnabled = false;
-      //   nativeCtx.mozImageSmoothingEnabled = false;
-      //   nativeCtx.imageSmoothingEnabled = false;
-      //   nativeCtx.msImageSmoothingEnabled = false;
-      //   bgImage = new Image();
-
-      //   xpix = 16000; // 16280.0 + 700;
-      //   ypix = 7400 ; //11950.0 + 400;
-      //   xpc = xpix / 24000.0;
-      //   ypc = ypix / 18000.0;
-      //   wpc = wid / 24000.0;
-      //   hpc = hei / 18000.0;
-      //   rgnstring = xpc + "," + ypc + "," + wpc + "," + hpc;
-      //   //bgImage.src = "images/resolver_1020701_12800,16640,544,544.jpg";
-      //   iipbase = "http://braincircuits.org/cgi-bin/iipsrv.fcgi?FIF=";
-      //   // brainno = "PMD2055";
-      //   seriesid = '3362';
-      //   sectionid = '691261';
-      //   apibase = "http://mitradevel.cshl.org/webtools/seriesbrowser";
-      //   $.getJSON(apibase+'/getsectionjp2path/'+sectionid, function(data) {
-      //       jp2filepath = data['jp2Path'];
-            
-      //       jp2pathdescribe(jp2filepath);
-      //       bgImage.src =
-      //           iipbase+jp2pathtranslate_(jp2filepath) +
-      //           "&WID="+ wid +
-      //           "&RGN=" + rgnstring +
-      //           "&MINMAX=1:0,255&MINMAX=2:0,255&MINMAX=3:0,255&GAM=1&CVT=jpeg";
-            
-      //       $('#regdetails').html(''+xpix+','+ypix+'; '+wid+'x'+hei);
-      //       bgImage.onload = function() {
-      //           outimg = new Konva.Image({
-      //               x: 0,
-      //               y: 0,
-      //               width: wid,
-      //               height: hei,
-      //               image: bgImage,
-      //               draggable: false
-      //           });
-      //           layer.add(outimg);
-      //           layer.draw();
-      //           // layer_vector.draw();
-      //           console.info('hello world');
-      //       };
-      //   });
-      // });
       </script>
     </body>
 </html>
