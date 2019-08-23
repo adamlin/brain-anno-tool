@@ -179,7 +179,7 @@ function selectedTile(tile, section_image_size, imageurl){
 	    layer.add(outimg);
 	    layer.draw();
 	    // layer_vector.draw();
-	    console.info('tile ' + tile);
+	    console.info('tile ' + tile + '| ' + imageurl);
 	    $('#image_loading_selected').css("display", "none");
 	};
 }
@@ -189,6 +189,13 @@ function selectedToolBtn(){
 	    $(this).click(function(){
 	        $(this).siblings().removeClass('active'); // if you want to remove class from all sibling buttons
 	        $(this).toggleClass('active');
+
+	        if($('#pixel_active').hasClass('active')){
+	        	activatedBtn = 'painting';
+	    	}else if ($('#pointer_active').hasClass('active')){
+	    		activatedBtn = 'pointer';
+	    	}
+
 	    });
 	});
 }
@@ -238,6 +245,10 @@ function selectedpixel(){
 	    e.preventDefault(); // cancel the link behaviour
 	    var selText = $(this).text();
 	    $('#selected-class').text(selText);
+	    $(this).siblings().removeClass('active');
+	    $(this).toggleClass('active');
+	    brushsize = $(this).attr('data-value');
+	    calBrushsize();
 	});
 
 	//$("#classTree").DropDownTree(options);

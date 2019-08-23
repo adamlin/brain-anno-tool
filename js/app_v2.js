@@ -24,6 +24,7 @@ var lastActIsEraseOrPaint = 0;
 
 // var brushsize = undefined;
 var brushmatrix = undefined;
+var brushsize = undefined;
 
 var age = 20;
 var outObj = {};
@@ -31,6 +32,9 @@ var outObj = {};
 var category = undefined;
 
 var rectMargin = 0.1;
+
+var activatedBtn;
+
 
 function setInitValue (){
   // color picker
@@ -555,7 +559,7 @@ var cumulateColorPoints = function(listOfColors) {
 
 function calBrushsize() {
   brushmatrix = [];
-  var brushsize = $("#BrushSize").val();
+  //var brushsize = $("#BrushSize").val();
   calcnt = (Math.sqrt(brushsize) -1)/2;
 
   // To make brush circle.
