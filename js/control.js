@@ -191,10 +191,12 @@ function selectedToolBtn(){
 	        $(this).toggleClass('active');
 
 	        if($('#pixel_active').hasClass('active')){
-	        	activatedBtn = 'painting';
-	    	}else if ($('#pointer_active').hasClass('active')){
-	    		activatedBtn = 'pointer';
-	    	}
+	        	activatedBtn = 'raster_pixel';
+	    		}else if ($('#pointer_active').hasClass('active')){
+	    			activatedBtn = 'pointer';
+	    		}else if ($('#erase_active').hasClass('active')){
+	    			activatedBtn = 'erase';
+	    		}
 
 	    });
 	});
@@ -247,10 +249,9 @@ function selectedpixel(){
 	    $('#selected-class').text(selText);
 	    $(this).siblings().removeClass('active');
 	    $(this).toggleClass('active');
-	    brushsize = $(this).attr('data-value');
-	    calBrushsize();
+	    var brushsize = $(this).attr('data-value'); ///// Brush size need be either of [1, 9, 25, 49,...] Mitsu
+	    calBrushMatrix(brushsize);  //Mitsu
 	});
-
 	//$("#classTree").DropDownTree(options);
 }
 
@@ -258,11 +259,10 @@ function selectedclasses(){
 	$("#annotated_class a").click(function(e){
 	    e.preventDefault(); // cancel the link behaviour
 	    var selText = $(this).text();
-	    category = selText; // by Mitsu for obj output.
-	    console.info(selText);
+	    setCtgAndColor(selText); // by Mitsu for obj output.
+	    // console.info(selText);
 	    $('#dropdownClasses').text('class: ' + selText);
 	});
-
 	//$("#classTree").DropDownTree(options);
 }
 

@@ -4,9 +4,17 @@ var currentscale = 0.2;
 var scaleBy = 1.1;
 var scrolldir = -1; //-1: scroll down goes to zoon-in. 1:-1: scroll down goes to zoon-out.
 
-var currentcolor = undefined;
+var category = undefined; // initial category
+var currentcolor = undefined; // initial color
+var colorForUndefined = '#808080';
 // var indicesWithSaidColor = [];
 // var positionForColor = {};
+var colorTable = {  // Temporally.
+  axons: '#0e2f44',
+  dendrites: '#990000', 
+  autofluorescence: '#ffa500',
+  artifact: '#4ca3dd',
+};
 
 var mouseLeftDown = false;
 var mouseRightDown = false;
@@ -22,35 +30,26 @@ var lastActIsEraseOrPaint = 0;
 
 // var currentvector = undefined;
 
-// var brushsize = undefined;
+var initBrushsize = 9; // Temporally. Brush size should be set at selector when page loaded.
 var brushmatrix = undefined;
-var brushsize = undefined;
 
-var age = 20;
+var age = 20;  // The old history of pixels that are not be shown (destroyed) and are older than 'age' will be deleted from the record (can not undo)  
 var outObj = {};
-
-var category = undefined;
 
 var rectMargin = 0.1;
 
-var activatedBtn;
-
+var activatedBtn = 'pointer'; // Temporally. drawing type should be set at tool button when page loaded.
 
 function setInitValue (){
-  // color picker
-  $('#picker').colorpicker({
-    color:'#ff9800',
-    // initialHistory: ['#ff0000','#000000','red', 'purple']
-  });
-  currentcolor = $('#picker').colorpicker("val");
+  // Set category and color 
+  setCtgAndColor(category);
 
   // magnify slider
-  var slider = document.getElementById("myRange");
-  slider.value = currentscale;
+  $("#myRange").val(currentscale);
   $("#zoomlabel").html(currentscale);
 
-  // paint brush 
-  brushmatrix = calBrushsize();
+  // paint brush size
+  brushmatrix = calBrushMatrix(initBrushsize);
 }
 
 function initializeStage (){
@@ -128,11 +127,25 @@ function mouseevt() {
   var ImPix_y = Math.floor((pointerPos.y - stgposition.y) / currentscale);
   // console.log(ImPix_y);
 
-  var selection = $("input[name=drawingtype]:checked").val();
+  // var selection = $("input[name=drawingtype]:checked").val();
   if (mouseLeftDown == true) {
-    if (selection == "pointer") {
+    if (activatedBtn == "pointer") {
       stage.draggable(true);
-    }else if (selection == "vector_linestring" || selection == "vector_polygon") {
+    }else if (activatedBtn == "erase") {
+      stage.draggable(false);
+      eraseRect(ImPix_x,ImPix_y);
+      showstatus();
+    }else if (activatedBtn == "raster_pixel"){
+      stage.draggable(false);
+        // console.log('[[ Start painting ]]');
+      for (var i = 0; i < brushmatrix.length; i++) {
+        paintRect(ImPix_x+brushmatrix[i][0], ImPix_y+brushmatrix[i][1], pointerPos);
+      }
+      layer.batchDraw();
+      actioncnt = actioncnt + 1;  // paintしなくてもactionが加算されることに注意
+      // console.log('[[ The last action(painting) done ]]');
+      showstatus();
+    }else if (activatedBtn == "vector_linestring" || activatedBtn == "vector_polygon") {
       // stage.draggable(false);
       // var vecname = "hopefully-unique-" + typeOfOperations.length; ///
       // if (currentvector == undefined) {
@@ -143,20 +156,6 @@ function mouseevt() {
       // currentvector.stroke($('#picker').colorpicker("val")); //colorlist[currentcolor - 1]);
       // currentvector.draw();
       // currentvector.name(vecname);
-    }else if (selection == "raster_pixel") {
-      stage.draggable(false);
-      if ($('#erase_active').hasClass('active')) {
-        eraseRect(ImPix_x,ImPix_y); 
-      }else{
-      	// console.log('[[ Start painting ]]');
-        for (var i = 0; i < brushmatrix.length; i++) {
-          paintRect(ImPix_x+brushmatrix[i][0], ImPix_y+brushmatrix[i][1], pointerPos);
-        }
-        layer.batchDraw();
-        actioncnt = actioncnt + 1;  // paintしなくてもactionが加算されることに注意
-        // console.log('[[ The last action(painting) done ]]');
-        showstatus();
-      }
     }
   }
 }
@@ -557,10 +556,10 @@ var cumulateColorPoints = function(listOfColors) {
   // return finalResult;
 };
 
-function calBrushsize() {
+function calBrushMatrix(brushsize) {
   brushmatrix = [];
   //var brushsize = $("#BrushSize").val();
-  calcnt = (Math.sqrt(brushsize) -1)/2;
+  var calcnt = (Math.sqrt(brushsize) -1)/2;
 
   // To make brush circle.
   for (var x = -calcnt; x<calcnt+1; x++){
@@ -571,6 +570,12 @@ function calBrushsize() {
     }
   }
   return brushmatrix
+}
+
+function setCtgAndColor(categoryTxt){
+  category = categoryTxt; // Temporally. We should not use label(text)
+  currentcolor = colorTable[category] == undefined ? colorForUndefined : colorTable[category];
+  console.log(currentcolor);
 }
 
 function setMouseEvt(){
@@ -590,8 +595,8 @@ function setMouseEvt(){
 
   stage.on("touchmove mousemove", function(){
     // For cursor type Mitsu
-    var selection = $("input[name=drawingtype]:checked").val();
-    if (selection == "pointer" || mouseRightDown == true) {
+    // var selection = $("input[name=drawingtype]:checked").val();
+    if (activatedBtn == "pointer" || mouseRightDown == true) {
       stage.container().style.cursor = 'pointer';
     }else{
       stage.container().style.cursor = 'default';
@@ -679,17 +684,16 @@ function setMouseEvt(){
 
     var n = 1; // Num of digits after the decimal point.
     newScale_show = Math.floor(newScale*Math.pow(10,n))/Math.pow(10,n);
-    var slider = document.getElementById("myRange");
-    slider.value = newScale_show;
+    $("#myRange").val(newScale_show);
     $("#zoomlabel").html(newScale_show);
   });
 }
 
 
 function setElementAct(){
-  $("#picker").change(function() {
-    currentcolor = this.value;
-  });
+  // $("#picker").change(function() {
+  //   currentcolor = this.value;
+  // });
 
   $("#undo_draw").click(function() {
     UndoOrRedo = 'undo';
@@ -750,13 +754,12 @@ function setElementAct(){
     // typeOfOperations = [];
   });
 
-  $("#BrushSize").change(function(){calBrushsize()}); ///// Brush size need to be either of [1, 9, 25, 49]
+  // $("#BrushSize").change(function(){calBrushMatrix()}); 
 
   // referring this https://konvajs.github.io/docs/sandbox/Zooming_Relative_To_Pointer.html
-  var slider = document.getElementById("myRange");
-  slider.oninput = function() {
+  $("#myRange").on('input',function() {
     var oldScale = stage.scaleX();
-    var newscale = slider.value;
+    var newscale = this.value;
 
     $("#zoomlabel").html(newscale);
     // default scale 5 is set by you. Assuming I want the scale to
@@ -792,7 +795,8 @@ function setElementAct(){
     stage.batchDraw();
 
     currentscale = newscale;
-  };
+    // console.log(currentscale);
+  });
 
 // $("#leftbutton").click(function() {
 //   currentoffset = stage.getOffset();
