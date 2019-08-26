@@ -10,10 +10,16 @@ var colorForUndefined = '#808080';
 // var indicesWithSaidColor = [];
 // var positionForColor = {};
 var colorTable = {  // Temporally.
-  axons: '#0e2f44',
-  dendrites: '#990000', 
-  autofluorescence: '#ffa500',
-  artifact: '#4ca3dd',
+  'axons': 'rgba(253, 225, 87, 0.7)',
+  'dendrites': 'rgba(218, 87, 253, 0.7)', 
+  'neurties unidentifiable':'rgba(253, 117, 87, 0.7)',
+  'passing fiber': 'rgba(253, 17, 87, 0.7)',
+  'axon fiber':'rgba(218, 87, 253, 0.7)',
+  'axon unidentifiable':'rgba(253, 87, 231, 0.7)',
+  'autofluorescence': 'rgba(87, 198, 253, 0.7)',
+  'artifact': 'rgba(253, 140, 87, 0.7)',
+  'injection soma':'rgba(117, 87, 253, 0.7)',
+  'injection area':'rgba(17, 87, 253, 0.7)',  
 };
 
 var mouseLeftDown = false;

@@ -29,6 +29,10 @@
         <script src="js/control.js" type="text/javascript"></script>
         <script src="js/popper.min.js" type="text/javascript"></script>
         <script src="js/bootstrap.min.js" type="text/javascript"></script>
+
+        <!-- include openlayers -->
+        <link rel="stylesheet" href="style/ol.css" type="text/css">
+        <script src="js/ol-4.6.4.js" type="text/javascript"></script>
     </head>
     <body>
 
@@ -149,12 +153,14 @@
                       <button class="el-tooltip tool-button" id="fillcolor_active">
                          <!----> <!----> <i class="zmdi zmdi-format-color-fill"></i> <!---->
                       </button>
+                      <!-- //hide for future uses
                       <button class="el-tooltip tool-button" id="crop_active">
-                         <!----> <!----> <i class="zmdi zmdi-crop"></i> <!---->
+                         <i class="zmdi zmdi-crop"></i>
                       </button>
                       <button class="el-tooltip tool-button" id="align_active">
-                         <!----> <!----> <i class="icon-align-bottom"></i> <!---->
+                         <i class="icon-align-bottom"></i>
                       </button>
+                      -->
                       <div class="dropdown" style="margin-top: 2px;">         
                           <button id="selected-class" type="button" class="btn btn-success dropdown-toggle" data-toggle="dropdown"> 
                               pixel
@@ -333,8 +339,8 @@
                     <div class="panel-tabs"></div>
                     <div class="actions">
                     </div>
-                </a> 
-                <img id='navImageSection' class="width: calc(20% - 3px); width: calc(20% - 3px);" src="">
+                </a>
+                <div id="map" class="map"></div> 
               </div>
               <!-- end panel-bottom -->
         </div>
@@ -346,6 +352,7 @@
         var fullurl;
         var brain_id = getUrlVars()["brain_id"];
         var type = getUrlVars()["type"];
+        var current_section = 230;
 
         if(brain_id == undefined){
           $.getJSON('http://braincircuits.org/cgi-bin/iipsrv.fcgi?IIIF=/PITT001/Marmo_7NA_7_layers_1um_spacing.jp2/info.json', function(data) {
@@ -356,11 +363,11 @@
               generateTileTable(dect);
           });
         }else{
-          generatesectiontils(brain_id);
+          generatesectiontils(brain_id, current_section);
         }
 
         mouseclick();
-        var nagImagesize = $(window).width() * 0.20 - 3;
+        //var nagImagesize = $(window).width() * 0.20 - 3;
   
         selectedToolBtn();
         selectedpixel(); // Does it need be here? Mitsu
@@ -376,10 +383,10 @@
             });
         });
         
-        if(brain_id == undefined){
-          var imageaddress = "http://braincircuits.org/cgi-bin/iipsrv.fcgi?FIF=/PITT001/Marmo_7NA_7_layers_1um_spacing.jp2&WID="+nagImagesize + "&QLT=130&CNT=1&CVT=jpeg";
-          $('#navImageSection').attr("src",imageaddress);
-        }
+        // if(brain_id == undefined){
+        //   var imageaddress = "http://braincircuits.org/cgi-bin/iipsrv.fcgi?FIF=/PITT001/Marmo_7NA_7_layers_1um_spacing.jp2&WID="+nagImagesize + "&QLT=130&CNT=1&CVT=jpeg";
+        //   $('#navImageSection').attr("src",imageaddress);
+        // }
 
       </script>
       
@@ -389,7 +396,7 @@
           initializeStage();
           setMouseEvt();
           setElementAct();
-          
+          beforeAndafterSection(current_section);
           // fitStageIntoParentContainer();
           // adapt the stage on any window resize
           // window.addEventListener('resize', fitStageIntoParentContainer);        

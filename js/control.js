@@ -125,6 +125,10 @@ function generateTileTable(size){
 	}
 	$('#listOfTiles').html(content);
 	// $('#image-3').addClass('active');
+	if(brain_id == undefined){
+		brain_url = 'http://braincircuits.org/cgi-bin/iipsrv.fcgi?zoomify=' + '/PITT001/Marmo_7NA_7_layers_1um_spacing.jp2';
+		generateOL(width, height, brain_url);
+	}
 }
 
 function selectedTile(tile, section_image_size, imageurl){
@@ -266,7 +270,7 @@ function selectedclasses(){
 	//$("#classTree").DropDownTree(options);
 }
 
-function generatesectiontils(brain_id){
+function generatesectiontils(brain_id, current_section){
 	var content = '';
 	var count = 0;
 	var fullurl;
@@ -279,7 +283,8 @@ function generatesectiontils(brain_id){
 	let typeused;
 
 	iipbase = 'http://braincircuits.org/cgi-bin/iipsrv.fcgi?FIF=';
-	iipinfo = 'http://braincircuits.org/cgi-bin/iipsrv.fcgi?IIIF='
+	iipinfo = 'http://braincircuits.org/cgi-bin/iipsrv.fcgi?IIIF=';
+	iipzoomify = 'http://braincircuits.org/cgi-bin/iipsrv.fcgi?zoomify=';
 	apibase = 'http://mitradevel.cshl.org/webtools/seriesbrowser';
    
 	$.getJSON(apibase+'/getseriesid/'+brain_id, function(data) {
@@ -292,7 +297,7 @@ function generatesectiontils(brain_id){
         }
 
         $.getJSON(apibase+'/getsectionids/'+typeused, function(data2) {
-	    	listOfsections = `${data2[230]}`
+	    	listOfsections = data2[current_section];
 
 	    	
 		    $.getJSON(apibase+'/getsectionjp2path/'+listOfsections, function(data3) {
@@ -368,15 +373,18 @@ function generatesectiontils(brain_id){
 						}
 					}
 					$('#listOfTiles').html(content);
-
+					$('#image_loading_selected').css("display", "none");
 					countTiles = count;
 					var nagImagesize = $(window).width() * 0.20 - 3;
 					var imageaddress = iipbase + imagecurrentPath + "&WID=" + nagImagesize + "&QLT=130&CNT=1&CVT=jpeg";
           			$('#navImageSection').attr("src",imageaddress);	
           			updateallinfo();
+
+          			generateOL(width, height, iipzoomify +imagecurrentPath);
 				});
 		    });
 		});
+		
     });
 
 }
@@ -405,4 +413,56 @@ function updateallinfo(){
 	section_number_init = section_number;
 
 	$('#header_info_brainname_section').html('Brain: ' + brain_name + ' | Section: ' + section_number ); 
+}
+
+function generateOL(width, height, brain_url){
+	$('#map').html('');
+    var imgWidth = width;
+    var imgHeight = height;
+
+    var imgCenter = [imgWidth / 2, -imgHeight / 2];
+
+    var proj = new ol.proj.Projection({
+      code: 'ZOOMIFY',
+      units: 'pixels',
+      extent: [0, 0, imgWidth, imgHeight]
+    });
+
+    var source = new ol.source.Zoomify({
+      url: brain_url + '/' ,
+      size: [imgWidth, imgHeight],
+      crossOrigin: 'anonymous'
+    });
+
+    var map = new ol.Map({
+      layers: [
+        new ol.layer.Tile({
+          source: source
+        })
+      ],
+      target: 'map',
+      view: new ol.View({
+        projection: proj,
+        center: imgCenter,
+        zoom: 1,
+        minZoom: 1,
+		maxZoom: 9,
+		extent: [0, -imgHeight, imgWidth, 0]
+      })
+    });	
+}
+
+function beforeAndafterSection(current_section){
+
+	$("#btn_section_right").click(function(e){
+		$('#image_loading_selected').css("display", "block");
+		current_section = current_section + 1;
+		generatesectiontils(brain_id, current_section);
+	});
+
+	$("#btn_section_left").click(function(e){
+		$('#image_loading_selected').css("display", "block");
+		current_section = current_section - 1;
+		generatesectiontils(brain_id, current_section);
+	});
 }
