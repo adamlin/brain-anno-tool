@@ -8,7 +8,7 @@ function mouseclick(){
 	let e = window.event;
 	let innerHeight = window.innerHeight;
 	let adjustTool = $("#gutter-vertical-control-top");
-	let adjustToolbt = $("#gutter-vertical-control-bottom");
+	let adjustToolbt = $("#gutter-vertical-control-bt");
 
 	function onMouseMove(e) {
 		//let panelbtmheight = $('#panel-bottom').height();
@@ -16,36 +16,40 @@ function mouseclick(){
 		$('#panel-top').height(moving);
 	}
 
+	adjustTool.mousedown(function(e){
+		document.addEventListener('mousemove', onMouseMove);
+	 //  	adjustTool.ondragstart = function() {
+		//   return false;
+		// };
+	})
+
+	
+	adjustTool.mouseup(function(e){
+	    document.removeEventListener('mousemove', onMouseMove);
+	    // adjustTool.onmouseup = null;
+  	});
+
 	function onMouseMoveBtm(e) {
 		//let panelbtmheight = $('#panel-bottom').height();
 		let topheight = $('#panel-top').height();
-		let middlemoving = ((e.clientY - topheight)/innerHeight)*100 + '%';
+		let middlemoving = ((e.clientY - topheight -4)/innerHeight)*100 + '%';
 
 		$('#panel-middle').height(middlemoving);
 	}
 
-	adjustTool.mousedown(function(e){
-		document.addEventListener('mousemove', onMouseMove);
-	  	adjustTool.ondragstart = function() {
-		  return false;
-		};
-	})
-
-	adjustTool.mouseup(function(e){
-	    document.removeEventListener('mousemove', onMouseMove);
-	    adjustTool.onmouseup = null;
-  	});
 
 	adjustToolbt.mousedown(function(e){
 		document.addEventListener('mousemove', onMouseMoveBtm);
-	  	adjustToolbt.ondragstart = function() {
-		  return false;
-		};
+	 //  	adjustToolbt.ondragstart = function() {
+		//   return false;
+		// };
+		console.info('moust down');
 	})
 
 	adjustToolbt.mouseup(function(e){
 	    document.removeEventListener('mousemove', onMouseMoveBtm);
-	    adjustToolbt.onmouseup = null;
+	    //adjustToolbt.onmouseup = null;
+	    console.info('moust up');
   	});
 }
 
@@ -186,6 +190,7 @@ function selectedTile(tile, section_image_size, imageurl){
 	    console.info('tile ' + tile + '| ' + imageurl);
 	    $('#image_loading_selected').css("display", "none");
 	};
+	$('#tile-number').html('tile ' + tile);
 }
 
 function selectedToolBtn(){

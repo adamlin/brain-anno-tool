@@ -2,7 +2,7 @@ var wid = 4096;
 var hei = 4096;
 var currentscale = 0.2;
 var scaleBy = 1.1;
-var scrolldir = -1; //-1: scroll down goes to zoon-in. 1:-1: scroll down goes to zoon-out.
+var scrolldir = 1; //-1: scroll down goes to zoon-in. 1:-1: scroll down goes to zoon-out.
 
 var category = undefined; // initial category
 var currentcolor = undefined; // initial color
