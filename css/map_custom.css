@@ -1,0 +1,130 @@
+.onoffswitch {
+    position: absolute; width: 40px;
+    top: 1px;
+    right: 4px;
+    -webkit-user-select:none; -moz-user-select:none; -ms-user-select: none;
+}
+.onoffswitch-checkbox {
+    display: none;
+}
+.onoffswitch-label {
+    display: block; overflow: hidden; cursor: pointer;
+    border: 2px solid #999999; border-radius: 3px;
+}
+.onoffswitch-inner {
+    display: block; width: 200%; margin-left: -100%;
+    transition: margin 0.3s ease-in 0s;
+}
+.onoffswitch-inner:before, .onoffswitch-inner:after {
+    display: block; float: left; width: 50%; height: 16px; padding: 0; line-height: 16px;
+    font-size: 12px; color: white; font-family: Trebuchet, Arial, sans-serif; font-weight: bold;
+    box-sizing: border-box;
+}
+.onoffswitch-inner:after {
+    content: "ON";
+    padding-left: 5px;
+    background-color: #C23434; color: #FFFFFF;
+}
+.onoffswitch-inner:before {
+    content: "OFF";
+    padding-right: 5px;
+    background-color: #EEEEEE; color: #999999;
+    text-align: right;
+}
+.onoffswitch-checkbox:checked + .onoffswitch-label .onoffswitch-inner {
+    margin-left: 0;
+}
+.onoffswitch-checkbox:checked + .onoffswitch-label .onoffswitch-switch {
+    right: 0px; 
+}
+
+/*/For his overlay function used/*/
+
+.onoffswitch1 {
+    position: absolute; width: 40px;
+    top: 5px;
+    right: 4px;
+    -webkit-user-select:none; -moz-user-select:none; -ms-user-select: none;
+}
+.onoffswitch-checkbox1 {
+    display: none;
+}
+.onoffswitch-label1 {
+    display: block; overflow: hidden; cursor: pointer;
+    border: 2px solid #999999; border-radius: 3px;
+}
+.onoffswitch-inner1 {
+    display: block; width: 200%; margin-left: -100%;
+    transition: margin 0.3s ease-in 0s;
+}
+.onoffswitch-inner1:before, .onoffswitch-inner1:after {
+    display: block; float: left; width: 50%; height: 16px; padding: 0; line-height: 16px;
+    font-size: 12px; color: white; font-family: Trebuchet, Arial, sans-serif; font-weight: bold;
+    box-sizing: border-box;
+}
+.onoffswitch-inner1:before {
+    content: "ON";
+    padding-left: 5px;
+    background-color: #C23434; color: #FFFFFF;
+}
+.onoffswitch-inner1:after {
+    content: "OFF";
+    padding-right: 5px;
+    background-color: #EEEEEE; color: #999999;
+    text-align: right;
+}
+.onoffswitch-checkbox1:checked + .onoffswitch-label1 .onoffswitch-inner1 {
+    margin-left: 0;
+}
+.onoffswitch-checkbox1:checked + .onoffswitch-label1 .onoffswitch-switch1 {
+    right: 0px; 
+}
+
+
+/* process bar on top */
+#progress {
+	position: absolute;
+	bottom: 134px;
+	left: 0;
+	height: 2px;
+	z-index: 9999;
+	background: rgba(255, 246, 0, 0.8);
+	width: 0;
+	transition: width 250ms;
+} 
+      
+.zonemap {
+	width: 233px; 
+	height: 105px; 
+	opacity: 1; 
+	right: 38px; 
+	top: 7px; 
+	position: absolute;
+	color: #fff;
+	background: #222;
+	-moz-border-radius: .3em;
+	-webkit-border-radius: .3em;
+	border-radius: .3em;
+	box-shadow: 4px 4px 4px rgba(0,0,0,0.75);
+	-moz-box-shadow: 4px 4px 4px rgba(0,0,0,0.75);
+	-webkit-box-shadow: 4px 4px 4px rgba(0,0,0,0.75);
+	-o-box-shadow: 4px 4px 4px rgba(0,0,0,0.75);
+	border-style: solid;
+    border-color: #ffffff #ffffff  #ffffff  #ffffff ;
+    z-index: 9999;
+}
+.focus_point{
+	position: absolute;
+	background-image: url("/openlayers/images/focal-points-2.png");
+    background-size: 100px 60px;
+    z-index: 9999;
+    width: 100px;
+    height: 60px;
+    left: 65px;
+    top: 20px;
+}
+.download_png{
+    position: relative;
+    text-align: center;
+    top: 10px;
+}

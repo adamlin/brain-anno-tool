@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Mitra Riken Group</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="stylesheet" href="css/bootstrap.min.css" type="text/css">
+        <link rel="stylesheet" href="css/bootstrap-theme.min.css" type="text/css">
+        <link rel="stylesheet" href="css/jquery.modal.css" type="text/css">
+        <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" type="text/css">
+        <link rel="stylesheet" href="css/ol.css" type="text/css">
+        <link rel="stylesheet" href="css/viewer.css" type="text/css">
+        <link rel="stylesheet" href="css/ol3-sidebar.css" type="text/css">
+        <link rel="stylesheet" href="css/ion-rangeSlider/ion.rangeSlider.css" />
+        <link rel="stylesheet" href="css/ion-rangeSlider/ion.rangeSlider.skinFlat.css" />
+        <link rel="stylesheet" href="css/map_custom.css" />
+        <link rel="icon" href="http://mitra.brain.riken.jp/wp-content/uploads/2016/02/logo.png" type="image/png">
+    
+        <script type="text/javascript" src="scripts/sweetalert.min.js"></script>    
+        <script type="text/javascript" src="scripts/lodash.min.js"></script>
+        <script type="text/javascript" src="scripts/jquery-1.12.3.min.js"></script>
+        <script type="text/javascript" src="scripts/jquery.lazyload.js"></script>
+        <script type="text/javascript" src="scripts/jquery.scrollTo.min.js"></script>
+        <script type="text/javascript" src="scripts/ol-custom.js"></script>
+        <script type="text/javascript" src="scripts/turf.min.js"></script>
+        <script type="text/javascript" src="scripts/path-controls.js"></script>
+        <script type="text/javascript" src="scripts/generate_tile_split.js"></script>
+        <script type="text/javascript" src="scripts/jquery-sidebar.js"></script>
+        <script type="text/javascript" src="scripts/ion-rangeSlider/ion.rangeSlider.js"></script>
+        <script type="text/javascript" src="scripts/marking-controls.js"></script> 
+
+        <script>
+            var brain_id = getParameterByName('brain_id');
+            var label    = getParameterByName('label');
+            var pid      = getParameterByName('pid');
+            var fid      = getParameterByName('fid');
+            showUser_for_ol4(brain_id, label, pid, fid);
+
+            window.app = {};
+            app = window.app;
+            app.logged_in = 0;
+            app.url= 'http://mitra.bnf.brain.riken.jp:3000/adore-djatoka/resolver';
+            
+            var ini_range = null;
+            try {
+                ini_range = localStorage['dynamic_range'].split(',');
+            } catch (e) {
+                console.log('parsing init range error', e);
+            }
+
+            if(ini_range == null){
+                app.rft_id = 'http://mitra.bnf.brain.riken.jp/wp-content/uploads/'+fid+'/'+pid;
+            }else{
+                app.rft_id = 'http://mitra.bnf.brain.riken.jp/wp-content/uploads/'+fid+'/'+pid + '&svc.crange='+ ini_range[0] + '-'+ ini_range[1] +','+ ini_range[2] + '-'+ ini_range[3] + ',' + ini_range[4] + '-'+ ini_range[5] +'&svc.gamma=' + ini_range[6];//+ '&svc.region=2355,9011,653,1177'
+            }
+            
+            app.features_fr = [];
+            app.features_fe = [];
+            app.features_fb = [];
+            app.features_dy = [];
+            app.features_bda = [];
+            app.features_fe_inj = [];
+            app.features_fr_inj = [];
+            app.sagittal_series = [{"cell_count": 0, "section": "r1a", "section_id": 4443, "coord": -19.676172636449337}];  
+            app.res = 24000/4.8*0.45;
+            var geourl = '/portal2/getatlasgeojson/PMD1080/52';
+        </script>
+        <script defer="defer" type="text/javascript">
+            var brain_id = getParameterByName('brain_id');
+            var label    = getParameterByName('label');
+            var pid      = getParameterByName('pid');
+            var fid      = getParameterByName('fid');
+
+            br_no= brain_id;
+
+            if(fid.includes("-16") && label == 'F'){
+                br_no = brain_id + '16';
+            }
+            if (fid.includes("-REG") && label == 'F'){
+                br_no = brain_id + '32';
+            }
+
+            slice_no = pid;
+            slice_type = label;
+            file_location = fid;
+            console.info(br_no);
+        </script>
+
+        <script type="text/javascript" src="scripts/ol-custom-controls.js"></script>
+        <script type="text/javascript" src="scripts/jquery.modal.min.js"></script>
+        <script type="text/javascript" src="scripts/bootstrap.min.js"></script> 
+        <script type="text/javascript" src="scripts/custom-slider.js"></script>
+    </head>
+<body>
+
+    <div id="progress"></div>
+    <div id="rangeslider"></div>
+    <div id="split_list"></div>
+    <div class="return_range"><button id="return_init_dyn_range" class="return_range-tabs" type="button">H</button></div>
+
+    <div id="map" class="map"></div>
+    <div id="split_info"></div>
+    <script type="text/javascript" src="scripts/viewer_ol.js"></script>
+    <script type="text/javascript" src="scripts/ion-custom-slider.js"></script>
+    <script type="text/javascript">
+        addSliderDiv();
+        addBrainName(pid);
+        addMetaDataDiv();
+        init_tile_split_controls_list();
+    </script>
+
+    </body>
+</html>
