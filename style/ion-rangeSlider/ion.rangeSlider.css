@@ -147,7 +147,7 @@
 }
 
 #rangeslider{
-	position: fixed;
+	/*position: fixed;*/
 	z-index: 999;
 	margin-top: 120px;
 	right: 10px;
@@ -157,7 +157,7 @@
 	color: #fff;
 	background: #222;
 	font-weight: normal;
-	padding: 5px;
+	padding: 10px;
 	font-size: 80%;
 	-moz-border-radius: .3em;
 	-webkit-border-radius: .3em;
@@ -172,15 +172,19 @@
 
 .red_slider_note{
   color: red;
+  font-size: 12px;
 }
 .blue_slider_note{
-  color: green;
+  color: blue;
+  font-size: 12px;
 }
 .green_slider_note{
-  color: blue;
+  color: green;
+  font-size: 12px;
 }
 .gamma_slider_note{
   color: yellow;
+  font-size: 12px;
 }
 .result_slider{
   color: white;

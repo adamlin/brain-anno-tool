@@ -3,6 +3,9 @@ var section_image_size;
 var brain_name ='';
 var countTiles = 0;
 var section_number_init = 30;
+var current_tile;
+var current_image_url;
+var current_range = [0,255,1];
 
 function mouseclick(){
 	let e = window.event;
@@ -135,8 +138,9 @@ function generateTileTable(size){
 	}
 }
 
-function selectedTile(tile, section_image_size, imageurl){
+function selectedTile(tile, section_image_size, imageurl, current_range){
 	$('#image_loading_selected').css("display", "block");
+
 	var width = section_image_size[0];
 	var height = section_image_size[1];
 	//FIXME: get these from http://braincircuits.org/cgi-bin/iipsrv.fcgi?IIIF=/PITT001/Marmo_7NA_7_layers_1um_spacing.jp2/info.json
@@ -167,8 +171,8 @@ function selectedTile(tile, section_image_size, imageurl){
 		jp2path = imageurl;
 	}
 
-	imagePath = iipbase + jp2path + "&WID="+ tilesize + "&RGN=" + rgnstring +
-		"&MINMAX=1:0,512&MINMAX=2:0,512&MINMAX=3:0,512&GAM=1&CVT=jpeg";
+	imagePath = iipbase + jp2path + "&CNT=" + current_range[2] + "&WID="+ tilesize + "&RGN=" + rgnstring +
+		"&MINMAX=1:0,512&MINMAX=2:0,512&MINMAX=3:0,512&GAM=1&CVT=jpeg" ;
 
 	bgImage.src = imagePath;
 	// bgImage.src = 'http://braincircuits.org/cgi-bin/iipsrv.fcgi?FIF=/PITT001/Marmo_7NA_7_layers_1um_spacing.jp2&GAM=1&MINMAX=1:0,512&MINMAX=2:0,512&MINMAX=3:0,512&JTL=3,' + tile;
@@ -188,6 +192,9 @@ function selectedTile(tile, section_image_size, imageurl){
 	    layer.draw();
 	    // layer_vector.draw();
 	    console.info('tile ' + tile + '| ' + imageurl);
+	    current_tile = tile;
+	    current_image_url = imageurl;
+
 	    $('#image_loading_selected').css("display", "none");
 	};
 	$('#tile-number').html('tile ' + tile);
@@ -251,6 +258,18 @@ function addnewannotation(category,color,numOfPix){
 	$('#listOfAnnotation').html(content2);
 }
 
+function clickrangecontrol(){
+	var range_on_off = document.getElementById("showing_range");
+
+    $('#dynamitc_select #st_on_dynamtic').click(function(){
+    	if(range_on_off.style.display == "none"){
+    		$('.toggle_range').css('display', 'block');
+    	}else{
+    		$('.toggle_range').css('display', 'none');
+    	}
+	});
+	
+}
 function selectedpixel(){
 	$("#brushsize_pixel a").click(function(e){
 	    e.preventDefault(); // cancel the link behaviour
@@ -470,4 +489,44 @@ function beforeAndafterSection(current_section){
 		current_section = current_section - 1;
 		generatesectiontils(brain_id, current_section);
 	});
+}
+
+function initRangeSlider(){
+	$(".red-range-slider").ionRangeSlider({
+        type: "double",
+        min: 0,
+        max: 4096,
+        from: 0,
+        to: 255,
+        grid: true
+    });
+	$(".green-range-slider").ionRangeSlider({
+        type: "double",
+        min: 0,
+        max: 4096,
+        from: 0,
+        to: 255,
+        grid: true
+    });
+ 	$(".blue-range-slider").ionRangeSlider({
+        type: "double",
+        min: 0,
+        max: 4096,
+        from: 0,
+        to: 255,
+        grid: true
+    });
+	$(".gamma-range-slider").ionRangeSlider({
+        min: 0,
+        max: 5,
+        from: 1,
+        grid: true,
+        step: 0.1,
+        onFinish: function (data) {
+            gamma_data = data.from;
+            console.info(gamma_data);
+            current_range = [0,255,gamma_data];
+            selectedTile(current_tile, section_image_size, current_image_url, current_range);
+        },
+    });      
 }

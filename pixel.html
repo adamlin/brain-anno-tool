@@ -15,8 +15,8 @@
         <link href="style/fontawesome.css" rel="stylesheet"/>
         <link href="style/solid.css" rel="stylesheet"/>
         
-
-        <script src="js/jquery.min.js" type="text/javascript"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+        <!-- <script src="js/jquery.min.js" type="text/javascript"></script> -->
         <script src="js/jquery-ui.min.js" type="text/javascript"></script>
         <link href="style/jquery-ui.css" rel="stylesheet"/>
     	  
@@ -33,6 +33,11 @@
         <!-- include openlayers -->
         <link rel="stylesheet" href="style/ol.css" type="text/css">
         <script src="js/ol-4.6.4.js" type="text/javascript"></script>
+
+        <!-- ion range slider -->
+        <link href="style/ion-rangeSlider/ion.rangeSlider.css" rel="stylesheet"/>
+        <link href="style/ion-rangeSlider/ion.rangeSlider.skinFlat.css" rel="stylesheet"/>
+        <script src="js/ion-rangeSlider/ion.rangeSlider.min.js" type="text/javascript"></script>
     </head>
     <body>
 
@@ -215,7 +220,7 @@
           </div>
           -->
         
-          <div class="row">
+          <div id="dynamitc_select" class="row">
             <div id="stage-parent" class="col-md-10" style="">
               <div id="image_loading_selected" class="lds-dual-ring"></div>
               <div id="container">
@@ -231,21 +236,31 @@
                   <i class="icon-minus"></i>
                 </a> 
                 <span>
-                  <a class="btn-round mt btn-options">
+                  <a id="st_on_dynamtic" class="btn-round mt btn-options">
                     <i class="icon-switch"></i>
                   </a>
                 </span>
               </div>
-              <div class="el-popover" style="width: 420px;transform-origin: right center;z-index: 2035;position: fixed;bottom: 15px;right: 80px;" x-placement="left">
-                <div>Dynamitic Range Control</div>
-                <div>1</div>
-                <div>1</div>
-                <div>1</div>
-                <div>1</div>
-                <div>1</div>
-                <div>1</div>
-                <div>1</div>
-                <div x-arrow="" class="popper__arrow" style="top: 140px;"></div>
+              <!-- <div id="showing_range" class="el-popover" style="width: 420px;transform-origin: right center;z-index: 2035;position: fixed;bottom: 15px;right: 80px;" x-placement="left"> -->
+              <div id="showing_range" class="toggle_range" style="width: 420px; position: fixed;bottom: 15px;right: 90px;" x-placement="left">  
+                <div id="rangeslider">
+                  <div class="red_slider">
+                    <div class="red_slider_note">Red:</div>
+                    <input type="text" class="red-range-slider" name="red_range" value="" /><br/>
+                  </div>
+                  <div class="blue_slider">
+                    <div class="blue_slider_note">Blue:</div>
+                    <input type="text" class="blue-range-slider" name="blue_range" value="" /><br/>
+                  </div>
+                  <div class="green_slider">
+                    <div class="green_slider_note">Green:</div>
+                    <input type="text" class="green-range-slider" name="green_range" value="" /><br/>
+                  </div>
+                   <div class="gamma_slider">
+                    <div class="gamma_slider_note">Gamma:</div>
+                    <input type="text" class="gamma-range-slider" name="gamma_range" value="" /><br/>
+                  </div>  
+                </div>
               </div>
             </div>
           </div>
@@ -399,7 +414,7 @@
                $(this).addClass('active');
                $(this).siblings().removeClass('active');
                res = imageid.split('-');
-               selectedTile(res[1],section_image_size, imagecurrentPath);
+               selectedTile(res[1],section_image_size, imagecurrentPath, current_range);
             });
         });
         
@@ -417,6 +432,8 @@
           setMouseEvt();
           setElementAct();
           beforeAndafterSection(current_section);
+          clickrangecontrol();
+          initRangeSlider();
           // fitStageIntoParentContainer();
           // adapt the stage on any window resize
           // window.addEventListener('resize', fitStageIntoParentContainer);        
