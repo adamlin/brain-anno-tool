@@ -64,7 +64,7 @@
                           <a class="project-title">annotation
                           </a> 
                           <i class="icon-chevron-small-right chevron"></i>
-                          <span id="tile-number" class="dataset-title">001</span>
+                          <span id="tile-number" class="dataset-title">000</span>
                         </span>
                       </div>
                    </div>
@@ -226,11 +226,11 @@
               <div id="container">
               </div>
               <div class="scene-controls">
-                <a class="btn-round mt">
-                  <i class="text">1:1</i>
+                <a id="apply_all_tiles_section" class="btn-round mt">
+                  <i class="text" style="font-size: 10px">Apply</i>
                 </a> 
-                <a class="btn-round">
-                  <i class="icon-plus"></i>
+                <a id="reset_all_tiles_section" class="btn-round mt">
+                  <i class="text" style="font-size: 10px">Reset</i>
                 </a> 
                 <a class="btn-round">
                   <i class="icon-minus"></i>
@@ -414,7 +414,7 @@
                $(this).addClass('active');
                $(this).siblings().removeClass('active');
                res = imageid.split('-');
-               selectedTile(res[1],section_image_size, imagecurrentPath, current_range);
+               selectedTile(res[1],section_image_size, imagecurrentPath, current_gamma);
             });
         });
         
@@ -434,6 +434,7 @@
           beforeAndafterSection(current_section);
           clickrangecontrol();
           initRangeSlider();
+          applyRangesControl();
           // fitStageIntoParentContainer();
           // adapt the stage on any window resize
           // window.addEventListener('resize', fitStageIntoParentContainer);        

@@ -5,7 +5,13 @@ var countTiles = 0;
 var section_number_init = 30;
 var current_tile;
 var current_image_url;
-var current_range = [0,255,1];
+
+var current_gamma 		= [1];
+var current_red_range 	= [1,0,255];
+var current_blue_range 	= [2,0,255];
+var current_green_range = [3,0,255];
+var current_width;
+var current_height;
 
 function mouseclick(){
 	let e = window.event;
@@ -134,11 +140,11 @@ function generateTileTable(size){
 	// $('#image-3').addClass('active');
 	if(brain_id == undefined){
 		brain_url = 'http://braincircuits.org/cgi-bin/iipsrv.fcgi?zoomify=' + '/PITT001/Marmo_7NA_7_layers_1um_spacing.jp2';
-		generateOL(width, height, brain_url);
+		generateOL(width, height, brain_url, 1);
 	}
 }
 
-function selectedTile(tile, section_image_size, imageurl, current_range){
+function selectedTile(tile, section_image_size, imageurl, current_gamma){
 	$('#image_loading_selected').css("display", "block");
 
 	var width = section_image_size[0];
@@ -171,8 +177,12 @@ function selectedTile(tile, section_image_size, imageurl, current_range){
 		jp2path = imageurl;
 	}
 
-	imagePath = iipbase + jp2path + "&CNT=" + current_range[2] + "&WID="+ tilesize + "&RGN=" + rgnstring +
-		"&MINMAX=1:0,512&MINMAX=2:0,512&MINMAX=3:0,512&GAM=1&CVT=jpeg" ;
+	imagePath = iipbase + jp2path + "&CNT=" + current_gamma[0] + "&WID=" 
+			  + tilesize + "&RGN=" + rgnstring + "&MINMAX="
+			  + current_red_range[0] + ":" + current_red_range[1] + "," + current_red_range[2] + "&MINMAX="
+			  + current_green_range[0] + ":" + current_green_range[1] + "," + current_green_range[2] + "&MINMAX="
+			  + current_blue_range[0] + ":" + current_blue_range[1] + "," + current_blue_range[2] 
+			  + "&GAM=1&CVT=jpeg" ;
 
 	bgImage.src = imagePath;
 	// bgImage.src = 'http://braincircuits.org/cgi-bin/iipsrv.fcgi?FIF=/PITT001/Marmo_7NA_7_layers_1um_spacing.jp2&GAM=1&MINMAX=1:0,512&MINMAX=2:0,512&MINMAX=3:0,512&JTL=3,' + tile;
@@ -353,10 +363,18 @@ function generatesectiontils(brain_id, current_section){
 							ypc = row * tilesize/height;
 
 							rgnstring = xpc + "," + ypc + "," + wpc + "," + hpc;
-
+							/*
 							imagePath = iipbase + jp2path + "&WID="+ tilesize/100 + "&RGN=" + rgnstring +
 							 "&MINMAX=1:0,512&MINMAX=2:0,512&MINMAX=3:0,512&GAM=1&CVT=jpeg";
 
+							*/
+
+							imagePath = iipbase + jp2path + "&CNT=" + current_gamma[0] + "&WID="+ tilesize/100 + "&RGN=" + rgnstring +
+							+ current_red_range[0] + ":" + current_red_range[1] + "," + current_red_range[2] + "&MINMAX="
+			  				+ current_green_range[0] + ":" + current_green_range[1] + "," + current_green_range[2] + "&MINMAX="
+			  				+ current_blue_range[0] + ":" + current_blue_range[1] + "," + current_blue_range[2] 
+			 				+ "&GAM=1&CVT=jpeg";
+			   
 							var i = row * ntiles2 + col;
 							content += 
 							         '<tr id="image-'+ i + '">'+
@@ -403,8 +421,9 @@ function generatesectiontils(brain_id, current_section){
 					var imageaddress = iipbase + imagecurrentPath + "&WID=" + nagImagesize + "&QLT=130&CNT=1&CVT=jpeg";
           			$('#navImageSection').attr("src",imageaddress);	
           			updateallinfo();
-
-          			generateOL(width, height, iipzoomify +imagecurrentPath);
+          			current_width = width;
+          			current_height = height;
+          			generateOL(current_width, current_height, iipzoomify +imagecurrentPath, 1);
 				});
 		    });
 		});
@@ -439,7 +458,14 @@ function updateallinfo(){
 	$('#header_info_brainname_section').html('Brain: ' + brain_name + ' | Section: ' + section_number ); 
 }
 
-function generateOL(width, height, brain_url){
+function generateOL(width, height, brain_url, ol_gamma){
+	uiargs = {
+        gamma: ol_gamma,
+        range_red: [current_red_range[1], current_red_range[2]],
+        range_green: [current_green_range[1], current_green_range[2]],
+        range_blue: [current_blue_range[1], current_blue_range[2]]
+    };
+
 	$('#map').html('');
     var imgWidth = width;
     var imgHeight = height;
@@ -453,7 +479,7 @@ function generateOL(width, height, brain_url){
     });
 
     var source = new ol.source.Zoomify({
-      url: brain_url + '/' ,
+      url: applyargs(brain_url,uiargs), 
       size: [imgWidth, imgHeight],
       crossOrigin: 'anonymous'
     });
@@ -474,6 +500,28 @@ function generateOL(width, height, brain_url){
 		extent: [0, -imgHeight, imgWidth, 0]
       })
     });	
+}
+
+function iipcmd(uiprop, arg) 
+{      
+      colornames=['','range_red','range_green','range_blue'];
+
+      if(uiprop.substr(0,5)=='range')
+            return 'MINMAX='+colornames.indexOf(uiprop)+':'+arg[0]+","+arg[1];
+      if(prop=="gamma")
+            return 'GAM='+arg;      
+}
+
+function applyargs(current_url, args) 
+{
+      //return mbaurl;
+      parts = current_url.split('?');
+      parts[1] = parts[1].replace('zoomify', 'FIF');
+      outstr = parts[0]+'?'+parts[1];
+      for(prop in args) {
+        outstr = outstr+'&'+iipcmd(prop,args[prop]);
+      }
+      return outstr+"&JTL={z},{tileIndex}";
 }
 
 function beforeAndafterSection(current_section){
@@ -498,7 +546,16 @@ function initRangeSlider(){
         max: 4096,
         from: 0,
         to: 255,
-        grid: true
+        grid: true,
+        onFinish: function (data) {
+        	if($('#tile-number').text() == '000'){
+        		return;
+        	}
+            red_data_from = data.from;
+			red_data_to = data.to;
+            current_red_range = [1,red_data_from,red_data_to];
+            selectedTile(current_tile, section_image_size, current_image_url, current_gamma);
+        },
     });
 	$(".green-range-slider").ionRangeSlider({
         type: "double",
@@ -506,7 +563,16 @@ function initRangeSlider(){
         max: 4096,
         from: 0,
         to: 255,
-        grid: true
+        grid: true,
+		onFinish: function (data) {
+			if($('#tile-number').text() == '000'){
+        		return;
+        	}
+            green_data_from = data.from;
+			green_data_to = data.to;
+            current_green_range = [2,green_data_from,green_data_to];
+            selectedTile(current_tile, section_image_size, current_image_url, current_gamma);
+        },
     });
  	$(".blue-range-slider").ionRangeSlider({
         type: "double",
@@ -514,19 +580,50 @@ function initRangeSlider(){
         max: 4096,
         from: 0,
         to: 255,
-        grid: true
+        grid: true,
+        onFinish: function (data) {
+        	if($('#tile-number').text() == '000'){
+        		return;
+        	}
+            blue_data_from = data.from;
+			blue_data_to = data.to;
+            current_blue_range = [3,blue_data_from,blue_data_to];
+            selectedTile(current_tile, section_image_size, current_image_url, current_gamma);
+        },
     });
 	$(".gamma-range-slider").ionRangeSlider({
-        min: 0,
+        min: 1,
         max: 5,
         from: 1,
         grid: true,
         step: 0.1,
         onFinish: function (data) {
+        	if($('#tile-number').text() == '000'){
+        		return;
+        	}
             gamma_data = data.from;
             console.info(gamma_data);
-            current_range = [0,255,gamma_data];
-            selectedTile(current_tile, section_image_size, current_image_url, current_range);
+            current_gamma = [gamma_data];
+            selectedTile(current_tile, section_image_size, current_image_url, current_gamma);
         },
     });      
+}
+
+function applyRangesControl(){
+	$("#apply_all_tiles_section").click(function(e){
+		generatesectiontils(brain_id, current_section);
+		if(current_gamma != 1){
+			ol_gamma = 1 - current_gamma[0] * 0.16;
+		}
+		generateOL(current_width, current_height, iipbase +imagecurrentPath, ol_gamma);
+	});
+	$("#reset_all_tiles_section").click(function(e){
+		current_gamma 		= [1];
+		current_red_range 	= [1,0,255];
+		current_blue_range 	= [2,0,255];
+		current_green_range = [3,0,255];
+		generatesectiontils(brain_id, current_section);
+		selectedTile(current_tile, section_image_size, current_image_url, current_gamma);
+	});
+
 }
