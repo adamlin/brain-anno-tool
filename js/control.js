@@ -177,12 +177,12 @@ function selectedTile(tile, section_image_size, imageurl, current_gamma){
 		jp2path = imageurl;
 	}
 
-	imagePath = iipbase + jp2path + "&CNT=" + current_gamma[0] + "&WID=" 
+	imagePath = iipbase + jp2path + "&GAM=" + current_gamma[0] + "&WID=" 
 			  + tilesize + "&RGN=" + rgnstring + "&MINMAX="
 			  + current_red_range[0] + ":" + current_red_range[1] + "," + current_red_range[2] + "&MINMAX="
 			  + current_green_range[0] + ":" + current_green_range[1] + "," + current_green_range[2] + "&MINMAX="
 			  + current_blue_range[0] + ":" + current_blue_range[1] + "," + current_blue_range[2] 
-			  + "&GAM=1&CVT=jpeg" ;
+			  + "&CVT=jpeg" ;
 
 	bgImage.src = imagePath;
 	// bgImage.src = 'http://braincircuits.org/cgi-bin/iipsrv.fcgi?FIF=/PITT001/Marmo_7NA_7_layers_1um_spacing.jp2&GAM=1&MINMAX=1:0,512&MINMAX=2:0,512&MINMAX=3:0,512&JTL=3,' + tile;
@@ -369,11 +369,11 @@ function generatesectiontils(brain_id, current_section){
 
 							*/
 
-							imagePath = iipbase + jp2path + "&CNT=" + current_gamma[0] + "&WID="+ tilesize/100 + "&RGN=" + rgnstring +
+							imagePath = iipbase + jp2path + "&GAM=" + current_gamma[0] + "&WID="+ tilesize/100 + "&RGN=" + rgnstring +
 							+ current_red_range[0] + ":" + current_red_range[1] + "," + current_red_range[2] + "&MINMAX="
 			  				+ current_green_range[0] + ":" + current_green_range[1] + "," + current_green_range[2] + "&MINMAX="
 			  				+ current_blue_range[0] + ":" + current_blue_range[1] + "," + current_blue_range[2] 
-			 				+ "&GAM=1&CVT=jpeg";
+			 				+ "&CVT=jpeg";
 			   
 							var i = row * ntiles2 + col;
 							content += 
@@ -423,7 +423,7 @@ function generatesectiontils(brain_id, current_section){
           			updateallinfo();
           			current_width = width;
           			current_height = height;
-          			generateOL(current_width, current_height, iipzoomify +imagecurrentPath, 1);
+          			generateOL(current_width, current_height, iipzoomify +imagecurrentPath, current_gamma[0]);
 				});
 		    });
 		});
@@ -592,8 +592,8 @@ function initRangeSlider(){
         },
     });
 	$(".gamma-range-slider").ionRangeSlider({
-        min: 1,
-        max: 5,
+        min: 0,
+        max: 1,
         from: 1,
         grid: true,
         step: 0.1,
@@ -612,9 +612,7 @@ function initRangeSlider(){
 function applyRangesControl(){
 	$("#apply_all_tiles_section").click(function(e){
 		generatesectiontils(brain_id, current_section);
-		if(current_gamma != 1){
-			ol_gamma = 1 - current_gamma[0] * 0.16;
-		}
+		ol_gamma = current_gamma[0];
 		generateOL(current_width, current_height, iipbase +imagecurrentPath, ol_gamma);
 	});
 	$("#reset_all_tiles_section").click(function(e){
