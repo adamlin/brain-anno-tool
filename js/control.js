@@ -179,7 +179,9 @@ function selectedTile(tile, section_image_size, imageurl){
 	    layer.add(outimg);
 	    layer.draw();
 	    // layer_vector.draw();
-	    console.info('tile ' + tile + '| ' + imageurl);
+	    // console.info('tile ' + tile + '| ' + imageurl);
+	    tileNo = tile; // Mitsu
+	    imageUrl = jp2path; // Mitsu
 	    $('#image_loading_selected').css("display", "none");
 	};
 }
