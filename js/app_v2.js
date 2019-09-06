@@ -583,6 +583,7 @@ function calBrushMatrix(brushsize) {
 function setCtgAndColor(categoryTxt){
   category = categoryTxt; // Temporally. We should not use label(text)
   currentcolor = colorTable[category] == undefined ? colorForUndefined : colorTable[category];
+  $('.drawing-color-change').css('color',"'" + currentcolor + "'");
   console.log(currentcolor);
 }
 
