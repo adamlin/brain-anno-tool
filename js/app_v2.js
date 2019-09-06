@@ -607,6 +607,7 @@ function setMouseEvt(){
     // var selection = $("input[name=drawingtype]:checked").val();
     if (activatedBtn == "pointer" || mouseRightDown == true) {
       stage.container().style.cursor = 'pointer';
+      touchDown = true;
     }else{
       stage.container().style.cursor = 'default';
       touchDown = true;

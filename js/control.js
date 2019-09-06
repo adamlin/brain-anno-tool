@@ -41,7 +41,7 @@ function mouseclick(){
 	function onMouseMoveBtm(e) {
 		//let panelbtmheight = $('#panel-bottom').height();
 		let topheight = $('#panel-top').height();
-		let middlemoving = ((e.clientY - topheight -4)/innerHeight)*100 + '%';
+		let middlemoving = ((e.clientY - topheight - 4)/innerHeight)*100 + '%';
 
 		$('#panel-middle').height(middlemoving);
 	}
