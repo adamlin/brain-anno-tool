@@ -24,6 +24,8 @@ var colorTable = {  // Temporally.
 
 var mouseLeftDown = false;
 var mouseRightDown = false;
+var touchDown = false;
+
 var UndoOrRedo = 0;
 
 var actionarray = {}; //Associative array. Key is a action count.
@@ -134,7 +136,7 @@ function mouseevt() {
   // console.log(ImPix_y);
 
   // var selection = $("input[name=drawingtype]:checked").val();
-  if (mouseLeftDown == true) {
+  if (mouseLeftDown == true || touchDown == true) {
     if (activatedBtn == "pointer") {
       stage.draggable(true);
     }else if (activatedBtn == "erase") {
@@ -606,6 +608,7 @@ function setMouseEvt(){
       stage.container().style.cursor = 'pointer';
     }else{
       stage.container().style.cursor = 'default';
+      touchDown = true;
     }
     mouseevt();
   });
