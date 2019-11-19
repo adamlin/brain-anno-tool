@@ -136,7 +136,7 @@ function mouseevt() {
   // console.log(ImPix_y);
 
   // var selection = $("input[name=drawingtype]:checked").val();
-  if (mouseLeftDown == true || touchDown == true) {
+    if (mouseLeftDown == true){// || touchDown == true) {
     if (activatedBtn == "pointer") {
       stage.draggable(true);
     }else if (activatedBtn == "erase") {
