@@ -534,7 +534,10 @@ function storeObj(){
   }
   var numOfPix = outObj['pixObj'].length;
   addnewannotation(category,color,numOfPix); // For object tracking by Adam
+
   console.log(outObj);
+
+  
 }
 
 var cumulateColorPoints = function(listOfColors) {
