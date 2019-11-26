@@ -6,7 +6,7 @@ var section_number_init = 30;
 var current_tile;
 var current_image_url;
 
-var current_gamma 		= [1];
+var current_gamma 		= [0.8];
 var current_red_range 	= [1,0,255];
 var current_blue_range 	= [2,0,255];
 var current_green_range = [3,0,255];
@@ -342,16 +342,16 @@ function generatesectiontils(brain_id, current_section){
 		        imagecurrentPath = jp2path; //for gobel uses.
 
 				$.getJSON(iipinfo + jp2path + '/info.json', function(data4) {
-				    width = `${data4.width}`
-				    height = `${data4.height}`
+				    width = parseInt(`${data4.width}`);
+				    height = parseInt(`${data4.height}`);
 				    let dect = [width, height];
 				    section_image_size = dect;
 
 
 					var tilesize = 4096;
 
-					var ntiles1 = Math.round(width/tilesize);
-					var ntiles2 = Math.round(height/tilesize);
+					var ntiles2 = Math.round(width/tilesize);
+					var ntiles1 = Math.round(height/tilesize);
 
 					wpc = tilesize / width;
 					hpc = tilesize / height;
