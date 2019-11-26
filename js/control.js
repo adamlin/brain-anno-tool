@@ -87,8 +87,8 @@ function generateTileTable(size){
 	iipbase = "http://braincircuits.org/cgi-bin/iipsrv.fcgi?FIF=";
 	jp2path = "/PITT001/Marmo_7NA_7_layers_1um_spacing.jp2";
 
-	for(var row = 0; row < ntiles1 ; row ++) {
-		for(var col = 0; col < ntiles2; col++) {
+	for(var row = 0; row < ntiles2 ; row ++) {
+		for(var col = 0; col < ntiles1; col++) {
 
 			xpc = col * tilesize/width;
 			ypc = row * tilesize/height;
@@ -98,7 +98,7 @@ function generateTileTable(size){
 			imagePath = iipbase + jp2path + "&WID="+ tilesize/100 + "&RGN=" + rgnstring +
 			 "&MINMAX=1:0,512&MINMAX=2:0,512&MINMAX=3:0,512&GAM=1&CVT=jpeg";
 
-		var i = row * ntiles2 + col;
+		var i = row * ntiles1 + col;
 		content += 
 		         '<tr id="image-'+ i + '">'+
 		            '<td class="padding"></td>'+
@@ -162,7 +162,7 @@ function selectedTile(tile, section_image_size, imageurl, current_gamma){
 	hpc = tilesize / height;
 
 	col = tile % ntiles1;
-	row = (tile - col) / ntiles2;
+	row = (tile - col) / ntiles1;
 
 	xpc = col * tilesize/width;
 	ypc = row * tilesize/height;
@@ -350,14 +350,14 @@ function generatesectiontils(brain_id, current_section){
 
 					var tilesize = 4096;
 
-					var ntiles2 = Math.round(width/tilesize);
-					var ntiles1 = Math.round(height/tilesize);
+					var ntiles1 = Math.round(width/tilesize);
+					var ntiles2 = Math.round(height/tilesize);
 
 					wpc = tilesize / width;
 					hpc = tilesize / height;
 
-					for(var row = 0; row < ntiles1 ; row ++) {
-						for(var col = 0; col < ntiles2; col++) {
+					for(var row = 0; row < ntiles2 ; row ++) {
+						for(var col = 0; col < ntiles1; col++) {
 
 							xpc = col * tilesize/width;
 							ypc = row * tilesize/height;
@@ -375,7 +375,7 @@ function generatesectiontils(brain_id, current_section){
 			  				+ current_blue_range[0] + ":" + current_blue_range[1] + "," + current_blue_range[2] 
 			 				+ "&CVT=jpeg";
 			   
-							var i = row * ntiles2 + col;
+							var i = row * ntiles1 + col;
 							content += 
 							         '<tr id="image-'+ i + '">'+
 							            '<td class="padding"></td>'+
