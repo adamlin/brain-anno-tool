@@ -452,6 +452,7 @@ function generatesectiontils(brain_id, current_section){
           			current_width = width;
           			current_height = height;
           			generateOL(current_width, current_height, iipzoomify +imagecurrentPath, current_gamma[0]);
+          			cell_annotation_marking_init();
 				});
 		    });
 		});
@@ -670,4 +671,15 @@ function applyRangesControl(){
 		selectedTile(current_tile, section_image_size, current_image_url, current_gamma);
 	});
 
+}
+
+function cell_annotation_marking_init(){
+
+	var meta_link = '<a href="http://www.braincircuits.org/mamo/ol_cshl_anno.html?brain_id=' + brain_id +'&label='+ type
+			  + '&pid=' + $('#full_image_file_name').text() + '" '
+	          + 'data-featherlight="iframe" data-featherlight-iframe-frameborder="0" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-style="display:block;border:none;height:95vh;width:85vw;">'
+	          + '<button id="cell_annotation_marking" class="cell_annotation-tabs" type="button">M</button>'
+	          + '</a>';
+
+	$(".cell_annotation").html(meta_link);
 }

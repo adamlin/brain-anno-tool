@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+    	<title>Mitra Riken Group</title>
+    	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="stylesheet" href="/openlayers/css/bootstrap.min.css" type="text/css">
+        <link rel="stylesheet" href="/openlayers/css/bootstrap-theme.min.css" type="text/css">
+        <link rel="stylesheet" href="/openlayers/css/jquery.modal.css" type="text/css">
+        <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" type="text/css">
+        <link rel="stylesheet" href="/openlayers/css/ol.css" type="text/css">
+        <link rel="stylesheet" href="/openlayers/css/viewer.css" type="text/css">
+        <link rel="stylesheet" href="/openlayers/css/ol3-sidebar.css" type="text/css">
+        <link rel="stylesheet" href="/openlayers/css/ion-rangeSlider/ion.rangeSlider.css" />
+        <link rel="stylesheet" href="/openlayers/css/ion-rangeSlider/ion.rangeSlider.skinFlat.css" />
+        <link rel="stylesheet" href="/openlayers/css/map_custom.css" />
+        <link rel="icon" href="http://mitra.brain.riken.jp/wp-content/uploads/2016/02/logo.png" type="image/png">
+        <link rel="stylesheet" href="/openlayers/css/sweetalert.css">
+        
+        <script type="text/javascript" src="/openlayers/scripts/sweetalert.min.js"></script>     
+        <script type="text/javascript" src="/openlayers/scripts/lodash.min.js"></script>
+        <script type="text/javascript" src="/openlayers/scripts/jquery-1.12.3.min.js"></script>
+        <script type="text/javascript" src="/openlayers/scripts/jquery.lazyload.js"></script>
+        <script type="text/javascript" src="/openlayers/scripts/jquery.scrollTo.min.js"></script>
+        <script type="text/javascript" src="/openlayers/scripts/ol-custom.js"></script>
+        <script type="text/javascript" src="/openlayers/scripts/turf.min.js"></script>
+        <script type="text/javascript" src="/openlayers/scripts/path-controls.js"></script>
+        <script type="text/javascript" src="/openlayers/scripts/jquery-sidebar.js"></script>
+        <script type="text/javascript" src="/openlayers/scripts/ion-rangeSlider/ion.rangeSlider.js"></script> 
+        <script type="text/javascript" src="/openlayers/scripts/marking-controls.js"></script>
+        <script type="text/javascript" src="/openlayers/scripts/atlas_name_color.js"></script>
+
+        <script>
+            var brain_id = getParameterByName('brain_id');
+            var label    = getParameterByName('label');
+            var pid      = getParameterByName('pid');
+            var fid      = getParameterByName('fid');
+            showUser_for_ol8(brain_id, label, pid, fid);
+
+    		window.app = {};
+		    app = window.app;
+		    app.logged_in = 0;
+		    app.url= 'http://www.braincircuits.org:8080/adore-djatoka/resolver';
+
+		    var ini_range = null;
+            try {
+                ini_range = localStorage['dynamic_range'].split(',');
+            } catch (e) {
+                console.log('parsing init range error', e);
+            }
+
+            if(ini_range == null){
+                app.rft_id = 'http://mitra.brain.riken.jp/wp-content/uploads/'+fid+'/'+pid;
+            }else{
+                if(label =='F'){
+                    app.rft_id = 'http://mitra.brain.riken.jp/wp-content/uploads/'+fid+'/'+pid + '&svc.crange='+ ini_range[0] + '-'+ ini_range[1] +','+ ini_range[2] + '-'+ ini_range[3] + ',' + ini_range[4] + '-'+ ini_range[5] +'&svc.gamma=' + ini_range[6];
+                }else{
+                    app.rft_id = 'http://mitra.brain.riken.jp/wp-content/uploads/'+fid+'/'+pid + '&svc.crange=0-255,0-255,0-255' + '&svc.gamma=' + ini_range[6];
+                }
+            }
+		    			
+            app.features_fr = [];
+		    app.features_fe = [];
+		    app.features_fb = [];
+		    app.features_dy = [];
+		    app.features_bda = [];
+		    app.features_fe_inj = [];
+		    app.features_fr_inj = [];
+		    app.sagittal_series = [{"cell_count": 0, "section": "r1a", "section_id": 4443, "coord": -19.676172636449337}];  
+		    app.res = 24000/4.8*0.45;
+			var geourl = '/portal2/getatlasgeojson/PMD1080/52';
+
+
+            setTimeout(function myFunction() {
+                var num = $('.current-section').prop('id').split('-');
+                centerslider(num[1]);
+
+                if($('#login-status').text().substring(0,1) =='*'){
+                    $('#cell_marking').hide();
+                    swal('No Session Detected!','Please log in from http://mitra.brain.riken.jp', 'error');
+                } 
+
+            }, 400)
+        </script>
+        <script defer="defer" type="text/javascript">
+            var brain_id = getParameterByName('brain_id');
+            var label    = getParameterByName('label');
+            var pid      = getParameterByName('pid');
+            br_no= brain_id;
+            slice_no = pid;
+            slice_type = label;
+            file_location = fid;
+        </script>
+
+        <script type="text/javascript" src="/openlayers/scripts/ol-custom-controls.js"></script>
+        <script type="text/javascript" src="/openlayers/scripts/jquery.modal.min.js"></script>
+        <script type="text/javascript" src="/openlayers/scripts/bootstrap.min.js"></script> 
+        <script type="text/javascript" src="/openlayers/scripts/custom-slider.js"></script>
+        
+    </head>
+<body>
+	<div id="sidebar" class="sidebar collapsed">
+		<!-- Nav tabs -->
+        <div class="sidebar-tabs">
+            <ul role="tablist">
+                <li><a href="#home" role="tab"><i class="fa fa-bars"></i></a></li>
+                <li><a href="#profile" role="tab"><i class="fa fa-user"></i></a></li>
+                <li class="disabled"><a href="#messages" role="tab"><i class="fa fa-envelope"></i></a></li>
+            </ul>
+
+            <ul role="tablist">
+                <li><a href="#settings" role="tab"><i class="fa fa-gear"></i></a></li>
+            </ul>
+        </div>
+        <div class="sidebar-content">
+            <div class="sidebar-pane" id="home">
+                <h2 class="sidebar-header">
+                    META DATA
+                    <span class="sidebar-close"><i class="fa fa-caret-left"></i></span>
+                </h2>
+                <div id="metadatainfo"></div>
+            </div>
+
+            <div class="sidebar-pane" id="profile">
+                <h2 class="sidebar-header">Profile<span class="sidebar-close"><i class="fa fa-caret-left"></i></span></h2>
+                <div class="profile_login_status"><a id="login-status"></a></div>
+            </div>
+
+            <div class="sidebar-pane" id="messages">
+                <h2 class="sidebar-header">Messages<span class="sidebar-close"><i class="fa fa-caret-left"></i></span></h2>
+            </div>
+
+            <div class="sidebar-pane" id="settings">
+                <h2 class="sidebar-header">Settings<span class="sidebar-close"><i class="fa fa-caret-left"></i></span></h2>
+                <div class="download_png">
+                    <div id="no-download" class="alert alert-danger" style="display: none">
+                      This example requires a browser that supports the
+                      <a href="http://caniuse.com/#feat=download">link download</a> attribute.
+                    </div>
+                    <a id="export-png" class="btn btn-default" download="map.png"><i class="fa fa-download"></i> Download PNG</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="region_name_info" style="opacity:0.8"></div>  
+    <div id="progress"></div>
+    <div id="rangeslider"></div>
+    <!-- <div id="cell_counting"></div> -->
+    <div id="cell_marking"></div>
+    
+    <div class="dis_measure">
+        <form class="form-inline">
+          <label>Measurement</label><br/>
+            <select class="selectMeasureBox" id="measure_type">
+              <option value="None">None</option>
+              <option value="LineString">Length (LineString)</option>
+              <!-- <option value="Area">Area (Polygon)</option> -->
+            </select>
+            <br/>
+            <div id="dis_measure_txt"></div>
+        </form>
+    </div>
+    <div class="return_range"><button id="return_init_dyn_range" class="return_range-tabs" type="button">H</button></div>
+    <div class="atlas-overlay-annotation">
+        <label>Annotation Labels</label>
+        <div id="info" class="alert alert-success" style="opacity:0.6; padding: 10px; !important">&nbsp;</div>  
+    </div>
+    <div id="marmoset-logo" class="marmoset-logo">
+        <a href="http://mitra.brain.riken.jp"><img src="http://mitra.brain.riken.jp:81/images/iip.32x32.png" alt="mitra brain riken logo"></a>
+    </div>
+    <div id="map" class="map"></div>
+    <div id="zonemap" class="zonemap">
+    <!-- <div id="focus_point" class="focus_point"></div> -->
+    </div>
+
+    <div class="credit">Copyright 2015-2016 Mitra Lab, BSI, RIKEN</div>      
+    <div class="gallery-thumbnail-container"><div id="gallery-thumbnail" class="gallery-thumbnail"></div></div>
+    <script type="text/javascript">
+        var sidebar = $('#sidebar').sidebar();
+    </script>
+    <script type="text/javascript" src="/openlayers/scripts/viewer_ol8.js"></script>
+    <script type="text/javascript" src="/openlayers/scripts/ion-custom-slider.js"></script>
+    <script type="text/javascript">
+        var pid      = getParameterByName('pid');
+        var fid      = getParameterByName('fid');
+        addSliderDiv();
+        addCellCountingDiv();
+        addBrainName(pid);
+        addMetaDataDiv();
+        init_marking_controls_list();
+        setTimeout(function myFunction() {
+            //showSliderAfterLoader();
+            //create_slider(fid, pid);
+            if(label == 'F'){
+                $('#geomtype option[value="Polygon"]').attr("disabled", true);
+                $('#geomtype option[value="Anno_Polygon"]').attr("disabled", true);
+            }
+            if(label == 'N' || label == 'M' || label == 'C'){
+                $('#geomtype option[value="Point"]').attr("disabled", true);
+            }
+        }, 1000)
+        $(window).bind("load", function(){ 
+            create_slider(fid, pid);
+            $('#login-status').load('getauth.php'); 
+        });
+    </script>
+
+    </body>
+</html>
