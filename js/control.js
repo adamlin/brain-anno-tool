@@ -2,14 +2,15 @@ var imagecurrentPath = '';
 var section_image_size;
 var brain_name ='';
 var countTiles = 0;
-var section_number_init = 30;
+var section_number_init = 55;
 var current_tile;
 var current_image_url;
 
 var current_gamma 		= [0.8];
-var current_red_range 	= [1,0,255];
-var current_blue_range 	= [2,0,255];
-var current_green_range = [3,0,255];
+var current_red_range 	= [1,0,1023];
+var current_blue_range 	= [2,0,1023];
+var current_green_range = [3,0,1023];
+var current_opacity = [0.7];
 var current_width;
 var current_height;
 
@@ -170,11 +171,16 @@ function selectedTile(tile, section_image_size, imageurl, current_gamma){
 	rgnstring = xpc + "," + ypc + "," + wpc + "," + hpc;
 	iipbase = "http://braincircuits.org/cgi-bin/iipsrv.fcgi?FIF=";
 
+	jp2path = undefined;
+	mskPath = undefined;
+
 	if(imageurl == ''){
 		jp2path = "/PITT001/Marmo_7NA_7_layers_1um_spacing.jp2";
 		
 	}else{
 		jp2path = imageurl;
+		parts = imageurl.split('/')
+		mskPath = "/imagedata/"+jp2path;
 	}
 
 	imagePath = iipbase + jp2path + "&GAM=" + current_gamma[0] + "&WID=" 
@@ -184,7 +190,17 @@ function selectedTile(tile, section_image_size, imageurl, current_gamma){
 			  + current_blue_range[0] + ":" + current_blue_range[1] + "," + current_blue_range[2] 
 			  + "&CVT=jpeg" ;
 
+	maskPath = iipbase + mskPath + "&GAM=1" + "&WID=" 
+				+ tilesize + "&RGN=" + rgnstring 
+				// + "&MINMAX="
+				// + current_red_range[0] + ":" + current_red_range[1] + "," + current_red_range[2] + "&MINMAX="
+				// + current_green_range[0] + ":" + current_green_range[1] + "," + current_green_range[2] + "&MINMAX="
+				// + current_blue_range[0] + ":" + current_blue_range[1] + "," + current_blue_range[2] 
+				+ "&CVT=jpeg" ;
+	
 	bgImage.src = imagePath;
+	mskImage.src = maskPath;
+
 	// bgImage.src = 'http://braincircuits.org/cgi-bin/iipsrv.fcgi?FIF=/PITT001/Marmo_7NA_7_layers_1um_spacing.jp2&GAM=1&MINMAX=1:0,512&MINMAX=2:0,512&MINMAX=3:0,512&JTL=3,' + tile;
 	// $('#regdetails').html(''+xpix+','+ypix+'; '+wid+'x'+hei);
 	bgImage.onload = function() {
@@ -197,8 +213,20 @@ function selectedTile(tile, section_image_size, imageurl, current_gamma){
 	        image: bgImage,
 	        draggable: false
 		});
+
+		outimg2 = new Konva.Image({
+			x:0,
+			y:0,
+			width: tilesize,
+			height: tilesize,
+			image: mskImage,
+			draggable: false,
+			opacity: current_opacity
+		});
+		outimg2.name('msk');
 		layer.removeChildren();
-	    layer.add(outimg);
+		layer.add(outimg);
+		layer.add(outimg2)
 	    layer.draw();
 	    // layer_vector.draw();
 	    console.info('tile ' + tile + '| ' + imageurl);
@@ -544,8 +572,8 @@ function initRangeSlider(){
         type: "double",
         min: 0,
         max: 4096,
-        from: 0,
-        to: 255,
+        from: current_red_range[1],
+        to: current_red_range[2],
         grid: true,
         onFinish: function (data) {
         	if($('#tile-number').text() == '000'){
@@ -561,8 +589,8 @@ function initRangeSlider(){
         type: "double",
         min: 0,
         max: 4096,
-        from: 0,
-        to: 255,
+        from: current_green_range[1],
+        to: current_green_range[2],
         grid: true,
 		onFinish: function (data) {
 			if($('#tile-number').text() == '000'){
@@ -578,8 +606,8 @@ function initRangeSlider(){
         type: "double",
         min: 0,
         max: 4096,
-        from: 0,
-        to: 255,
+        from: current_blue_range[1],
+        to: current_blue_range[2],
         grid: true,
         onFinish: function (data) {
         	if($('#tile-number').text() == '000'){
@@ -592,9 +620,9 @@ function initRangeSlider(){
         },
     });
 	$(".gamma-range-slider").ionRangeSlider({
-        min: 0,
-        max: 1,
-        from: 1,
+        min: 0.2,
+        max: 2,
+        from: current_gamma[0],
         grid: true,
         step: 0.1,
         onFinish: function (data) {
@@ -606,7 +634,25 @@ function initRangeSlider(){
             current_gamma = [gamma_data];
             selectedTile(current_tile, section_image_size, current_image_url, current_gamma);
         },
-    });      
+	});  
+	$(".opacity-range-slider").ionRangeSlider({
+		min: 0,
+		max: 1,
+		from: 0.7,
+		step: 0.1,
+		onFinish: function(data){
+			if($('#tile-number').text() == '000'){
+        		return;
+        	}
+			opac_data = data.from;
+			mskimg = layer.getChildren(function(node){
+				return node.name()=='msk';
+			});
+			mskimg.opacity(opac_data);
+			current_opacity = [opac_data];
+			layer.draw();
+		}
+	});    
 }
 
 function applyRangesControl(){
@@ -617,9 +663,9 @@ function applyRangesControl(){
 	});
 	$("#reset_all_tiles_section").click(function(e){
 		current_gamma 		= [1];
-		current_red_range 	= [1,0,255];
-		current_blue_range 	= [2,0,255];
-		current_green_range = [3,0,255];
+		current_red_range 	= [1,0,1023];
+		current_blue_range 	= [2,0,1023];
+		current_green_range = [3,0,1023];
 		generatesectiontils(brain_id, current_section);
 		selectedTile(current_tile, section_image_size, current_image_url, current_gamma);
 	});

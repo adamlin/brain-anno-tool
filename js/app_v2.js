@@ -1,3 +1,33 @@
+function csrfSafeMethod(method) {
+  // these HTTP methods do not require CSRF protection
+  return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+}
+
+function getCookie(name) {
+  var cookieValue = null;
+  if (document.cookie && document.cookie !== '') {
+      var cookies = document.cookie.split(';');
+      for (var i = 0; i < cookies.length; i++) {
+          var cookie = cookies[i].trim();
+          // Does this cookie string begin with the name we want?
+          if (cookie.substring(0, name.length + 1) === (name + '=')) {
+              cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+              break;
+          }
+      }
+  }
+  return cookieValue;
+}
+var csrftoken = getCookie('csrftoken');
+
+$.ajaxSetup({
+  beforeSend: function(xhr, settings) {
+      if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+          xhr.setRequestHeader("X-CSRFToken", csrftoken);
+      }
+  }
+});
+
 var wid = 4096;
 var hei = 4096;
 var currentscale = 0.2;
@@ -84,6 +114,9 @@ function initializeStage (){
   nativeCtx.msImageSmoothingEnabled = false;
 
   bgImage = new Image();
+  
+  mskImage = new Image(); // set in control::selectedTile
+
   bgImage.onload = function() {
     var outimg = new Konva.Image({
         x: 0,
@@ -142,7 +175,7 @@ function mouseevt() {
     }else if (activatedBtn == "erase") {
       stage.draggable(false);
       eraseRect(ImPix_x,ImPix_y);
-      showstatus();
+      // showstatus();
     }else if (activatedBtn == "raster_pixel"){
       stage.draggable(false);
         // console.log('[[ Start painting ]]');
@@ -152,7 +185,7 @@ function mouseevt() {
       layer.batchDraw();
       actioncnt = actioncnt + 1;  // paintしなくてもactionが加算されることに注意
       // console.log('[[ The last action(painting) done ]]');
-      showstatus();
+      // showstatus();
     }else if (activatedBtn == "vector_linestring" || activatedBtn == "vector_polygon") {
       // stage.draggable(false);
       // var vecname = "hopefully-unique-" + typeOfOperations.length; ///
@@ -311,7 +344,7 @@ function UndoRedo() {
     ActCursorForRedo = ActCursorForRedo -1;
   }
   actioncnt = actioncnt + 1;
-  showstatus();
+  // showstatus();
 }
 
 function undopix(properActCursor, keys, newundo){
@@ -468,7 +501,7 @@ function eraseRect(ImPix_x,ImPix_y){
   layer.draw(); // draw is faster than batchdraw for erase?
   actioncnt = actioncnt + 1;
   // console.log('[[ The last action(erasing) done ]]');
-  showstatus();
+  // showstatus();
 }
 
 function minimizehistory(){ // To reduce memory use.
@@ -720,7 +753,31 @@ function setElementAct(){
   });
 
   $("#savebutton").click(function() {
-    // xyarray_filt = [];
+    showstatus();
+    $.post("http://localhost:8000/mbaservices/annotationservice/save/",actionarray, 
+      function(resp){alert(resp.answer);}
+      );
+
+    if(false) {
+      //TODO:
+      // extract actionarray as geojson pointlist
+      xyarray_filt_add = {};
+      xyarray_filt_erase = {};
+
+      for(const k of Object.keys(actionarray))
+      {
+        cat = actionarray[k].category;
+        flg = actionarray[k].flag;
+
+        for(const ii of Object.keys(actionarray[k].lindex))
+        {
+          pt = actionarray[k].lindex[ii].xy;
+          xyarray_filt[cat][flg].push(pt);
+        }
+      }
+      //FIXME: incomplete
+    }  
+
     // for (ii = 0; ii < xyarray.length; ++ii) {
     //   if (flagarray[ii] == 1) xyarray_filt.push(xyarray[ii]);
     // }

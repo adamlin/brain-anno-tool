@@ -140,7 +140,7 @@
                    <a class="btn">
                        <i class="zmdi zmdi-spinner"></i><div>load</div>
                    </a>
-                   <a class="btn">
+                   <a id="savebutton" class="btn">
                        <i class="zmdi zmdi-save"></i><div>save</div>
                    </a>
                    <a class="btn">
@@ -272,7 +272,11 @@
                    <div class="gamma_slider">
                     <div class="gamma_slider_note">Gamma:</div>
                     <input type="text" class="gamma-range-slider" name="gamma_range" value="" /><br/>
-                  </div>  
+                  </div>
+                  <div class="opacity_slider">
+                     <div class="opacity_slider_note">Mask opacity:</div>
+                     <input type="text" class="opacity-range-slider" name="opacity_range" value="" /><br/>
+                   </div>  
                 </div>
               </div>
             </div>
@@ -421,14 +425,18 @@
         selectedpixel(); // Does it need be here? Mitsu
         selectedclasses(); // Does it need be here? Mitsu
 
+        var currentimgid = null;
         $(document).on("click", "#listTableTiles tbody tr", function() {
             imageid = $(this).closest('tr').attr('id');
-            $('#' + imageid).click(function() {
-               $(this).addClass('active');
-               $(this).siblings().removeClass('active');
-               res = imageid.split('-');
-               selectedTile(res[1],section_image_size, imagecurrentPath, current_gamma);
-            });
+            if(imageid!=currentimgid) {
+               currentimgid=imageid;
+               $('#' + imageid).click(function() {
+                  $(this).addClass('active');
+                  $(this).siblings().removeClass('active');
+                  res = imageid.split('-');
+                  selectedTile(res[1],section_image_size, imagecurrentPath, current_gamma);
+               });
+            }
         });
         
         // if(brain_id == undefined){
