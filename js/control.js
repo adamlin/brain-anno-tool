@@ -682,4 +682,10 @@ function cell_annotation_marking_init(){
 	          + '</a>';
 
 	$(".cell_annotation").html(meta_link);
+
+	var configuration = ({
+	   beforeClose: function(event){
+	     console.info('hello I am here');
+	   }
+	});
 }
