@@ -63,87 +63,87 @@ function mouseclick(){
   	});
 }
 
-function generateTileTable(size){
-	var content = '';
-	// var imagePath = '';
+// function generateTileTable(size){
+// 	var content = '';
+// 	// var imagePath = '';
 
-	var width = size[0];
-	var height = size[1];
-	//FIXME: get these from http://braincircuits.org/cgi-bin/iipsrv.fcgi?IIIF=/PITT001/Marmo_7NA_7_layers_1um_spacing.jp2/info.json
+// 	var width = size[0];
+// 	var height = size[1];
+// 	//FIXME: get these from http://braincircuits.org/cgi-bin/iipsrv.fcgi?IIIF=/PITT001/Marmo_7NA_7_layers_1um_spacing.jp2/info.json
 	
-	// $.getJSON('http://braincircuits.org/cgi-bin/iipsrv.fcgi?IIIF=/PITT001/Marmo_7NA_7_layers_1um_spacing.jp2/info.json', function(data) {
- //        width = `${data.width}`
- //        height = `${data.height}`
- //    });
+// 	// $.getJSON('http://braincircuits.org/cgi-bin/iipsrv.fcgi?IIIF=/PITT001/Marmo_7NA_7_layers_1um_spacing.jp2/info.json', function(data) {
+//  //        width = `${data.width}`
+//  //        height = `${data.height}`
+//  //    });
 
-	var tilesize = 4096;
+// 	var tilesize = 4096;
 
-	var ntiles1 = Math.round(width/tilesize);
-	var ntiles2 = Math.round(height/tilesize);
+// 	var ntiles1 = Math.round(width/tilesize);
+// 	var ntiles2 = Math.round(height/tilesize);
 
-	wpc = tilesize / width;
-	hpc = tilesize / height;
+// 	wpc = tilesize / width;
+// 	hpc = tilesize / height;
 
-	// imagePath = 'http://braincircuits.org/cgi-bin/iipsrv.fcgi?FIF=/PITT001/Marmo_7NA_7_layers_1um_spacing.jp2&GAM=1&MINMAX=1:0,512&MINMAX=2:0,512&MINMAX=3:0,512&JTL=3,' + i;
-	iipbase = "http://braincircuits.org/cgi-bin/iipsrv.fcgi?FIF=";
-	jp2path = "/PITT001/Marmo_7NA_7_layers_1um_spacing.jp2";
+// 	// imagePath = 'http://braincircuits.org/cgi-bin/iipsrv.fcgi?FIF=/PITT001/Marmo_7NA_7_layers_1um_spacing.jp2&GAM=1&MINMAX=1:0,512&MINMAX=2:0,512&MINMAX=3:0,512&JTL=3,' + i;
+// 	iipbase = "http://braincircuits.org/cgi-bin/iipsrv.fcgi?FIF=";
+// 	jp2path = "/PITT001/Marmo_7NA_7_layers_1um_spacing.jp2";
 
-	for(var row = 0; row < ntiles2 ; row ++) {
-		for(var col = 0; col < ntiles1; col++) {
+// 	for(var row = 0; row < ntiles2 ; row ++) {
+// 		for(var col = 0; col < ntiles1; col++) {
 
-			xpc = col * tilesize/width;
-			ypc = row * tilesize/height;
+// 			xpc = col * tilesize/width;
+// 			ypc = row * tilesize/height;
 
-			rgnstring = xpc + "," + ypc + "," + wpc + "," + hpc;
+// 			rgnstring = xpc + "," + ypc + "," + wpc + "," + hpc;
 
-			imagePath = iipbase + jp2path + "&WID="+ tilesize/100 + "&RGN=" + rgnstring +
-			 "&MINMAX=1:0,512&MINMAX=2:0,512&MINMAX=3:0,512&GAM=1&CVT=jpeg";
+// 			imagePath = iipbase + jp2path + "&WID="+ tilesize/100 + "&RGN=" + rgnstring +
+// 			 "&MINMAX=1:0,255&MINMAX=2:0,255&MINMAX=3:0,255&GAM=0.7&CVT=jpeg";
 
-		var i = row * ntiles1 + col;
-		content += 
-		         '<tr id="image-'+ i + '">'+
-		            '<td class="padding"></td>'+
-		            '<td class="preview clickable">'+
-		               '<div class="preview-pic" lazy="loaded" style="background-image: url(' + imagePath + ');"></div>'+
-		            '</td>'+
-		            '<td class="w100">'+
-		               '<div class="title">'+
-		                  'section on tile ' + i +
-		               '</div>'+
-		               '<div><span class="img-info">'+
-		               		'<img class="icon-layers-1"></img> '+
-		               			'<b>(1/8 mm)</b>'+
-		               		'</span> '+
-		               		'<span class="img-info">'+
-		               			'<img class="icon-calendar-1"></img> '+
-		               			'<b>tile: ' + '4096x4096' + '</b>'+
-		               		'</span>'+
-		               	'</div>'+
-		            '</td>'+
-		            '<td class="icn">'+
-		               '<div class="show-on-hover el-dropdown">'+
-		               		'<span class="el-dropdown-link">'+
-		               			'<img class="zmdi zmdi-download download-icon-1"></img>'+
-		               		'</span> '+
-		               	'</div>'+
-		            '</td>'+
-		            '<td class="icn">'+
-		               '<button type="button" class="el-button show-on-hover icon-btn black el-button--text" title="Delete image" disabled="disabled">'+
-		                  '<span><img class="icon-trash delete-1"></img></span>'+
-		               '</button>'+
-		            '</td>'+
-		            '<td class="padding"></td>'+
-		         '</tr>';
-		 imagePath = '';
-		}
-	}
-	$('#listOfTiles').html(content);
-	// $('#image-3').addClass('active');
-	if(brain_id == undefined){
-		brain_url = 'http://braincircuits.org/cgi-bin/iipsrv.fcgi?zoomify=' + '/PITT001/Marmo_7NA_7_layers_1um_spacing.jp2';
-		generateOL(width, height, brain_url, 1);
-	}
-}
+// 		var i = row * ntiles1 + col;
+// 		content += 
+// 		         '<tr id="image-'+ i + '">'+
+// 		            '<td class="padding"></td>'+
+// 		            '<td class="preview clickable">'+
+// 		               '<div class="preview-pic" lazy="loaded" style="background-image: url(' + imagePath + ');"></div>'+
+// 		            '</td>'+
+// 		            '<td class="w100">'+
+// 		               '<div class="title">'+
+// 		                  'section on tile ' + i +
+// 		               '</div>'+
+// 		               '<div><span class="img-info">'+
+// 		               		'<img class="icon-layers-1"></img> '+
+// 		               			'<b>(1/8 mm)</b>'+
+// 		               		'</span> '+
+// 		               		'<span class="img-info">'+
+// 		               			'<img class="icon-calendar-1"></img> '+
+// 		               			'<b>tile: ' + '4096x4096' + '</b>'+
+// 		               		'</span>'+
+// 		               	'</div>'+
+// 		            '</td>'+
+// 		            '<td class="icn">'+
+// 		               '<div class="show-on-hover el-dropdown">'+
+// 		               		'<span class="el-dropdown-link">'+
+// 		               			'<img class="zmdi zmdi-download download-icon-1"></img>'+
+// 		               		'</span> '+
+// 		               	'</div>'+
+// 		            '</td>'+
+// 		            '<td class="icn">'+
+// 		               '<button type="button" class="el-button show-on-hover icon-btn black el-button--text" title="Delete image" disabled="disabled">'+
+// 		                  '<span><img class="icon-trash delete-1"></img></span>'+
+// 		               '</button>'+
+// 		            '</td>'+
+// 		            '<td class="padding"></td>'+
+// 		         '</tr>';
+// 		 imagePath = '';
+// 		}
+// 	}
+// 	$('#listOfTiles').html(content);
+// 	// $('#image-3').addClass('active');
+// 	if(brain_id == undefined){
+// 		brain_url = 'http://braincircuits.org/cgi-bin/iipsrv.fcgi?zoomify=' + '/PITT001/Marmo_7NA_7_layers_1um_spacing.jp2';
+// 		generateOL(width, height, brain_url, 1);
+// 	}
+// }
 
 function selectedTile(tile, section_image_size, imageurl, current_gamma){
 	$('#image_loading_selected').css("display", "block");
@@ -397,10 +397,10 @@ function generatesectiontils(brain_id, current_section){
 
 							*/
 
-							imagePath = iipbase + jp2path + "&GAM=" + current_gamma[0] + "&WID="+ tilesize/100 + "&RGN=" + rgnstring +
-							+ current_red_range[0] + ":" + current_red_range[1] + "," + current_red_range[2] + "&MINMAX="
-			  				+ current_green_range[0] + ":" + current_green_range[1] + "," + current_green_range[2] + "&MINMAX="
-			  				+ current_blue_range[0] + ":" + current_blue_range[1] + "," + current_blue_range[2] 
+							imagePath = iipbase + jp2path + "&GAM=0.7"  + "&WID="+ tilesize/100 + "&RGN=" + rgnstring 
+							+"&MINMAX=1:0,255" //+ current_red_range[0] + ":" + current_red_range[1] + "," + current_red_range[2] 
+							+ "&MINMAX=2:0,255" // + current_green_range[0] + ":" + current_green_range[1] + "," + current_green_range[2] 
+							+ "&MINMAX=3:0,255" //+ current_blue_range[0] + ":" + current_blue_range[1] + "," + current_blue_range[2] 
 			 				+ "&CVT=jpeg";
 			   
 							var i = row * ntiles1 + col;

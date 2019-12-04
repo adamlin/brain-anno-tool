@@ -30,7 +30,7 @@ $.ajaxSetup({
 
 var wid = 4096;
 var hei = 4096;
-var currentscale = 0.2;
+var currentscale = 0.5;
 var scaleBy = 1.1;
 var scrolldir = 1; //-1: scroll down goes to zoon-in. 1:-1: scroll down goes to zoon-out.
 
@@ -211,7 +211,7 @@ function paintRect(ImPix_x, ImPix_y, pointerPos) {
 	// if (existingrect.className == "Image") {  /////////// どういう役割？
 
   if (action != undefined && actionarray[action]['flag'] == 1) {
-    console.log('already exist');
+    // console.log('already exist');
   }else if (action != undefined && actionarray[action]['flag'] == 0){ // When the pixel is empty by erasing or undo/redo at last time.
     var newrect = makeNewRect(ImPix_x, ImPix_y,currentcolor,linearindex);
     // newrect.on("click tap", checkEraseRect);
@@ -536,20 +536,28 @@ function minimizehistory(){ // To reduce memory use.
 
 function storeObj(){
   // Temporally. Later, get value from selector.
-  var tileNo = '7_10';
-  var Imagename = 'Marmoset_0001';
+  // var tileNo = current_section; //'7_10';
+  var Imagename = brain_id; //'Marmoset_0001';
   // var category = 'Cell body';
   var color = undefined;
 
   outObj = { //初期化
     imagename: Imagename,
-    tileNo: tileNo,
+    sectionNo: ""+current_section, //defined in pixel.html
+    tileNo: parseInt(current_tile),
+    tileWidth: wid,
+    tileHeight: hei,
+    imageWidth: current_width,
+    imageHeight: current_height,
+    annotator:'default', //FIXME 
     category: '',
-    pixObj: []
+    pixObj: [],
+    feature: undefined
   };
 
   var actiokeys = Object.keys(actionarray); //Key(action number) is supposed to be in order from small to big.
 
+  pointarray = [];
   for (var i = 0; i<actiokeys.length; i++) {
     var action = actiokeys[i];
     var linearindexkeys = Object.keys(actionarray[action]['lindex']);
@@ -562,14 +570,17 @@ function storeObj(){
         // delete outtemp['type'];
         outObj['category'] = actionarray[action]['category'];
         outObj['pixObj'].push(outtemp);
+        pointarray.push(outtemp.xy);
       }
     }
   }
+  outObj['feature']=turf.multiPoint(pointarray);
+
   var numOfPix = outObj['pixObj'].length;
   addnewannotation(category,color,numOfPix); // For object tracking by Adam
 
-  console.log(outObj);
-
+  //console.log(outObj);
+  return outObj;
   
 }
 
@@ -697,6 +708,10 @@ function setMouseEvt(){
     }
   });
 
+  function scrollbounds(v){
+      //limit from 0.5 to 8 for scroll
+    return Math.min(8,Math.max(0.5,v));
+  }
   // Mitsu's scroll zooming
   stage.on("mousewheel", e => {
     e.evt.preventDefault();
@@ -709,11 +724,11 @@ function setMouseEvt(){
 
     if (scrolldir == -1) {
       var newScale =
-      e.evt.deltaY > 0 ? oldScale * scaleBy : oldScale / scaleBy;
+      e.evt.deltaY > 0 ? scrollbounds(oldScale * scaleBy) : scrollbounds(oldScale / scaleBy);
       stage.scale({ x: newScale, y: newScale });
     }else if (scrolldir == 1) {
       var newScale =
-      e.evt.deltaY < 0 ? oldScale * scaleBy : oldScale / scaleBy;
+      e.evt.deltaY < 0 ? scrollbounds(oldScale * scaleBy) : scrollbounds(oldScale / scaleBy);
       stage.scale({ x: newScale, y: newScale });
     }else{
       console.log('Choose a proper scroll direction');
@@ -754,29 +769,32 @@ function setElementAct(){
 
   $("#savebutton").click(function() {
     showstatus();
-    $.post("http://localhost:8000/mbaservices/annotationservice/save/",actionarray, 
+    var annodata = storeObj();
+    annodata.pixObj = null;
+    var postdata = JSON.stringify(annodata);
+    $.post("http://localhost:8000/mbaservices/annotationservice/save/",{'msg':postdata}, 
       function(resp){alert(resp.answer);}
       );
 
-    if(false) {
-      //TODO:
-      // extract actionarray as geojson pointlist
-      xyarray_filt_add = {};
-      xyarray_filt_erase = {};
+    // if(false) {
+    //   //TODO: - done by storeObj
+    //   // extract actionarray as geojson pointlist
+    //   xyarray_filt_add = {};
+    //   xyarray_filt_erase = {};
 
-      for(const k of Object.keys(actionarray))
-      {
-        cat = actionarray[k].category;
-        flg = actionarray[k].flag;
+    //   for(const k of Object.keys(actionarray))
+    //   {
+    //     cat = actionarray[k].category;
+    //     flg = actionarray[k].flag;
 
-        for(const ii of Object.keys(actionarray[k].lindex))
-        {
-          pt = actionarray[k].lindex[ii].xy;
-          xyarray_filt[cat][flg].push(pt);
-        }
-      }
-      //FIXME: incomplete
-    }  
+    //     for(const ii of Object.keys(actionarray[k].lindex))
+    //     {
+    //       pt = actionarray[k].lindex[ii].xy;
+    //       xyarray_filt[cat][flg].push(pt);
+    //     }
+    //   }
+    //   //FIXME: incomplete
+    // }  
 
     // for (ii = 0; ii < xyarray.length; ++ii) {
     //   if (flagarray[ii] == 1) xyarray_filt.push(xyarray[ii]);
