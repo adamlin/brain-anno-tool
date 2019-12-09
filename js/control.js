@@ -221,12 +221,15 @@ function selectedTile(tile, section_image_size, imageurl, current_gamma){
 			height: tilesize,
 			image: mskImage,
 			draggable: false,
-			opacity: current_opacity
+			opacity: 0.1 //current_opacity
 		});
 		outimg2.name('msk');
 		layer.removeChildren();
 		layer.add(outimg);
-		layer.add(outimg2)
+		layer.add(outimg2);
+			//brain_id and current_section defined in pixel.html
+		addFirstPass(brain_id,current_section,tile);
+
 	    layer.draw();
 	    // layer_vector.draw();
 	    console.info('tile ' + tile + '| ' + imageurl);
@@ -236,6 +239,18 @@ function selectedTile(tile, section_image_size, imageurl, current_gamma){
 	    $('#image_loading_selected').css("display", "none");
 	};
 	$('#tile-number').html('tile ' + tile);
+}
+
+function addFirstPass(brainid, sec, tile) {
+	apibase = 'http://localhost:8000/mbaservices/annotationservice';
+	msg = {"brainname":brainid, "section": sec, "tile": tile,"tile_wid":4096,"tile_hei":4096,"category":"soma","subcategory":null};
+	$.getJSON(apibase+'/load_firstpass/',msg,function(data) {
+		pixels = data.detect.feature.geometry.coordinates[0];
+		pixels.forEach(function(pt){
+			paintRect(pt[1],pt[0]);
+		});
+		// console.log(pixels);
+	});
 }
 
 function selectedToolBtn(){
@@ -257,7 +272,7 @@ function selectedToolBtn(){
 }
 
 function addnewannotation(category,color,numOfPix){
-	var content2 = '';
+	var content2 = $('#listOfAnnotation').html();
 	content2 += 
 			'<tr>'+
 			   '<td class="padding"></td>'+
