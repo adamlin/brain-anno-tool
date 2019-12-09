@@ -6,8 +6,8 @@ var section_number_init = 55;
 var current_tile;
 var current_image_url;
 
-var current_gamma 		= [0.8];
-var current_red_range 	= [1,0,1023];
+var current_gamma 		= [1.3];
+var current_red_range 	= [1,0,4095];
 var current_blue_range 	= [2,0,1023];
 var current_green_range = [3,0,1023];
 var current_opacity = [0.7];
@@ -214,19 +214,19 @@ function selectedTile(tile, section_image_size, imageurl, current_gamma){
 	        draggable: false
 		});
 
-		outimg2 = new Konva.Image({
-			x:0,
-			y:0,
-			width: tilesize,
-			height: tilesize,
-			image: mskImage,
-			draggable: false,
-			opacity: 0.1 //current_opacity
-		});
-		outimg2.name('msk');
+		// outimg2 = new Konva.Image({
+		// 	x:0,
+		// 	y:0,
+		// 	width: tilesize,
+		// 	height: tilesize,
+		// 	image: mskImage,
+		// 	draggable: false,
+		// 	opacity: 0.1 //current_opacity
+		// });
+		// outimg2.name('msk');
 		layer.removeChildren();
 		layer.add(outimg);
-		layer.add(outimg2);
+		// layer.add(outimg2);
 			//brain_id and current_section defined in pixel.html
 		addFirstPass(brain_id,current_section,tile);
 
@@ -249,7 +249,9 @@ function addFirstPass(brainid, sec, tile) {
 		pixels.forEach(function(pt){
 			paintRect(pt[1],pt[0]);
 		});
-		// console.log(pixels);
+		layer.draw();
+		// console.log('done');
+
 	});
 }
 
