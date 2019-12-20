@@ -201,6 +201,13 @@ function mouseevt() {
   }
 }
 
+function paintRect_firstpass(ImPix_x, ImPix_y, pointerPos) {
+  var linearindex = ImPix_y * wid + ImPix_x; // Left-top is 0.
+  var newrect = makeNewRect(ImPix_x, ImPix_y,currentcolor,linearindex);
+    // newrect.on("click tap", checkEraseRect);
+  layer.add(newrect);
+}
+
 function paintRect(ImPix_x, ImPix_y, pointerPos) {
 	var linearindex = ImPix_y * wid + ImPix_x; // Left-top is 0.
 	var action = idxaction[linearindex]; // Search the last action number of the pixel
@@ -577,7 +584,8 @@ function storeObj(){
   outObj['feature']=turf.multiPoint(pointarray);
 
   var numOfPix = outObj['pixObj'].length;
-  addnewannotation(category,color,numOfPix); // For object tracking by Adam
+  // addnewannotation(category,color,numOfPix); // For object tracking by Adam
+  updateannotationtracking(category,color, numOfPix);
 
   //console.log(outObj);
   return outObj;
@@ -698,7 +706,7 @@ function setMouseEvt(){
       //   });
       // }
       minimizehistory();
-      storeObj();
+      // storeObj();
     }else if (click == 2) {
       mouseRightDown = false;
       console.log('To Do: disable the context menu pop up.');
@@ -724,11 +732,13 @@ function setMouseEvt(){
 
     if (scrolldir == -1) {
       var newScale =
-      e.evt.deltaY > 0 ? scrollbounds(oldScale * scaleBy) : scrollbounds(oldScale / scaleBy);
+      // e.evt.deltaY > 0 ? scrollbounds(oldScale * scaleBy) : scrollbounds(oldScale / scaleBy);
+      e.evt.deltaY > 0 ? scrollbounds(oldScale+0.5) : scrollbounds(oldScale-0.5);
       stage.scale({ x: newScale, y: newScale });
     }else if (scrolldir == 1) {
       var newScale =
-      e.evt.deltaY < 0 ? scrollbounds(oldScale * scaleBy) : scrollbounds(oldScale / scaleBy);
+      // e.evt.deltaY < 0 ? scrollbounds(oldScale * scaleBy) : scrollbounds(oldScale / scaleBy);
+      e.evt.deltaY < 0 ?  scrollbounds(oldScale+0.5) : scrollbounds(oldScale-0.5);
       stage.scale({ x: newScale, y: newScale });
     }else{
       console.log('Choose a proper scroll direction');

@@ -247,7 +247,7 @@ function addFirstPass(brainid, sec, tile) {
 	$.getJSON(apibase+'/load_firstpass/',msg,function(data) {
 		pixels = data.detect.feature.geometry.coordinates[0];
 		pixels.forEach(function(pt){
-			paintRect(pt[1],pt[0]);
+			paintRect_firstpass(pt[1],pt[0]);
 		});
 		layer.draw();
 		// console.log('done');
@@ -273,10 +273,18 @@ function selectedToolBtn(){
 	});
 }
 
+function updateannotationtracking(category,color, numOfPix){
+	if ($('#listOfAnnotation').find('tr#row-'+category))
+		$('#row-'+category).find('td.area').html('<span>'+ numOfPix+' pixels</span>');
+	else
+		addnewannotation(category, color, numOfPix);
+	// console.log('here');
+}
+
 function addnewannotation(category,color,numOfPix){
 	var content2 = $('#listOfAnnotation').html();
 	content2 += 
-			'<tr>'+
+			'<tr id="row-'+category+'">'+
 			   '<td class="padding"></td>'+
 			   '<td class="icn">'+
 			   '</td>'+
@@ -348,8 +356,7 @@ function selectedclasses(){
 	});
 	//$("#classTree").DropDownTree(options);
 }
-
-function generatesectiontils(brain_id, current_section){
+function generatesectiontils(seriesid, current_section) {
 	var content = '';
 	var count = 0;
 	var fullurl;
@@ -359,11 +366,123 @@ function generatesectiontils(brain_id, current_section){
 	let nissl, fluor, ctb;
 	let listOfsections;
 	let jp2path;
-	let typeused;
+	// let typeused;
 
 	iipbase = 'http://braincircuits.org/cgi-bin/iipsrv.fcgi?FIF=';
 	iipinfo = 'http://braincircuits.org/cgi-bin/iipsrv.fcgi?IIIF=';
 	iipzoomify = 'http://braincircuits.org/cgi-bin/iipsrv.fcgi?zoomify=';
+	apibase = 'http://mitradevel.cshl.org/webtools/seriesbrowser';
+
+	$.getJSON(apibase+'/getthumbnails/'+seriesid, function(data2) {
+		listOfSections = data2['F'];
+		currentsecid = undefined;
+		listOfSections.some(function(elt){
+			if(elt[0]==current_section) {
+				currentsecid = elt[2];
+				return true;
+			}
+		});
+
+		// listOfsections = data2[current_section];
+
+		
+		$.getJSON(apibase+'/getsectionjp2path/'+currentsecid, function(data3) {
+			jp2path = `${data3.jp2Path}`
+			jp2path = jp2path.replace('&', '%26');
+			jp2path = jp2path.replace('/brainimg', '');
+
+			imagecurrentPath = jp2path; //for gobel uses.
+
+			$.getJSON(iipinfo + jp2path + '/info.json', function(data4) {
+				width = parseInt(`${data4.width}`);
+				height = parseInt(`${data4.height}`);
+				let dect = [width, height];
+				section_image_size = dect;
+
+
+				var tilesize = 4096;
+
+				var ntiles1 = Math.round(width/tilesize);
+				var ntiles2 = Math.round(height/tilesize);
+
+				wpc = tilesize / width;
+				hpc = tilesize / height;
+
+				for(var row = 0; row < ntiles2 ; row ++) {
+					for(var col = 0; col < ntiles1; col++) {
+
+						xpc = col * tilesize/width;
+						ypc = row * tilesize/height;
+
+						rgnstring = xpc + "," + ypc + "," + wpc + "," + hpc;
+						/*
+						imagePath = iipbase + jp2path + "&WID="+ tilesize/100 + "&RGN=" + rgnstring +
+						 "&MINMAX=1:0,512&MINMAX=2:0,512&MINMAX=3:0,512&GAM=1&CVT=jpeg";
+
+						*/
+
+						imagePath = iipbase + jp2path + "&GAM=1"  + "&WID="+ tilesize/100 + "&RGN=" + rgnstring 
+						+"&MINMAX=1:0,2047" //+ current_red_range[0] + ":" + current_red_range[1] + "," + current_red_range[2] 
+						+ "&MINMAX=2:0,2047" // + current_green_range[0] + ":" + current_green_range[1] + "," + current_green_range[2] 
+						+ "&MINMAX=3:0,2047" //+ current_blue_range[0] + ":" + current_blue_range[1] + "," + current_blue_range[2] 
+						 + "&CVT=jpeg";
+		   
+						var i = row * ntiles1 + col;
+						content += 
+								 '<tr id="image-'+ i + '">'+
+									'<td class="padding"></td>'+
+									'<td class="preview clickable">'+
+									   '<div class="preview-pic" lazy="loaded" style="background-image: url(' + imagePath + ');"></div>'+
+									'</td>'+
+									'<td class="w100">'+
+									   '<div class="title">'+
+										  'section on tile ' + i +
+									   '</div>'+
+									   '<div><span class="img-info">'+
+											   '<img class="icon-layers-1"></img> '+
+												   '<b>(1/8 mm)</b>'+
+											   '</span> '+
+											   '<span class="img-info">'+
+												   '<img class="icon-calendar-1"></img> '+
+												   '<b>tile: ' + '4096x4096' + '</b>'+
+											   '</span>'+
+										   '</div>'+
+									'</td>'+
+									'<td class="icn">'+
+									   '<div class="show-on-hover el-dropdown">'+
+											   '<span class="el-dropdown-link">'+
+												   '<img class="zmdi zmdi-download download-icon-1"></img>'+
+											   '</span> '+
+										   '</div>'+
+									'</td>'+
+									'<td class="icn">'+
+									   '<button type="button" class="el-button show-on-hover icon-btn black el-button--text" title="Delete image" disabled="disabled">'+
+										  '<span><img class="icon-trash delete-1"></img></span>'+
+									   '</button>'+
+									'</td>'+
+									'<td class="padding"></td>'+
+								 '</tr>';
+						 imagePath = '';
+						 count = count + 1;
+					}
+				}
+				$('#listOfTiles').html(content);
+				$('#image_loading_selected').css("display", "none");
+				countTiles = count;
+				var nagImagesize = $(window).width() * 0.20 - 3;
+				var imageaddress = iipbase + imagecurrentPath + "&WID=" + nagImagesize + "&QLT=130&CNT=1&CVT=jpeg";
+				  $('#navImageSection').attr("src",imageaddress);	
+				  updateallinfo();
+				  current_width = width;
+				  current_height = height;
+				  generateOL(current_width, current_height, iipzoomify +imagecurrentPath, current_gamma[0]);
+				  cell_annotation_marking_init();
+			});
+		});
+	});
+}
+function generatesectiontils_brainid(brain_id, current_section){
+	
 	apibase = 'http://mitradevel.cshl.org/webtools/seriesbrowser';
    
 	$.getJSON(apibase+'/getseriesid/'+brain_id, function(data) {
@@ -374,105 +493,7 @@ function generatesectiontils(brain_id, current_section){
         }else if (type == 'N'){
         	typeused = nissl;
         }
-
-        $.getJSON(apibase+'/getsectionids/'+typeused, function(data2) {
-	    	listOfsections = data2[current_section];
-
-	    	
-		    $.getJSON(apibase+'/getsectionjp2path/'+listOfsections, function(data3) {
-		        jp2path = `${data3.jp2Path}`
-		        jp2path = jp2path.replace('&', '%26');
-		        jp2path = jp2path.replace('/brainimg', '');
-
-		        imagecurrentPath = jp2path; //for gobel uses.
-
-				$.getJSON(iipinfo + jp2path + '/info.json', function(data4) {
-				    width = parseInt(`${data4.width}`);
-				    height = parseInt(`${data4.height}`);
-				    let dect = [width, height];
-				    section_image_size = dect;
-
-
-					var tilesize = 4096;
-
-					var ntiles1 = Math.round(width/tilesize);
-					var ntiles2 = Math.round(height/tilesize);
-
-					wpc = tilesize / width;
-					hpc = tilesize / height;
-
-					for(var row = 0; row < ntiles2 ; row ++) {
-						for(var col = 0; col < ntiles1; col++) {
-
-							xpc = col * tilesize/width;
-							ypc = row * tilesize/height;
-
-							rgnstring = xpc + "," + ypc + "," + wpc + "," + hpc;
-							/*
-							imagePath = iipbase + jp2path + "&WID="+ tilesize/100 + "&RGN=" + rgnstring +
-							 "&MINMAX=1:0,512&MINMAX=2:0,512&MINMAX=3:0,512&GAM=1&CVT=jpeg";
-
-							*/
-
-							imagePath = iipbase + jp2path + "&GAM=0.7"  + "&WID="+ tilesize/100 + "&RGN=" + rgnstring 
-							+"&MINMAX=1:0,255" //+ current_red_range[0] + ":" + current_red_range[1] + "," + current_red_range[2] 
-							+ "&MINMAX=2:0,255" // + current_green_range[0] + ":" + current_green_range[1] + "," + current_green_range[2] 
-							+ "&MINMAX=3:0,255" //+ current_blue_range[0] + ":" + current_blue_range[1] + "," + current_blue_range[2] 
-			 				+ "&CVT=jpeg";
-			   
-							var i = row * ntiles1 + col;
-							content += 
-							         '<tr id="image-'+ i + '">'+
-							            '<td class="padding"></td>'+
-							            '<td class="preview clickable">'+
-							               '<div class="preview-pic" lazy="loaded" style="background-image: url(' + imagePath + ');"></div>'+
-							            '</td>'+
-							            '<td class="w100">'+
-							               '<div class="title">'+
-							                  'section on tile ' + i +
-							               '</div>'+
-							               '<div><span class="img-info">'+
-							               		'<img class="icon-layers-1"></img> '+
-							               			'<b>(1/8 mm)</b>'+
-							               		'</span> '+
-							               		'<span class="img-info">'+
-							               			'<img class="icon-calendar-1"></img> '+
-							               			'<b>tile: ' + '4096x4096' + '</b>'+
-							               		'</span>'+
-							               	'</div>'+
-							            '</td>'+
-							            '<td class="icn">'+
-							               '<div class="show-on-hover el-dropdown">'+
-							               		'<span class="el-dropdown-link">'+
-							               			'<img class="zmdi zmdi-download download-icon-1"></img>'+
-							               		'</span> '+
-							               	'</div>'+
-							            '</td>'+
-							            '<td class="icn">'+
-							               '<button type="button" class="el-button show-on-hover icon-btn black el-button--text" title="Delete image" disabled="disabled">'+
-							                  '<span><img class="icon-trash delete-1"></img></span>'+
-							               '</button>'+
-							            '</td>'+
-							            '<td class="padding"></td>'+
-							         '</tr>';
-							 imagePath = '';
-							 count = count + 1;
-						}
-					}
-					$('#listOfTiles').html(content);
-					$('#image_loading_selected').css("display", "none");
-					countTiles = count;
-					var nagImagesize = $(window).width() * 0.20 - 3;
-					var imageaddress = iipbase + imagecurrentPath + "&WID=" + nagImagesize + "&QLT=130&CNT=1&CVT=jpeg";
-          			$('#navImageSection').attr("src",imageaddress);	
-          			updateallinfo();
-          			current_width = width;
-          			current_height = height;
-          			generateOL(current_width, current_height, iipzoomify +imagecurrentPath, current_gamma[0]);
-          			cell_annotation_marking_init();
-				});
-		    });
-		});
+		generatesectiontils(typeused, current_section);
 		
     });
 
@@ -575,13 +596,13 @@ function beforeAndafterSection(current_section){
 	$("#btn_section_right").click(function(e){
 		$('#image_loading_selected').css("display", "block");
 		current_section = current_section + 1;
-		generatesectiontils(brain_id, current_section);
+		generatesectiontils_brainid(brain_id, current_section);
 	});
 
 	$("#btn_section_left").click(function(e){
 		$('#image_loading_selected').css("display", "block");
 		current_section = current_section - 1;
-		generatesectiontils(brain_id, current_section);
+		generatesectiontils_brainid(brain_id, current_section);
 	});
 }
 
@@ -675,7 +696,7 @@ function initRangeSlider(){
 
 function applyRangesControl(){
 	$("#apply_all_tiles_section").click(function(e){
-		generatesectiontils(brain_id, current_section);
+		generatesectiontils_brainid(brain_id, current_section);
 		ol_gamma = current_gamma[0];
 		generateOL(current_width, current_height, iipbase +imagecurrentPath, ol_gamma);
 	});
@@ -684,7 +705,7 @@ function applyRangesControl(){
 		current_red_range 	= [1,0,1023];
 		current_blue_range 	= [2,0,1023];
 		current_green_range = [3,0,1023];
-		generatesectiontils(brain_id, current_section);
+		generatesectiontils_brainid(brain_id, current_section);
 		selectedTile(current_tile, section_image_size, current_image_url, current_gamma);
 	});
 

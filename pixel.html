@@ -406,20 +406,26 @@
       <script type="text/javascript">
         var section_image_size;
         var fullurl;
+        var series_id = getUrlVars()['series_id'];
         var brain_id = getUrlVars()["brain_id"];
         var type = getUrlVars()["type"];
         var current_section = Number(getUrlVars()["section"]);
 
-        if(brain_id == undefined){
-          $.getJSON('http://braincircuits.org/cgi-bin/iipsrv.fcgi?IIIF=/PITT001/Marmo_7NA_7_layers_1um_spacing.jp2/info.json', function(data) {
-              width = `${data.width}`
-              height = `${data.height}`
-              let dect = [width, height];
-              section_image_size = dect;
-              generateTileTable(dect);
-          });
-        }else{
-          generatesectiontils(brain_id, current_section);
+        if(series_id == undefined){
+
+         //  $.getJSON('http://braincircuits.org/cgi-bin/iipsrv.fcgi?IIIF=/PITT001/Marmo_7NA_7_layers_1um_spacing.jp2/info.json', function(data) {
+         //      width = `${data.width}`
+         //      height = `${data.height}`
+         //      let dect = [width, height];
+         //      section_image_size = dect;
+         //      generateTileTable(dect);
+         //  });
+            
+            generatesectiontils_brainid(brain_id, current_section);
+        }
+        else
+        {
+          generatesectiontils(series_id, current_section);
         }
 
         mouseclick();
