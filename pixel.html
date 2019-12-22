@@ -98,40 +98,58 @@
                       </button>
                       <ul id="annotated_class" class="dropdown-menu multi-level" role="menu" aria-labelledby="dropdownMenu">
                           <li class="dropdown-submenu">
-                            <a  class="dropdown-item" tabindex="-1" href="#">neurites</a>
+                            <a  class="dropdown-item" tabindex="-1" href="#" key="axon">Axons</a>
                             <ul class="dropdown-menu">
                               <li class="dropdown-submenu">
-                                <a class="dropdown-item" href="#">axons</a>
-                                <ul class="dropdown-menu">
+                                <a class="dropdown-item" href="#" key='axon.fasciculated'>Fasciculated axon</a>
+                                <a class="dropdown-item" href="#" key='axon.terminal_arbor'>Axon terminal arbor</a>
+                                <a class="dropdown-item" href="#" key='axon.passing_no_fasciculated'>Axon Passing no fasciculated</a>
+                                <a class="dropdown-item" href="#" key='axon.synaptic_swelling'>Axon synaptic swelling</a>
+                                <!-- <ul class="dropdown-menu">
                                     <li class="dropdown-item"><a href="#">passing fiber</a></li>
                                     <li class="dropdown-item"><a href="#">axon fiber</a></li>
                                     <li class="dropdown-item"><a href="#">axon unidentifiable</a></li>
-                                </ul>
-                                <a class="dropdown-item" href="#">dendrites</a>
-                                <a class="dropdown-item" href="#">neurties unidentifiable</a>
+                                </ul> -->
+                                <!-- <a class="dropdown-item" href="#">dendrites</a> -->
+                                <!-- <a class="dropdown-item" href="#">neurties unidentifiable</a> -->
                               </li>
                             </ul>
                           </li>
                           <li class="dropdown-submenu">
-                            <a class="dropdown-item" href="#">injection site</a>
+                            <a class="dropdown-item" href="#" key='dendrite'>Somatic dendritic compartment</a>
                             <ul class="dropdown-menu">
                               <li class="dropdown-submenu">
-                                <a class="dropdown-item" href="#">injection soma</a>
-                                <a class="dropdown-item" href="#">injection area</a>
+                                <a class="dropdown-item" href="#" key='dendrite.synaptic_swelling'>Dendrite synaptic swelling</a>
+                                <a class="dropdown-item" href="#" key='dendrite.dendritic_fiber'>Dendritic fiber</a>
+                                <a class="dropdown-item" href="#" key='dendrite.soma'>Soma</a>
                               </li>
                             </ul>
                           </li>
                           <li class="dropdown-submenu">
-                            <a class="dropdown-item" href="#">others</a>
-                            <ul class="dropdown-menu">
+                            <a class="dropdown-item" href="#" key='neurites.unidentifiable'>Neurites unidentifiable</a>
+                           </li>
+                           <li class="dropdown-submenu">
+                              <a class="dropdown-item" href="#" key='artifact'>Artifact</a>
+                              <ul class="dropdown-menu">
+                                 <li class="dropdown-submenu">
+                                    <a class="dropdown-item" href="#" key='artifact.autofluorescent_cell'>Autofluorescent cells</a>
+                                    <a class="dropdown-item" href="#" key='artifact.dust'>Dust</a>                                    
+                                 </li>
+                              </ul>
+                           </li>
+                            <!-- <ul class="dropdown-menu">
                               <li class="dropdown-submenu">
                                 <a class="dropdown-item" href="#">autofluorescence</a>
                                 <a class="dropdown-item" href="#">artifact</a>
                               </li>
-                            </ul>
-                          </li>
+                            </ul> -->
+                          
                         </ul>
                    </div>
+                   <div class="divider"></div>
+                   <a id="btn_firstpass" class="btn">
+                       <i class="zmdi zmdi-spinner"></i><div>First pass</div>
+                   </a>
                    <div class="divider"></div>
                    <a id="undo_draw" class="btn">
                        <i class="zmdi zmdi-undo"></i><div>undo</div>
@@ -276,7 +294,7 @@
                     <input type="text" class="gamma-range-slider" name="gamma_range" value="" /><br/>
                   </div>
                   <div class="opacity_slider">
-                     <div class="opacity_slider_note">Mask opacity:</div>
+                     <div class="opacity_slider_note">Tile opacity:</div>
                      <input type="text" class="opacity-range-slider" name="opacity_range" value="" /><br/>
                    </div>  
                 </div>
@@ -404,8 +422,10 @@
       <!-- end sidebar control -->
 
       <script type="text/javascript">
-        var section_image_size;
+      //   var section_image_size;
         var fullurl;
+        
+        
         var series_id = getUrlVars()['series_id'];
         var brain_id = getUrlVars()["brain_id"];
         var type = getUrlVars()["type"];
@@ -444,7 +464,7 @@
                   $(this).addClass('active');
                   $(this).siblings().removeClass('active');
                   res = imageid.split('-');
-                  selectedTile(res[1],section_image_size, imagecurrentPath, current_gamma);
+                  selectedTile(res[1],app.section_image_size, app.jp2Path, current_gamma);
                });
             }
         });

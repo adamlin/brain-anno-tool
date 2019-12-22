@@ -28,51 +28,60 @@ $.ajaxSetup({
   }
 });
 
-var wid = 4096;
-var hei = 4096;
-var currentscale = 0.5;
-var scaleBy = 1.1;
-var scrolldir = 1; //-1: scroll down goes to zoon-in. 1:-1: scroll down goes to zoon-out.
+// var wid = 4096;
+// var hei = 4096;
+var app = {};
+app.category = undefined; // initial category
+app.currentcolor = undefined; // initial color
 
-var category = undefined; // initial category
-var currentcolor = undefined; // initial color
 var colorForUndefined = '#808080';
 // var indicesWithSaidColor = [];
 // var positionForColor = {};
-var colorTable = {  // Temporally.
-  'axons': 'rgba(253, 225, 87, 0.7)',
-  'dendrites': 'rgba(218, 87, 253, 0.7)', 
-  'neurties unidentifiable':'rgba(253, 117, 87, 0.7)',
-  'passing fiber': 'rgba(253, 17, 87, 0.7)',
-  'axon fiber':'rgba(218, 87, 253, 0.7)',
-  'axon unidentifiable':'rgba(253, 87, 231, 0.7)',
-  'autofluorescence': 'rgba(87, 198, 253, 0.7)',
+colorTable = {  // Temporally.
+  'axon': 'rgba(253, 225, 87, 0.7)',
+  'axon.fasciculated': 'rgba(253, 225, 87, 0.7)',
+  'axon.terminal_arbor': 'rgba(253, 225, 87, 0.7)',
+  'axon.passing_no_fasciculated': 'rgba(253, 17, 87, 0.7)',
+  'axon.synaptic_swelling': 'rgba(253, 225, 87, 0.7)',
+
+  'dendrite': 'rgba(218, 87, 253, 0.7)', 
+  'dendrite.synaptic_swelling': 'rgba(253, 225, 87, 0.7)',
+  'dendrite.dendritic_fiber':'rgba(253, 117, 87, 0.7)',
+  'dendrite.soma': 'rgba(253, 225, 87, 0.7)',
+
+  // 'passing fiber': 'rgba(253, 17, 87, 0.7)',
+  // 'axon fiber':'rgba(218, 87, 253, 0.7)',
+  'neurites.unidentifiable':'rgba(253, 87, 231, 0.7)',
+
+  // 'autofluorescence': 'rgba(87, 198, 253, 0.7)',
   'artifact': 'rgba(253, 140, 87, 0.7)',
-  'injection soma':'rgba(117, 87, 253, 0.7)',
-  'injection area':'rgba(17, 87, 253, 0.7)',  
+  'artifact.autofluorescent_cell':'rgba(117, 87, 253, 0.7)',
+  'artifact.dust':'rgba(17, 87, 253, 0.7)'
 };
 
 var mouseLeftDown = false;
 var mouseRightDown = false;
 var touchDown = false;
 
-var UndoOrRedo = 0;
+app.UndoOrRedo = 0;
 
 var actionarray = {}; //Associative array. Key is a action count.
 var idxaction = {}; //Associative array. Key is a linearindex.
 
-var actioncnt = 1;
+app.actioncnt = 1;
 var ActCursorForRedo = undefined;
 var lastActIsUndoRedo = 0;
 var lastActIsEraseOrPaint = 0;
 
+var disp = {};
+disp.currentscale = 0.5;
 // var currentvector = undefined;
 
 var initBrushsize = 9; // Temporally. Brush size should be set at selector when page loaded.
 var brushmatrix = undefined;
 
 var age = 20;  // The old history of pixels that are not be shown (destroyed) and are older than 'age' will be deleted from the record (can not undo)  
-var outObj = {};
+// var outObj = {};
 
 var rectMargin = 0.1;
 
@@ -80,11 +89,11 @@ var activatedBtn = 'pointer'; // Temporally. drawing type should be set at tool 
 
 function setInitValue (){
   // Set category and color 
-  setCtgAndColor(category);
+  setCtgAndColor(app.category);
 
   // magnify slider
-  $("#myRange").val(currentscale);
-  $("#zoomlabel").html(currentscale);
+  $("#myRange").val(disp.currentscale);
+  $("#zoomlabel").html(disp.currentscale);
 
   // paint brush size
   brushmatrix = calBrushMatrix(initBrushsize);
@@ -99,7 +108,7 @@ function initializeStage (){
     container: "container",
     width: stageWidth, //window.innerWidth,
     height: stageHeight, //window.innerHeight - 45,
-    scale: { x: currentscale, y: currentscale },
+    scale: { x: disp.currentscale, y: disp.currentscale },
     draggable: false // if this is changed, then stage offset should be considered while recording points
   });
 
@@ -115,14 +124,14 @@ function initializeStage (){
 
   bgImage = new Image();
   
-  mskImage = new Image(); // set in control::selectedTile
+  // mskImage = new Image(); // set in control::selectedTile
 
   bgImage.onload = function() {
     var outimg = new Konva.Image({
         x: 0,
         y: 0,
-        width: wid,
-        height: hei,
+        width: app.tilewid,
+        height: app.tilehei,
         image: bgImage,
         draggable: false
     });
@@ -157,15 +166,15 @@ function makeNewRect(ImPix_x, ImPix_y, color, linearindex) {
     // fill: color == undefined ? $('#picker').colorpicker("val") : color,
     fill: color,
     draggable: false,
-    category: 'kategori-'
+    // category: 'kategori-'
   });
 }
 
 function mouseevt() {
   var pointerPos = stage.getPointerPosition(); //Pointer position on the image. Left-top of the container(background) is the [0 0].
   var stgposition = stage.position(); // The distance of the stage from the left-top of the container.
-  var ImPix_x = Math.floor((pointerPos.x - stgposition.x) / currentscale); // X coordinate of the pixel of the image where the cursor is on. Top-left is 0.
-  var ImPix_y = Math.floor((pointerPos.y - stgposition.y) / currentscale);
+  var ImPix_x = Math.floor((pointerPos.x - stgposition.x) / disp.currentscale); // X coordinate of the pixel of the image where the cursor is on. Top-left is 0.
+  var ImPix_y = Math.floor((pointerPos.y - stgposition.y) / disp.currentscale);
   // console.log(ImPix_y);
 
   // var selection = $("input[name=drawingtype]:checked").val();
@@ -183,7 +192,7 @@ function mouseevt() {
         paintRect(ImPix_x+brushmatrix[i][0], ImPix_y+brushmatrix[i][1], pointerPos);
       }
       layer.batchDraw();
-      actioncnt = actioncnt + 1;  // paintしなくてもactionが加算されることに注意
+      app.actioncnt = app.actioncnt + 1;  // paintしなくてもactionが加算されることに注意
       // console.log('[[ The last action(painting) done ]]');
       // showstatus();
     }else if (activatedBtn == "vector_linestring" || activatedBtn == "vector_polygon") {
@@ -203,7 +212,7 @@ function mouseevt() {
 
 function paintRect_firstpass(ImPix_x, ImPix_y, pointerPos) {
   var linearindex = ImPix_y * wid + ImPix_x; // Left-top is 0.
-  var newrect = makeNewRect(ImPix_x, ImPix_y,currentcolor,linearindex);
+  var newrect = makeNewRect(ImPix_x, ImPix_y,app.currentcolor,linearindex);
     // newrect.on("click tap", checkEraseRect);
   layer.add(newrect);
 }
@@ -220,29 +229,29 @@ function paintRect(ImPix_x, ImPix_y, pointerPos) {
   if (action != undefined && actionarray[action]['flag'] == 1) {
     // console.log('already exist');
   }else if (action != undefined && actionarray[action]['flag'] == 0){ // When the pixel is empty by erasing or undo/redo at last time.
-    var newrect = makeNewRect(ImPix_x, ImPix_y,currentcolor,linearindex);
+    var newrect = makeNewRect(ImPix_x, ImPix_y,app.currentcolor,linearindex);
     // newrect.on("click tap", checkEraseRect);
     layer.add(newrect);
     // layer.draw();
 
-    if (actionarray[actioncnt] == undefined) { // 新しくactionを作る. Use associative array not to make a unnecessary empties.
-      actionarray[actioncnt] = {
-        category: category,
-        color: currentcolor,
+    if (actionarray[app.actioncnt] == undefined) { // 新しくactionを作る. Use associative array not to make a unnecessary empties.
+      actionarray[app.actioncnt] = {
+        category: app.category,
+        color: app.currentcolor,
         flag: 1,
         undo: 0,
         type: "pixel",
         lindex: {}
       };
     }
-    actionarray[actioncnt]['lindex'][linearindex] = JSON.parse(JSON.stringify(actionarray[action]['lindex'][linearindex])); //元のstatusを新しいactionにコピー(deep copy)
+    actionarray[app.actioncnt]['lindex'][linearindex] = JSON.parse(JSON.stringify(actionarray[action]['lindex'][linearindex])); //元のstatusを新しいactionにコピー(deep copy)
     // console.log(actionarray[action]);
     // actionarray[actioncnt][linearindex]['flag'] = 1;
     // actionarray[actioncnt][linearindex]['undo'] = 0;
     // actionarray[actioncnt][linearindex]['color'] = currentcolor;
     // actionarray[actioncnt][linearindex]['type'] = "pixel";
 
-    idxaction[linearindex] = actioncnt; //action countの更新
+    idxaction[linearindex] = app.actioncnt; //action countの更新
 
     delete actionarray[action]['lindex'][linearindex]; // 元のactionを削除する
     if (Object.keys(actionarray[action]['lindex']).length == 0) {
@@ -258,15 +267,15 @@ function paintRect(ImPix_x, ImPix_y, pointerPos) {
     // positionForColor[currentcolor].push([ImPix_x, ImPix_y]); /// need check
     
   }else{ // Make a new rect at a new pixel
-    var newrect = makeNewRect(ImPix_x, ImPix_y,currentcolor,linearindex);
+    var newrect = makeNewRect(ImPix_x, ImPix_y,app.currentcolor,linearindex);
     // newrect.on("click tap", checkEraseRect);
     layer.add(newrect);
     // layer.draw();
     
-    if (actionarray[actioncnt] == undefined) { // 新しくactionを作る. Use associative array not to make a unnecessary empties.
-      actionarray[actioncnt] = {
-        category: category,
-        color: currentcolor,
+    if (actionarray[app.actioncnt] == undefined) { // 新しくactionを作る. Use associative array not to make a unnecessary empties.
+      actionarray[app.actioncnt] = {
+        category: app.category,
+        color: app.currentcolor,
         flag: 1,
         undo: 0,
         type: "pixel",
@@ -275,7 +284,7 @@ function paintRect(ImPix_x, ImPix_y, pointerPos) {
     }
 
     // push a new status to the array.
-    actionarray[actioncnt]['lindex'][linearindex] = {
+    actionarray[app.actioncnt]['lindex'][linearindex] = {
       xy: [ImPix_x, ImPix_y],
       // flag: 1,
       // undo: 0,
@@ -283,7 +292,7 @@ function paintRect(ImPix_x, ImPix_y, pointerPos) {
       // type: "pixel"
     };
     
-    idxaction[linearindex] = actioncnt;
+    idxaction[linearindex] = app.actioncnt;
 
     lastActIsUndoRedo = 0;
     lastActIsEraseOrPaint = 1;
@@ -301,10 +310,10 @@ function UndoRedo() {
   var properActCursor = 0;
   var newundo = undefined;
 
-  if (UndoOrRedo == 'undo'){
+  if (app.UndoOrRedo == 'undo'){
     newundo = 1;
 
-    for (var i = actioncnt-1; i>0 && !(actionarray[i] != undefined && actionarray[i]['undo'] == 0); i--){
+    for (var i = app.actioncnt-1; i>0 && !(actionarray[i] != undefined && actionarray[i]['undo'] == 0); i--){
       // console.log('### Searching a correct action number... ###');  
       // console.log('The action cursor ' + i + ' was not what we want to undo/redo for.');
       // console.log('Next, try a cursor ' + (i-1));
@@ -318,7 +327,7 @@ function UndoRedo() {
     properActCursor = i;
     var keys = Object.keys(actionarray[properActCursor]['lindex']);
 
-  }else if(UndoOrRedo == 'redo'){
+  }else if(app.UndoOrRedo == 'redo'){
     newundo = 0;
 
     if (ActCursorForRedo == undefined) {
@@ -345,12 +354,12 @@ function UndoRedo() {
   }
 
   // For the next redo.
-  if (UndoOrRedo == 'undo'){
-    ActCursorForRedo = actioncnt;
-  }else if (UndoOrRedo == 'redo') {
+  if (app.UndoOrRedo == 'undo'){
+    ActCursorForRedo = app.actioncnt;
+  }else if (app.UndoOrRedo == 'redo') {
     ActCursorForRedo = ActCursorForRedo -1;
   }
-  actioncnt = actioncnt + 1;
+  app.actioncnt = app.actioncnt + 1;
   // showstatus();
 }
 
@@ -373,8 +382,8 @@ function undopix(properActCursor, keys, newundo){
       newflag = 0;
       var stgposition = stage.position();
       var RectPos = {
-        x: (ImPix_x+0.5)*currentscale + stgposition.x, // Left-top Impix is [0, 0]. So, add 0.5 to point the center of the pixel.
-        y: (ImPix_y+0.5)*currentscale + stgposition.y 
+        x: (ImPix_x+0.5)*disp.currentscale + stgposition.x, // Left-top Impix is [0, 0]. So, add 0.5 to point the center of the pixel.
+        y: (ImPix_y+0.5)*disp.currentscale + stgposition.y 
       };
       // console.log(pointerPos);
       var existingrect = stage.getIntersection(RectPos, "Rect");
@@ -385,8 +394,8 @@ function undopix(properActCursor, keys, newundo){
     }
 
     // Make a new action
-    if (actionarray[actioncnt] == undefined) { // 新しくactionを作る. Use associative array not to make a unnecessary empties.
-      actionarray[actioncnt] = {
+    if (actionarray[app.actioncnt] == undefined) { // 新しくactionを作る. Use associative array not to make a unnecessary empties.
+      actionarray[app.actioncnt] = {
         category: actionarray[properActCursor]['category'],
         color: actionarray[properActCursor]['color'],
         flag: newflag,
@@ -395,11 +404,11 @@ function undopix(properActCursor, keys, newundo){
         lindex: {}
       };
     }
-    actionarray[actioncnt]['lindex'][keys[i]] = JSON.parse(JSON.stringify(actionarray[properActCursor]['lindex'][keys[i]])); //元のstatusを新しいactionにコピー(deep copy)
+    actionarray[app.actioncnt]['lindex'][keys[i]] = JSON.parse(JSON.stringify(actionarray[properActCursor]['lindex'][keys[i]])); //元のstatusを新しいactionにコピー(deep copy)
     // actionarray[actioncnt][keys[i]]['flag'] = newflag;
     // actionarray[actioncnt][keys[i]]['undo'] = newundo;
 
-    idxaction[keys[i]] = actioncnt; //action countの更新
+    idxaction[keys[i]] = app.actioncnt; //action countの更新
 
     delete actionarray[properActCursor]['lindex'][keys[i]]; // 元のactionを削除する
     if (Object.keys(actionarray[properActCursor]['lindex']).length == 0) {
@@ -467,8 +476,8 @@ function eraseRect(ImPix_x,ImPix_y){
 
     var stgposition = stage.position();
     var RectPos = {
-    	x: (ImPix_x+x+0.5)*currentscale + stgposition.x, // Left-top Impix is [0, 0]. So, add 0.5 to point the center of the pixel.
-    	y: (ImPix_y+y+0.5)*currentscale + stgposition.y 
+    	x: (ImPix_x+x+0.5)*disp.currentscale + stgposition.x, // Left-top Impix is [0, 0]. So, add 0.5 to point the center of the pixel.
+    	y: (ImPix_y+y+0.5)*disp.currentscale + stgposition.y 
     };
 
     var existingrect = stage.getIntersection(RectPos, "Rect");
@@ -477,8 +486,8 @@ function eraseRect(ImPix_x,ImPix_y){
     	existingrect.destroy();
     	// layer.draw();
 
-      if (actionarray[actioncnt] == undefined) {
-        actionarray[actioncnt] = {
+      if (actionarray[app.actioncnt] == undefined) {
+        actionarray[app.actioncnt] = {
           category: actionarray[action]['category'],
           color: actionarray[action]['color'],
           flag: 0,
@@ -488,7 +497,7 @@ function eraseRect(ImPix_x,ImPix_y){
         }; // 新しくactionを作る. Use associative array not to make a unnecessary empties.
       }
 
-      actionarray[actioncnt]['lindex'][linearindex] = JSON.parse(JSON.stringify(actionarray[action]['lindex'][linearindex])); //元のstatusを新しいactionにコピー (deep copy)
+      actionarray[app.actioncnt]['lindex'][linearindex] = JSON.parse(JSON.stringify(actionarray[action]['lindex'][linearindex])); //元のstatusを新しいactionにコピー (deep copy)
       // console.log(actionarray[action]);
       // actionarray[actioncnt][linearindex]['flag'] = 0;
       // actionarray[actioncnt][linearindex]['undo'] = 0;
@@ -501,12 +510,12 @@ function eraseRect(ImPix_x,ImPix_y){
       lastActIsUndoRedo = 0;
       lastActIsEraseOrPaint = 0;
 
-      idxaction[linearindex] = actioncnt; //action countの更新
+      idxaction[linearindex] = app.actioncnt; //action countの更新
     }
 	}
   // layer.batchDraw();
   layer.draw(); // draw is faster than batchdraw for erase?
-  actioncnt = actioncnt + 1;
+  app.actioncnt = app.actioncnt + 1;
   // console.log('[[ The last action(erasing) done ]]');
   // showstatus();
 }
@@ -544,11 +553,11 @@ function minimizehistory(){ // To reduce memory use.
 function storeObj(){
   // Temporally. Later, get value from selector.
   // var tileNo = current_section; //'7_10';
-  var Imagename = brain_id; //'Marmoset_0001';
+  var Imagename = app.brain_id; //'Marmoset_0001';
   // var category = 'Cell body';
   var color = undefined;
 
-  outObj = { //初期化
+  var outObj = { //初期化
     imagename: Imagename,
     sectionNo: ""+current_section, //defined in pixel.html
     tileNo: parseInt(current_tile),
@@ -576,7 +585,7 @@ function storeObj(){
         // delete outtemp['undo'];
         // delete outtemp['type'];
         outObj['category'] = actionarray[action]['category'];
-        outObj['pixObj'].push(outtemp);
+        // outObj['pixObj'].push(outtemp);
         pointarray.push(outtemp.xy);
       }
     }
@@ -632,15 +641,17 @@ function calBrushMatrix(brushsize) {
       brushmatrix.push([x,y]);
     }
   }
-  return brushmatrix
+  return brushmatrix;
 }
 
 function setCtgAndColor(categoryTxt){
-  category = categoryTxt; // Temporally. We should not use label(text)
-  currentcolor = colorTable[category] == undefined ? colorForUndefined : colorTable[category];
-  $('.drawing-color-change').css('color',"'" + currentcolor + "'");
-  console.log(currentcolor);
+  app.category = categoryTxt; // Temporally. We should not use label(text)
+  app.currentcolor = colorTable[app.category] == undefined ? colorForUndefined : colorTable[app.category];
+  $('.drawing-color-change').css('color',"'" + app.currentcolor + "'");
+  // console.log(currentcolor);
 }
+
+disp.currentscale = 0.5;
 
 function setMouseEvt(){
   stage.on("touchstart mousedown", function(e) {
@@ -720,6 +731,12 @@ function setMouseEvt(){
       //limit from 0.5 to 8 for scroll
     return Math.min(8,Math.max(0.5,v));
   }
+
+  
+  var scaleIncrement = 0.5;
+  var scaleBy = 1.1;
+  var scrolldir = 1; //-1: scroll down goes to zoon-in. 1:-1: scroll down goes to zoon-out.
+
   // Mitsu's scroll zooming
   stage.on("mousewheel", e => {
     e.evt.preventDefault();
@@ -730,15 +747,17 @@ function setMouseEvt(){
       y: stage.getPointerPosition().y / oldScale - stage.y() / oldScale
     };
 
+    var newScale = oldScale;
+
     if (scrolldir == -1) {
-      var newScale =
+      newScale =
       // e.evt.deltaY > 0 ? scrollbounds(oldScale * scaleBy) : scrollbounds(oldScale / scaleBy);
-      e.evt.deltaY > 0 ? scrollbounds(oldScale+0.5) : scrollbounds(oldScale-0.5);
+      e.evt.deltaY > 0 ? scrollbounds(oldScale+scaleIncrement) : scrollbounds(oldScale-scaleIncrement);
       stage.scale({ x: newScale, y: newScale });
     }else if (scrolldir == 1) {
-      var newScale =
+      newScale =
       // e.evt.deltaY < 0 ? scrollbounds(oldScale * scaleBy) : scrollbounds(oldScale / scaleBy);
-      e.evt.deltaY < 0 ?  scrollbounds(oldScale+0.5) : scrollbounds(oldScale-0.5);
+      e.evt.deltaY < 0 ?  scrollbounds(oldScale+scaleIncrement) : scrollbounds(oldScale-scaleIncrement);
       stage.scale({ x: newScale, y: newScale });
     }else{
       console.log('Choose a proper scroll direction');
@@ -752,7 +771,7 @@ function setMouseEvt(){
     stage.position(newPos);
     stage.batchDraw();
 
-    currentscale = newScale;
+    disp.currentscale = newScale;
 
     var n = 1; // Num of digits after the decimal point.
     newScale_show = Math.floor(newScale*Math.pow(10,n))/Math.pow(10,n);
@@ -767,13 +786,22 @@ function setElementAct(){
   //   currentcolor = this.value;
   // });
 
+  $('#btn_firstpass').click(function(){
+    if(app.category!= undefined) {
+      addFirstPass(app.section_id,app.current_section,app.sel_tile,app.category);
+    }
+    else {
+      alert('Select category of neurite');
+    }
+  });
+
   $("#undo_draw").click(function() {
-    UndoOrRedo = 'undo';
+    app.UndoOrRedo = 'undo';
     UndoRedo();
   });
 
   $("#redo_draw").click(function() {
-    UndoOrRedo = 'redo';
+    app.UndoOrRedo = 'redo';
     UndoRedo();
   });
 
@@ -893,7 +921,7 @@ function setElementAct(){
     stage.position(newPos);
     stage.batchDraw();
 
-    currentscale = newscale;
+    disp.currentscale = newscale;
     // console.log(currentscale);
   });
 

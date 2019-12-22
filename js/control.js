@@ -1,18 +1,18 @@
-var imagecurrentPath = '';
-var section_image_size;
-var brain_name ='';
+// var imagecurrentPath = '';
+// var section_image_size;
+// var brain_name ='';
 var countTiles = 0;
-var section_number_init = 55;
-var current_tile;
-var current_image_url;
+// var section_number_init = 55;
+// var current_tile;
+// var current_image_url;
 
 var current_gamma 		= [1.3];
 var current_red_range 	= [1,0,4095];
 var current_blue_range 	= [2,0,1023];
 var current_green_range = [3,0,1023];
-var current_opacity = [0.7];
-var current_width;
-var current_height;
+var current_opacity = [1.0];
+// var current_width;
+// var current_height;
 
 function mouseclick(){
 	let e = window.event;
@@ -152,21 +152,21 @@ function selectedTile(tile, section_image_size, imageurl, current_gamma){
 	var height = section_image_size[1];
 	//FIXME: get these from http://braincircuits.org/cgi-bin/iipsrv.fcgi?IIIF=/PITT001/Marmo_7NA_7_layers_1um_spacing.jp2/info.json
 
+	app.sel_tile = tile;
 
+	// var tilesize = 4096;
 
-	var tilesize = 4096;
+	var ntiles1 = Math.round(width/app.tilewid) ;//tilesize);
+	var ntiles2 = Math.round(height/app.tilehei); //tilesize);
 
-	var ntiles1 = Math.round(width/tilesize);
-	var ntiles2 = Math.round(height/tilesize);
-
-	wpc = tilesize / width;
-	hpc = tilesize / height;
+	wpc = app.tilewid / width;
+	hpc = app.tilehei / height;
 
 	col = tile % ntiles1;
 	row = (tile - col) / ntiles1;
 
-	xpc = col * tilesize/width;
-	ypc = row * tilesize/height;
+	xpc = col * app.tilewid/width;
+	ypc = row * app.tilehei/height;
 
 	rgnstring = xpc + "," + ypc + "," + wpc + "," + hpc;
 	iipbase = "http://braincircuits.org/cgi-bin/iipsrv.fcgi?FIF=";
@@ -184,14 +184,14 @@ function selectedTile(tile, section_image_size, imageurl, current_gamma){
 	}
 
 	imagePath = iipbase + jp2path + "&GAM=" + current_gamma[0] + "&WID=" 
-			  + tilesize + "&RGN=" + rgnstring + "&MINMAX="
+			  + app.tilewid + "&RGN=" + rgnstring + "&MINMAX="
 			  + current_red_range[0] + ":" + current_red_range[1] + "," + current_red_range[2] + "&MINMAX="
 			  + current_green_range[0] + ":" + current_green_range[1] + "," + current_green_range[2] + "&MINMAX="
 			  + current_blue_range[0] + ":" + current_blue_range[1] + "," + current_blue_range[2] 
 			  + "&CVT=jpeg" ;
 
 	maskPath = iipbase + mskPath + "&GAM=1" + "&WID=" 
-				+ tilesize + "&RGN=" + rgnstring 
+				+ app.tilewid + "&RGN=" + rgnstring 
 				// + "&MINMAX="
 				// + current_red_range[0] + ":" + current_red_range[1] + "," + current_red_range[2] + "&MINMAX="
 				// + current_green_range[0] + ":" + current_green_range[1] + "," + current_green_range[2] + "&MINMAX="
@@ -199,7 +199,7 @@ function selectedTile(tile, section_image_size, imageurl, current_gamma){
 				+ "&CVT=jpeg" ;
 	
 	bgImage.src = imagePath;
-	mskImage.src = maskPath;
+	// mskImage.src = maskPath;
 
 	// bgImage.src = 'http://braincircuits.org/cgi-bin/iipsrv.fcgi?FIF=/PITT001/Marmo_7NA_7_layers_1um_spacing.jp2&GAM=1&MINMAX=1:0,512&MINMAX=2:0,512&MINMAX=3:0,512&JTL=3,' + tile;
 	// $('#regdetails').html(''+xpix+','+ypix+'; '+wid+'x'+hei);
@@ -208,12 +208,12 @@ function selectedTile(tile, section_image_size, imageurl, current_gamma){
 	    outimg = new Konva.Image({
 	        x: 0,
 	        y: 0,
-	        width: tilesize,
-	        height: tilesize,
+	        width: app.tilewid,
+	        height: app.tilehei,
 	        image: bgImage,
 	        draggable: false
 		});
-
+		outimg.name('tileimg');
 		// outimg2 = new Konva.Image({
 		// 	x:0,
 		// 	y:0,
@@ -228,22 +228,27 @@ function selectedTile(tile, section_image_size, imageurl, current_gamma){
 		layer.add(outimg);
 		// layer.add(outimg2);
 			//brain_id and current_section defined in pixel.html
-		addFirstPass(brain_id,current_section,tile);
+		layer.draw();
+		
+		// addFirstPass(app.section_id,app.current_section,tile, "Soma", null);
 
-	    layer.draw();
+	    
 	    // layer_vector.draw();
 	    console.info('tile ' + tile + '| ' + imageurl);
-	    current_tile = tile;
-	    current_image_url = imageurl;
+	    // current_tile = tile;
+	    // current_image_url = imageurl;
 
 	    $('#image_loading_selected').css("display", "none");
 	};
 	$('#tile-number').html('tile ' + tile);
 }
 
-function addFirstPass(brainid, sec, tile) {
+function addFirstPass(sectionid, sec, tile, category) {
 	apibase = 'http://localhost:8000/mbaservices/annotationservice';
-	msg = {"brainname":brainid, "section": sec, "tile": tile,"tile_wid":4096,"tile_hei":4096,"category":"soma","subcategory":null};
+	msg = {"series_id":app.seriesid, "section_id": sectionid, "section": sec, 
+	"tile": tile,"tile_wid":app.tilewid,"tile_hei":app.tilehei,
+	"category":category};
+
 	$.getJSON(apibase+'/load_firstpass/',msg,function(data) {
 		pixels = data.detect.feature.geometry.coordinates[0];
 		pixels.forEach(function(pt){
@@ -349,7 +354,7 @@ function selectedpixel(){
 function selectedclasses(){
 	$("#annotated_class a").click(function(e){
 	    e.preventDefault(); // cancel the link behaviour
-	    var selText = $(this).text();
+	    var selText = $(this).attr('key');
 	    setCtgAndColor(selText); // by Mitsu for obj output.
 	    // console.info(selText);
 	    $('#dropdownClasses').text('class: ' + selText);
@@ -357,6 +362,8 @@ function selectedclasses(){
 	//$("#classTree").DropDownTree(options);
 }
 function generatesectiontils(seriesid, current_section) {
+	app.series_id = seriesid;
+	app.current_section = current_section;
 	var content = '';
 	var count = 0;
 	var fullurl;
@@ -377,42 +384,55 @@ function generatesectiontils(seriesid, current_section) {
 		listOfSections = data2['F'];
 		currentsecid = undefined;
 		listOfSections.some(function(elt){
-			if(elt[0]==current_section) {
+			if(elt[0]==app.current_section) {
 				currentsecid = elt[2];
 				return true;
 			}
 		});
 
 		// listOfsections = data2[current_section];
-
+		app.section_id = currentsecid;
 		
+
 		$.getJSON(apibase+'/getsectionjp2path/'+currentsecid, function(data3) {
 			jp2path = `${data3.jp2Path}`
 			jp2path = jp2path.replace('&', '%26');
 			jp2path = jp2path.replace('/brainimg', '');
 
-			imagecurrentPath = jp2path; //for gobel uses.
+			// imagecurrentPath = jp2path; //for gobel uses.
+			app.jp2Path = jp2path;
 
 			$.getJSON(iipinfo + jp2path + '/info.json', function(data4) {
 				width = parseInt(`${data4.width}`);
 				height = parseInt(`${data4.height}`);
 				let dect = [width, height];
-				section_image_size = dect;
+				app.section_image_size = dect;
 
+				app.width = width;
+				app.height = height;
 
-				var tilesize = 4096;
+				app.tilewid = 4096; //2174 = 1mm
+				app.tilehei = 4096;
+				if(app.width < 24000) {
+					app.tilewid = 2048;
+					app.tilehei = 2048;
+				}
+				// var tilesize = 4096;
 
-				var ntiles1 = Math.round(width/tilesize);
-				var ntiles2 = Math.round(height/tilesize);
+				var ntiles1 = Math.round(width/app.tilewid);
+				var ntiles2 = Math.round(height/app.tilehei);
 
-				wpc = tilesize / width;
-				hpc = tilesize / height;
+				wpc = app.tilewid / width;
+				hpc = app.tilehei / height;
+
+				shp = app.tilewid + 'x' + app.tilehei;
+				sidelen = Math.round(app.tilewid * 0.46/1000 *100)/100;
 
 				for(var row = 0; row < ntiles2 ; row ++) {
 					for(var col = 0; col < ntiles1; col++) {
 
-						xpc = col * tilesize/width;
-						ypc = row * tilesize/height;
+						xpc = col * app.tilewid/width;
+						ypc = row * app.tilehei/height;
 
 						rgnstring = xpc + "," + ypc + "," + wpc + "," + hpc;
 						/*
@@ -421,7 +441,7 @@ function generatesectiontils(seriesid, current_section) {
 
 						*/
 
-						imagePath = iipbase + jp2path + "&GAM=1"  + "&WID="+ tilesize/100 + "&RGN=" + rgnstring 
+						imagePath = iipbase + jp2path + "&GAM=1"  + "&WID="+ app.tilewid/100 + "&RGN=" + rgnstring 
 						+"&MINMAX=1:0,2047" //+ current_red_range[0] + ":" + current_red_range[1] + "," + current_red_range[2] 
 						+ "&MINMAX=2:0,2047" // + current_green_range[0] + ":" + current_green_range[1] + "," + current_green_range[2] 
 						+ "&MINMAX=3:0,2047" //+ current_blue_range[0] + ":" + current_blue_range[1] + "," + current_blue_range[2] 
@@ -436,15 +456,15 @@ function generatesectiontils(seriesid, current_section) {
 									'</td>'+
 									'<td class="w100">'+
 									   '<div class="title">'+
-										  'section on tile ' + i +
+										  'section tile ' + i +
 									   '</div>'+
 									   '<div><span class="img-info">'+
 											   '<img class="icon-layers-1"></img> '+
-												   '<b>(1/8 mm)</b>'+
+												   '<b>'+ sidelen +' mm</b>'+
 											   '</span> '+
 											   '<span class="img-info">'+
 												   '<img class="icon-calendar-1"></img> '+
-												   '<b>tile: ' + '4096x4096' + '</b>'+
+												   '<b>tile: ' + shp + '</b>'+
 											   '</span>'+
 										   '</div>'+
 									'</td>'+
@@ -470,12 +490,12 @@ function generatesectiontils(seriesid, current_section) {
 				$('#image_loading_selected').css("display", "none");
 				countTiles = count;
 				var nagImagesize = $(window).width() * 0.20 - 3;
-				var imageaddress = iipbase + imagecurrentPath + "&WID=" + nagImagesize + "&QLT=130&CNT=1&CVT=jpeg";
+				var imageaddress = iipbase + app.jp2Path + "&WID=" + nagImagesize + "&QLT=130&CNT=1&CVT=jpeg";
 				  $('#navImageSection').attr("src",imageaddress);	
 				  updateallinfo();
-				  current_width = width;
-				  current_height = height;
-				  generateOL(current_width, current_height, iipzoomify +imagecurrentPath, current_gamma[0]);
+				//   current_width = width;
+				//   current_height = height;
+				  generateOL(app.width, app.height, iipzoomify +app.jp2Path, current_gamma[0]);
 				  cell_annotation_marking_init();
 			});
 		});
@@ -509,18 +529,18 @@ function getUrlVars() {
 
 function updateallinfo(){
 	$('#total_tiles').html('Total Tiles: ' + countTiles);
-	$('#full_image_file_name').html(imagecurrentPath);
+	$('#full_image_file_name').html(app.jp2Path);
 
 	let brain_name = getUrlVars()["brain_id"];
 	if(typeof brain_name == 'number'){
 		brain_name = 'PMD' + brain_name;
 	}
 
-	let section_number = imagecurrentPath.replace('.jp2','');
+	let section_number = app.jp2Path.replace('.jp2','');
 	section_number = section_number.split('_');
 	section_number = section_number.slice(-1).pop();
 
-	section_number_init = section_number;
+	// section_number_init = section_number;
 
 	$('#header_info_brainname_section').html('Brain: ' + brain_name + ' | Section: ' + section_number ); 
 }
@@ -621,7 +641,7 @@ function initRangeSlider(){
             red_data_from = data.from;
 			red_data_to = data.to;
             current_red_range = [1,red_data_from,red_data_to];
-            selectedTile(current_tile, section_image_size, current_image_url, current_gamma);
+            selectedTile(app.sel_tile, app.section_image_size, app.jp2Path, current_gamma);
         },
     });
 	$(".green-range-slider").ionRangeSlider({
@@ -638,7 +658,7 @@ function initRangeSlider(){
             green_data_from = data.from;
 			green_data_to = data.to;
             current_green_range = [2,green_data_from,green_data_to];
-            selectedTile(current_tile, section_image_size, current_image_url, current_gamma);
+            selectedTile(app.sel_tile, app.section_image_size, app.jp2Path, current_gamma);
         },
     });
  	$(".blue-range-slider").ionRangeSlider({
@@ -655,7 +675,7 @@ function initRangeSlider(){
             blue_data_from = data.from;
 			blue_data_to = data.to;
             current_blue_range = [3,blue_data_from,blue_data_to];
-            selectedTile(current_tile, section_image_size, current_image_url, current_gamma);
+            selectedTile(app.sel_tile, app.section_image_size, app.jp2Path, current_gamma);
         },
     });
 	$(".gamma-range-slider").ionRangeSlider({
@@ -671,23 +691,23 @@ function initRangeSlider(){
             gamma_data = data.from;
             console.info(gamma_data);
             current_gamma = [gamma_data];
-            selectedTile(current_tile, section_image_size, current_image_url, current_gamma);
+            selectedTile(app.sel_tile, app.section_image_size, app.jp2Path, current_gamma);
         },
 	});  
 	$(".opacity-range-slider").ionRangeSlider({
 		min: 0,
 		max: 1,
-		from: 0.7,
+		from: current_opacity[0],
 		step: 0.1,
 		onFinish: function(data){
 			if($('#tile-number').text() == '000'){
         		return;
         	}
 			opac_data = data.from;
-			mskimg = layer.getChildren(function(node){
-				return node.name()=='msk';
+			tileimg = layer.getChildren(function(node){
+				return node.name()=='tileimg';
 			});
-			mskimg.opacity(opac_data);
+			tileimg.opacity(opac_data);
 			current_opacity = [opac_data];
 			layer.draw();
 		}
@@ -698,7 +718,7 @@ function applyRangesControl(){
 	$("#apply_all_tiles_section").click(function(e){
 		generatesectiontils_brainid(brain_id, current_section);
 		ol_gamma = current_gamma[0];
-		generateOL(current_width, current_height, iipbase +imagecurrentPath, ol_gamma);
+		generateOL(app.width, app.height, iipbase +app.jp2Path, ol_gamma);
 	});
 	$("#reset_all_tiles_section").click(function(e){
 		current_gamma 		= [1];
@@ -706,7 +726,7 @@ function applyRangesControl(){
 		current_blue_range 	= [2,0,1023];
 		current_green_range = [3,0,1023];
 		generatesectiontils_brainid(brain_id, current_section);
-		selectedTile(current_tile, section_image_size, current_image_url, current_gamma);
+		selectedTile(app.sel_tile, app.section_image_size, app.jp2Path, current_gamma);
 	});
 
 }
