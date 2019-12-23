@@ -257,7 +257,7 @@ function addFirstPass(sectionid, sec, tile, category) {
 		});
 		layer.draw();
 		// console.log('done');
-
+		addnewannotation("2-"+category,2,category,pixels.length);
 	});
 }
 
@@ -280,16 +280,17 @@ function selectedToolBtn(){
 }
 
 function updateannotationtracking(category, flag, numOfPix){
-	if ($('#listOfAnnotation').find('tr#row-'+category))
-		$('#row-'+category).find('td.area').html('<span>'+ numOfPix+' pixels</span>');
+	if ($('#listOfAnnotation').find('tr#row-'+flag+'-'+category).length>0)
+		$('#row-'+flag+'-'+category).find('td.area').html('<span>'+ numOfPix+' pixels</span>');
 	else
-		addnewannotation(category, flag, numOfPix);
+		addnewannotation(flag+'-'+category, flag, category, numOfPix);
 	// console.log('here');
 }
 
-function addnewannotation(category,flag,numOfPix){
+function addnewannotation(category,flag, catname, numOfPix){
 	color = flag==1?'green':'red';
-	
+	color = flag==2?'black':color;
+
 	var content2 = $('#listOfAnnotation').html();
 	content2 += 
 			'<tr id="row-'+category+'">'+
@@ -304,7 +305,7 @@ function addnewannotation(category,flag,numOfPix){
 			      '<div class="circle" style="background-color: '+color+';"></div>'+
 			   '</td>'+
 			   '<td class="class-name clickable"><span title="test">'+
-			      category+
+			      catname+
 			      '</span>'+
 			   '</td>'+
 			   '<td class="area"><span>'+

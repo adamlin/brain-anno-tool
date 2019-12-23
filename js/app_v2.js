@@ -68,7 +68,7 @@ app.UndoOrRedo = 0;
 var actionarray = {}; //Associative array. Key is a action count.
 var idxaction = {}; //Associative array. Key is a linearindex.
 
-app.actioncnt = 1;
+app.actioncnt = 0;
 var ActCursorForRedo = undefined;
 var lastActIsUndoRedo = 0;
 var lastActIsEraseOrPaint = 0;
@@ -240,7 +240,7 @@ function paintRect(ImPix_x, ImPix_y, pointerPos) {
         color: app.currentcolor,
         flag: 1,
         undo: 0,
-        type: "pixel",
+        // type: "pixel",
         lindex: {}
       };
     }
@@ -278,7 +278,7 @@ function paintRect(ImPix_x, ImPix_y, pointerPos) {
         color: app.currentcolor,
         flag: 1,
         undo: 0,
-        type: "pixel",
+        // type: "pixel",
         lindex: {}
       };
     }
@@ -307,26 +307,32 @@ function paintRect(ImPix_x, ImPix_y, pointerPos) {
 
 
 function UndoRedo() {
-  var properActCursor = 0;
+  var properActCursor = -1;
   var newundo = undefined;
+
+  var keys=[];
 
   if (app.UndoOrRedo == 'undo'){
     newundo = 1;
 
-    for (var i = app.actioncnt-1; i>0 && !(actionarray[i] != undefined && actionarray[i]['undo'] == 0); i--){
+    // for (var i = app.actioncnt-1; i>0 && !(actionarray[i] != undefined && actionarray[i].undo == 0); i--){
+    for (var i = app.actioncnt-1; i>=0; i--){
       // console.log('### Searching a correct action number... ###');  
       // console.log('The action cursor ' + i + ' was not what we want to undo/redo for.');
       // console.log('Next, try a cursor ' + (i-1));
+      if(actionarray[i] == undefined)
+        continue;
+
+      if ((lastActIsEraseOrPaint == 0 && actionarray[i].flag == 1) || (lastActIsEraseOrPaint == 1 && actionarray[i].flag == 0)) {
+        // console.log('No more undo');
+        // return //Eraseを一旦したら、そのErase郡以前のものをUndoできないようにする。同様に一旦Paintをしたら、そのPaint郡以前のものをUndoできないようにする。ただし、過去にEraseしたところをすべてPaintした場合は、undo=0かつflag=0の場所が無くなるので、eraseがそもそも無かったことになり、すべて１つのPaint郡として捉えられる。
+        continue;
+      }
+
+      properActCursor = i;
+      keys = Object.keys(actionarray[properActCursor].lindex);
+      break;
     }
-
-    if ((lastActIsEraseOrPaint == 0 && actionarray[i]['flag'] == 1) || (lastActIsEraseOrPaint == 1 && actionarray[i]['flag'] == 0)) {
-      console.log('No more undo');
-      return //Eraseを一旦したら、そのErase郡以前のものをUndoできないようにする。同様に一旦Paintをしたら、そのPaint郡以前のものをUndoできないようにする。ただし、過去にEraseしたところをすべてPaintした場合は、undo=0かつflag=0の場所が無くなるので、eraseがそもそも無かったことになり、すべて１つのPaint郡として捉えられる。
-    }
-
-    properActCursor = i;
-    var keys = Object.keys(actionarray[properActCursor]['lindex']);
-
   }else if(app.UndoOrRedo == 'redo'){
     newundo = 0;
 
@@ -336,26 +342,32 @@ function UndoRedo() {
     }else if (lastActIsUndoRedo == 0) {
       console.log('The last action need to be Undo or redo.');
       return;
-    }else if (actionarray[ActCursorForRedo]['undo'] != 1) { //最後のredoを行ったundoのactionの1個前のactionがundoでなければいけない。 
-      console.log('No more redo');
-      return;
+    }else {
+      while(ActCursorForRedo>=0 && actionarray[ActCursorForRedo]==undefined)
+        ActCursorForRedo = ActCursorForRedo -1;
+      if (ActCursorForRedo!=-1 && actionarray[ActCursorForRedo]!=undefined && actionarray[ActCursorForRedo].undo != 1) { //最後のredoを行ったundoのactionの1個前のactionがundoでなければいけない。 
+        console.log('No more redo');
+        return;
+      }
     }
 
     properActCursor = ActCursorForRedo;
-    var keys = Object.keys(actionarray[properActCursor]['lindex']);
+    keys = Object.keys(actionarray[properActCursor].lindex);
   }
 
   // console.log('Found a proper action cursor to do undo/redo: ' + properActCursor);
   
-  if (actionarray[properActCursor]['type'] === "pixel") {
+  // if (actionarray[properActCursor]['type'] === "pixel") {
+  if(properActCursor!=-1)
     undopix(properActCursor, keys, newundo);
-  }else if(actionarray[properActCursor]['type'] === "vec"){
-    undovec();
-  }
+  // }else if(actionarray[properActCursor]['type'] === "vec"){
+    // undovec();
+  // }
 
   // For the next redo.
   if (app.UndoOrRedo == 'undo'){
-    ActCursorForRedo = app.actioncnt;
+    if(properActCursor!=-1)
+      ActCursorForRedo = properActCursor; //app.actioncnt;
   }else if (app.UndoOrRedo == 'redo') {
     ActCursorForRedo = ActCursorForRedo -1;
   }
@@ -364,17 +376,18 @@ function UndoRedo() {
 }
 
 function undopix(properActCursor, keys, newundo){
-  var lastaction = actionarray[properActCursor]['flag'];
+  var lastaction = actionarray[properActCursor].flag;
   var newflag = undefined;
-
+  // keys.forEach(function(key){
   for (var i = 0; i < keys.length; i++) {
-    var Impix = actionarray[properActCursor]['lindex'][keys[i]]['xy'];
+    var key = keys[i];
+    var Impix = actionarray[properActCursor].lindex[key].xy;
     var ImPix_x = Impix[0];
     var ImPix_y = Impix[1];
     if (!lastaction) { // if the last action is 0 (erase), then redraw.
       newflag = 1;
-      var orgColor = actionarray[properActCursor]['color'];
-      var newrect = makeNewRect(ImPix_x, ImPix_y, orgColor, keys[i]);  /////////////color needs to match to the original
+      var orgColor = actionarray[properActCursor].color;
+      var newrect = makeNewRect(ImPix_x, ImPix_y, orgColor, key);  /////////////color needs to match to the original
       // newrect.on("click tap", checkEraseRect);
       layer.add(newrect);
       // layer.draw();
@@ -396,28 +409,29 @@ function undopix(properActCursor, keys, newundo){
     // Make a new action
     if (actionarray[app.actioncnt] == undefined) { // 新しくactionを作る. Use associative array not to make a unnecessary empties.
       actionarray[app.actioncnt] = {
-        category: actionarray[properActCursor]['category'],
-        color: actionarray[properActCursor]['color'],
+        category: actionarray[properActCursor].category,
+        // color: actionarray[properActCursor]['color'],
         flag: newflag,
         undo: newundo,
-        type: "pixel",
+        // type: "pixel",
         lindex: {}
       };
     }
-    actionarray[app.actioncnt]['lindex'][keys[i]] = JSON.parse(JSON.stringify(actionarray[properActCursor]['lindex'][keys[i]])); //元のstatusを新しいactionにコピー(deep copy)
+    xy = JSON.parse(JSON.stringify(actionarray[properActCursor].lindex[key].xy));
+    actionarray[app.actioncnt].lindex[key] ={xy:xy}; //JSON.parse(JSON.stringify(actionarray[properActCursor]['lindex'][keys[i]])); //元のstatusを新しいactionにコピー(deep copy)
     // actionarray[actioncnt][keys[i]]['flag'] = newflag;
     // actionarray[actioncnt][keys[i]]['undo'] = newundo;
 
-    idxaction[keys[i]] = app.actioncnt; //action countの更新
+    idxaction[key] = app.actioncnt; //action countの更新
 
-    delete actionarray[properActCursor]['lindex'][keys[i]]; // 元のactionを削除する
-    if (Object.keys(actionarray[properActCursor]['lindex']).length == 0) {
+    delete actionarray[properActCursor].lindex[key]; // 元のactionを削除する
+    if (Object.keys(actionarray[properActCursor].lindex).length == 0) {
       delete actionarray[properActCursor]; // To reduce memory usage.
     }
 
     lastActIsUndoRedo = 1;
     // showstatus();
-  }
+  }//);
   layer.batchDraw();
 }
 
@@ -488,23 +502,23 @@ function eraseRect(ImPix_x,ImPix_y){
       // layer.draw();
       
       cat = app.category;
-      color = app.colorTable[app.category];
-      typ = "pixel";
+      // color = colorTable[app.category];
+      // typ = "pixel";
       xy = [ImPix_x,ImPix_y];
       if(action!=undefined) {
-        cat = actionarray[action]['category'];
-        color = actionarray[action]['color'];
-        typ = actionarray[action]['type'];
-        xy = actionarray[action]['lindex'][linearindex]['xy'];
+        cat = actionarray[action].category;
+        // color = actionarray[action]['color'];
+        // typ = actionarray[action]['type'];
+        xy = JSON.parse(JSON.stringify(actionarray[action].lindex[linearindex].xy));
       }
 
       if (actionarray[app.actioncnt] == undefined) {
         actionarray[app.actioncnt] = {
           category: cat,
-          color: color,
+          // color: color,
           flag: 0,
           undo: 0,
-          type: typ,
+          // type: typ,
           lindex: {}
         }; // 新しくactionを作る. Use associative array not to make a unnecessary empties.
       }
@@ -516,9 +530,9 @@ function eraseRect(ImPix_x,ImPix_y){
       // actionarray[actioncnt][linearindex]['undo'] = 0;
 
       if(action!=undefined) {
-        delete actionarray[action]['lindex'][linearindex]; // 元のactionを削除する
+        delete actionarray[action].lindex[linearindex]; // 元のactionを削除する
 
-        if (Object.keys(actionarray[action]['lindex']).length == 0) {
+        if (Object.keys(actionarray[action].lindex).length == 0) {
           delete actionarray[action]; // To reduce memory usage.
         }
       }
@@ -566,7 +580,7 @@ function minimizehistory(){ // To reduce memory use.
   showstatus();
 }
 
-function storeObj(){
+function storeObj(todb){
   // Temporally. Later, get value from selector.
   // var tileNo = current_section; //'7_10';
   // var Imagename = app.brain_id; //'Marmoset_0001';
@@ -633,18 +647,20 @@ function storeObj(){
       var coordinates = pointarray[ii][cat];
       
       var numOfPix = coordinates.length;
-      updateannotationtracking(category, ii, numOfPix);
+      updateannotationtracking(cat, ii, numOfPix);
 
-      outObj_template.feature = turf.multiPoint(coordinates);
-      outObj_template.category = cat;
+      if(todb != undefined) {
+        outObj_template.feature = turf.multiPoint(coordinates);
+        outObj_template.category = cat;
 
-      var postdata = JSON.stringify(outObj_template);
-      $.post(apibase+apifuncnames[ii],
-          {'msg':postdata}, 
-          function(resp){
-            alert(resp.answer);
-          }
-        );  
+        var postdata = JSON.stringify(outObj_template);
+        $.post(apibase+apifuncnames[ii],
+            {'msg':postdata}, 
+            function(resp){
+              alert(resp.answer);
+            }
+          );  
+      }
     });
   }
 
@@ -655,7 +671,7 @@ function storeObj(){
   
 
   //console.log(outObj);
-  return outObj;
+  // return outObj;
   
 }
 
@@ -774,7 +790,7 @@ function setMouseEvt(){
       //     type: "pixel"
       //   });
       // }
-      minimizehistory();
+      // minimizehistory(); //FIXME: this was enabled
       // storeObj();
     }else if (click == 2) {
       mouseRightDown = false;
@@ -865,8 +881,9 @@ function setElementAct(){
 
   $("#savebutton").click(function() {
     showstatus();
-    //FIXME messages happen in store, just manage the array here
-    var annodata = storeObj();
+    //FIXME messages happen in store if flagged, just manage the array here
+    //var annodata = 
+    storeObj();
     // annodata.pixObj = null;
     // var postdata = JSON.stringify(annodata);
     // $.post("http://localhost:8000/mbaservices/annotationservice/save/",{'msg':postdata}, 
