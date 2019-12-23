@@ -245,7 +245,8 @@ function selectedTile(tile, section_image_size, imageurl, current_gamma){
 
 function addFirstPass(sectionid, sec, tile, category) {
 	apibase = 'http://localhost:8000/mbaservices/annotationservice';
-	msg = {"series_id":app.seriesid, "section_id": sectionid, "section": sec, 
+	// apibase = 'http://mitradevel.cshl.org/webtools/seriesbrowser';
+	msg = {"series_id":app.series_id, "section_id": sectionid, "section": sec, 
 	"tile": tile,"tile_wid":app.tilewid,"tile_hei":app.tilehei,
 	"category":category};
 
@@ -278,15 +279,17 @@ function selectedToolBtn(){
 	});
 }
 
-function updateannotationtracking(category,color, numOfPix){
+function updateannotationtracking(category, flag, numOfPix){
 	if ($('#listOfAnnotation').find('tr#row-'+category))
 		$('#row-'+category).find('td.area').html('<span>'+ numOfPix+' pixels</span>');
 	else
-		addnewannotation(category, color, numOfPix);
+		addnewannotation(category, flag, numOfPix);
 	// console.log('here');
 }
 
-function addnewannotation(category,color,numOfPix){
+function addnewannotation(category,flag,numOfPix){
+	color = flag==1?'green':'red';
+	
 	var content2 = $('#listOfAnnotation').html();
 	content2 += 
 			'<tr id="row-'+category+'">'+

@@ -210,15 +210,15 @@ function mouseevt() {
   }
 }
 
-function paintRect_firstpass(ImPix_x, ImPix_y, pointerPos) {
-  var linearindex = ImPix_y * wid + ImPix_x; // Left-top is 0.
+function paintRect_firstpass(ImPix_x, ImPix_y) {
+  var linearindex = ImPix_y * app.tilewid + ImPix_x; // Left-top is 0.
   var newrect = makeNewRect(ImPix_x, ImPix_y,app.currentcolor,linearindex);
     // newrect.on("click tap", checkEraseRect);
   layer.add(newrect);
 }
 
 function paintRect(ImPix_x, ImPix_y, pointerPos) {
-	var linearindex = ImPix_y * wid + ImPix_x; // Left-top is 0.
+	var linearindex = ImPix_y * app.tilewid + ImPix_x; // Left-top is 0.
 	var action = idxaction[linearindex]; // Search the last action number of the pixel
   // console.log('linearindex is '+linearindex);
   // console.log('action # is '+action);
@@ -466,12 +466,13 @@ function eraseRect(ImPix_x,ImPix_y){
     var x = brushmatrix[i][0];
     var y = brushmatrix[i][1];
 
-    var linearindex = (ImPix_y+y) * wid + (ImPix_x+x);
+    var linearindex = (ImPix_y+y) * app.tilewid + (ImPix_x+x);
     var action = idxaction[linearindex];
     // console.log(action);
     if (action == undefined) {
       // console.log('No action history for liner id: ' + linearindex);
-      continue
+      // continue
+      // NOTE: might be erase on first pass - so don't continue
     }
 
     var stgposition = stage.position();
@@ -484,27 +485,42 @@ function eraseRect(ImPix_x,ImPix_y){
 
     if (existingrect.className == "Rect") {
     	existingrect.destroy();
-    	// layer.draw();
+      // layer.draw();
+      
+      cat = app.category;
+      color = app.colorTable[app.category];
+      typ = "pixel";
+      xy = [ImPix_x,ImPix_y];
+      if(action!=undefined) {
+        cat = actionarray[action]['category'];
+        color = actionarray[action]['color'];
+        typ = actionarray[action]['type'];
+        xy = actionarray[action]['lindex'][linearindex]['xy'];
+      }
 
       if (actionarray[app.actioncnt] == undefined) {
         actionarray[app.actioncnt] = {
-          category: actionarray[action]['category'],
-          color: actionarray[action]['color'],
+          category: cat,
+          color: color,
           flag: 0,
           undo: 0,
-          type: actionarray[action]['type'],
+          type: typ,
           lindex: {}
         }; // 新しくactionを作る. Use associative array not to make a unnecessary empties.
       }
 
-      actionarray[app.actioncnt]['lindex'][linearindex] = JSON.parse(JSON.stringify(actionarray[action]['lindex'][linearindex])); //元のstatusを新しいactionにコピー (deep copy)
+      // actionarray[app.actioncnt]['lindex'][linearindex] = JSON.parse(JSON.stringify(actionarray[action]['lindex'][linearindex])); //元のstatusを新しいactionにコピー (deep copy)
+      actionarray[app.actioncnt].lindex[linearindex] = {xy: xy};
       // console.log(actionarray[action]);
       // actionarray[actioncnt][linearindex]['flag'] = 0;
       // actionarray[actioncnt][linearindex]['undo'] = 0;
 
-      delete actionarray[action]['lindex'][linearindex]; // 元のactionを削除する
-      if (Object.keys(actionarray[action]['lindex']).length == 0) {
-        delete actionarray[action]; // To reduce memory usage.
+      if(action!=undefined) {
+        delete actionarray[action]['lindex'][linearindex]; // 元のactionを削除する
+
+        if (Object.keys(actionarray[action]['lindex']).length == 0) {
+          delete actionarray[action]; // To reduce memory usage.
+        }
       }
 
       lastActIsUndoRedo = 0;
@@ -553,48 +569,90 @@ function minimizehistory(){ // To reduce memory use.
 function storeObj(){
   // Temporally. Later, get value from selector.
   // var tileNo = current_section; //'7_10';
-  var Imagename = app.brain_id; //'Marmoset_0001';
+  // var Imagename = app.brain_id; //'Marmoset_0001';
   // var category = 'Cell body';
-  var color = undefined;
+  // var color = undefined;
 
-  var outObj = { //初期化
-    imagename: Imagename,
-    sectionNo: ""+current_section, //defined in pixel.html
-    tileNo: parseInt(current_tile),
-    tileWidth: wid,
-    tileHeight: hei,
-    imageWidth: current_width,
-    imageHeight: current_height,
-    annotator:'default', //FIXME 
+  var outObj_template = { //初期化
+    imagename: app.brain_id,
+    seriesid: app.series_id,
+    sectionNo: ""+app.current_section, //defined in pixel.html
+    tileNo: parseInt(app.sel_tile),
+    tileWidth: app.tilewid,
+    tileHeight: app.tilehei,
+    imageWidth: app.width,
+    imageHeight: app.height,
+    annotator:'default', //FIXME
     category: '',
-    pixObj: [],
+    // pixObj: [],
     feature: undefined
   };
 
+  pointarray = [{},{}]; // 0=> del, 1=> add
+
   var actiokeys = Object.keys(actionarray); //Key(action number) is supposed to be in order from small to big.
+  
+  actiokeys.forEach(function(action){
 
-  pointarray = [];
-  for (var i = 0; i<actiokeys.length; i++) {
-    var action = actiokeys[i];
-    var linearindexkeys = Object.keys(actionarray[action]['lindex']);
-    if (actionarray[action]['flag'] == 1) {
-      color = actionarray[action]['color'];
-      for (var k = 0; k<linearindexkeys.length; k++) {
-        var outtemp = JSON.parse(JSON.stringify(actionarray[action]['lindex'][linearindexkeys[k]])); //元のオブジェクトをコピー (deep copy), 注意点あり。 https://leben.mobi/blog/copy_arrays_and_objects_without_loop/javascript/
-        // delete outtemp['flag'];
-        // delete outtemp['undo'];
-        // delete outtemp['type'];
-        outObj['category'] = actionarray[action]['category'];
-        // outObj['pixObj'].push(outtemp);
-        pointarray.push(outtemp.xy);
-      }
-    }
-  }
-  outObj['feature']=turf.multiPoint(pointarray);
+  // for (var i = 0; i<actiokeys.length; i++) {
+    // var action = actiokeys[i];
+      var ac = actionarray[action];
+    
+      cat = ac.category;
+      
+      if(!pointarray[ac.flag].hasOwnProperty(cat))
+        pointarray[ac.flag][cat]=[]
 
-  var numOfPix = outObj['pixObj'].length;
+      var linearindexkeys = Object.keys(ac.lindex);
+    
+      linearindexkeys.forEach(function(elt) {
+        xy = ac.lindex[elt].xy;        
+        pointarray[ac.flag][cat].push(xy);
+      });
+      // for (var k = 0; k<linearindexkeys.length; k++) {
+      //   xy = actionarray[action].lindex[]
+      //   var outtemp = JSON.parse(JSON.stringify(actionarray[action]['lindex'][linearindexkeys[k]])); //元のオブジェクトをコピー (deep copy), 注意点あり。 https://leben.mobi/blog/copy_arrays_and_objects_without_loop/javascript/
+      //   // delete outtemp['flag'];
+      //   // delete outtemp['undo'];
+      //   // delete outtemp['type'];
+      //   outObj['category'] = actionarray[action]['category'];
+      //   // outObj['pixObj'].push(outtemp);
+      //   pointarray.push(outtemp.xy);
+      // }
+    
+  });
+
+  apibase = "http://localhost:8000/mbaservices/annotationservice/";
+  apifuncnames = ['save_pixel_deletions/', 'save_pixel_additions/'];
+
+  // make one set of messages for add, one for del
+  for(ii = 0; ii < 2; ii++) {
+    
+    var categories = Object.keys(pointarray[ii]);
+    categories.forEach(function(cat){
+      var coordinates = pointarray[ii][cat];
+      
+      var numOfPix = coordinates.length;
+      updateannotationtracking(category, ii, numOfPix);
+
+      outObj_template.feature = turf.multiPoint(coordinates);
+      outObj_template.category = cat;
+
+      var postdata = JSON.stringify(outObj_template);
+      $.post(apibase+apifuncnames[ii],
+          {'msg':postdata}, 
+          function(resp){
+            alert(resp.answer);
+          }
+        );  
+    });
+  
+
+  // outObj['feature']=turf.multiPoint(pointarray);
+
+  
   // addnewannotation(category,color,numOfPix); // For object tracking by Adam
-  updateannotationtracking(category,color, numOfPix);
+  
 
   //console.log(outObj);
   return outObj;
