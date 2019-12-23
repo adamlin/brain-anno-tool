@@ -646,7 +646,7 @@ function storeObj(){
           }
         );  
     });
-  
+  }
 
   // outObj['feature']=turf.multiPoint(pointarray);
 
@@ -865,12 +865,13 @@ function setElementAct(){
 
   $("#savebutton").click(function() {
     showstatus();
+    //FIXME messages happen in store, just manage the array here
     var annodata = storeObj();
-    annodata.pixObj = null;
-    var postdata = JSON.stringify(annodata);
-    $.post("http://localhost:8000/mbaservices/annotationservice/save/",{'msg':postdata}, 
-      function(resp){alert(resp.answer);}
-      );
+    // annodata.pixObj = null;
+    // var postdata = JSON.stringify(annodata);
+    // $.post("http://localhost:8000/mbaservices/annotationservice/save/",{'msg':postdata}, 
+    //   function(resp){alert(resp.answer);}
+    //   );
 
     // if(false) {
     //   //TODO: - done by storeObj
