@@ -244,8 +244,8 @@ function selectedTile(tile, section_image_size, imageurl, current_gamma){
 }
 
 function addFirstPass(sectionid, sec, tile, category) {
-	apibase = 'http://localhost:8000/mbaservices/annotationservice';
-	// apibase = 'http://mitradevel.cshl.org/webtools/seriesbrowser';
+	// apibase = 'http://localhost:8000/mbaservices/annotationservice';
+	apibase = 'http://mitradevel.cshl.org/webtools/seriesbrowser';
 	msg = {"series_id":app.series_id, "section_id": sectionid, "section": sec, 
 	"tile": tile,"tile_wid":app.tilewid,"tile_hei":app.tilehei,
 	"category":category};
@@ -262,8 +262,8 @@ function addFirstPass(sectionid, sec, tile, category) {
 }
 
 function fetchAdditions( sectionid, sec, tile, category, annotator) {
-	apibase = 'http://localhost:8000/mbaservices/annotationservice';
-	// apibase = 'http://mitradevel.cshl.org/webtools/seriesbrowser';
+	// apibase = 'http://localhost:8000/mbaservices/annotationservice';
+	apibase = 'http://mitradevel.cshl.org/webtools/seriesbrowser';
 	msg = {"series_id":app.series_id, "section_id": sectionid, "section": sec, 
 	"tile": tile,"tile_wid":app.tilewid,"tile_hei":app.tilehei,"image_wid":app.width,"image_hei":app.height,
 	"category":category,"annotator":annotator};
@@ -279,8 +279,8 @@ function fetchAdditions( sectionid, sec, tile, category, annotator) {
 }
 
 function fetchDeletions(sectionid, sec, tile, category, annotator) {
-	apibase = 'http://localhost:8000/mbaservices/annotationservice';
-	// apibase = 'http://mitradevel.cshl.org/webtools/seriesbrowser';
+	// apibase = 'http://localhost:8000/mbaservices/annotationservice';
+	apibase = 'http://mitradevel.cshl.org/webtools/seriesbrowser';
 	msg = {"series_id":app.series_id, "section_id": sectionid, "section": sec, 
 	"tile": tile,"tile_wid":app.tilewid,"tile_hei":app.tilehei,"image_wid":app.width,"image_hei":app.height,
 	"category":category,"annotator":annotator};

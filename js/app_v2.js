@@ -636,8 +636,8 @@ function storeObj(todb){
       // }
     
   });
-
-  apibase = "http://localhost:8000/mbaservices/annotationservice/";
+  apibase = 'http://mitradevel.cshl.org/webtools/seriesbrowser';
+  // apibase = "http://localhost:8000/mbaservices/annotationservice/";
   apifuncnames = ['save_pixel_deletions/', 'save_pixel_additions/'];
 
   // make one set of messages for add, one for del
