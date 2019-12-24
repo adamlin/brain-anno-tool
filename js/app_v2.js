@@ -589,9 +589,9 @@ function storeObj(todb){
 
   var outObj_template = { //初期化
     imagename: app.brain_id,
-    series_id: app.series_id,
-    section_id: app.section_id,
-    sectionNo: ""+app.current_section, //defined in pixel.html
+    series_id: ""+app.series_id,
+    section_id: ""+app.section_id,
+    section: ""+app.current_section, //defined in pixel.html
     tile: parseInt(app.sel_tile),
     tile_wid: app.tilewid,
     tile_hei: app.tilehei,
@@ -658,7 +658,7 @@ function storeObj(todb){
         $.post(apibase+apifuncnames[ii],
             {'msg':postdata}, 
             function(resp){
-              alert(resp.answer);
+              alert(JSON.stringify(resp));
             }
           );  
       }
@@ -891,10 +891,10 @@ function setElementAct(){
   });
 
   $("#savebutton").click(function() {
-    showstatus();
+    // showstatus();
     //FIXME messages happen in store if flagged, just manage the array here
     //var annodata = 
-    storeObj();
+    storeObj(true);
     // annodata.pixObj = null;
     // var postdata = JSON.stringify(annodata);
     // $.post("http://localhost:8000/mbaservices/annotationservice/save/",{'msg':postdata}, 

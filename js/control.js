@@ -269,12 +269,12 @@ function fetchAdditions( sectionid, sec, tile, category, annotator) {
 	"category":category,"annotator":annotator};
 
 	$.getJSON(apibase+'/fetch_pixel_additions/',msg,function(data) {
-		pixels = data.detect.feature.geometry.coordinates[0];
+		pixels = data.annotation.feature.geometry.coordinates[0];
 		pixels.forEach(function(pt){
 			paintRect(pt[1],pt[0]);
 		});
 		layer.draw();
-		updateannotationtracking(category, flag, pixels.length);
+		updateannotationtracking(category, 1, pixels.length);
 	});
 }
 
@@ -286,12 +286,12 @@ function fetchDeletions(sectionid, sec, tile, category, annotator) {
 	"category":category,"annotator":annotator};
 
 	$.getJSON(apibase+'/fetch_pixel_deletions/',msg,function(data) {
-		pixels = data.detect.feature.geometry.coordinates[0];
+		pixels = data.annotation.feature.geometry.coordinates[0];
 		pixels.forEach(function(pt){
 			eraseRect(pt[1],pt[0]);
 		});
 		layer.draw();
-		updateannotationtracking(category, flag, pixels.length);
+		updateannotationtracking(category, 0, pixels.length);
 	});
 }
 
