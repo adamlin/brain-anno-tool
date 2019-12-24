@@ -226,9 +226,9 @@ function paintRect(ImPix_x, ImPix_y, pointerPos) {
 	// var existingrect = stage.getIntersection(pointerPos, "Rect");
 	// if (existingrect.className == "Image") {  /////////// どういう役割？
 
-  if (action != undefined && actionarray[action]['flag'] == 1) {
+  if (action != undefined && actionarray[action].flag == 1) {
     // console.log('already exist');
-  }else if (action != undefined && actionarray[action]['flag'] == 0){ // When the pixel is empty by erasing or undo/redo at last time.
+  }else if (action != undefined && actionarray[action].flag == 0){ // When the pixel is empty by erasing or undo/redo at last time.
     var newrect = makeNewRect(ImPix_x, ImPix_y,app.currentcolor,linearindex);
     // newrect.on("click tap", checkEraseRect);
     layer.add(newrect);
@@ -244,7 +244,7 @@ function paintRect(ImPix_x, ImPix_y, pointerPos) {
         lindex: {}
       };
     }
-    actionarray[app.actioncnt]['lindex'][linearindex] = JSON.parse(JSON.stringify(actionarray[action]['lindex'][linearindex])); //元のstatusを新しいactionにコピー(deep copy)
+    actionarray[app.actioncnt].lindex[linearindex] = JSON.parse(JSON.stringify(actionarray[action].lindex[linearindex])); //元のstatusを新しいactionにコピー(deep copy)
     // console.log(actionarray[action]);
     // actionarray[actioncnt][linearindex]['flag'] = 1;
     // actionarray[actioncnt][linearindex]['undo'] = 0;
@@ -253,8 +253,8 @@ function paintRect(ImPix_x, ImPix_y, pointerPos) {
 
     idxaction[linearindex] = app.actioncnt; //action countの更新
 
-    delete actionarray[action]['lindex'][linearindex]; // 元のactionを削除する
-    if (Object.keys(actionarray[action]['lindex']).length == 0) {
+    delete actionarray[action].lindex[linearindex]; // 元のactionを削除する
+    if (Object.keys(actionarray[action].lindex).length == 0) {
       delete actionarray[action]; // To reduce memory usage.
     }
 
@@ -284,7 +284,7 @@ function paintRect(ImPix_x, ImPix_y, pointerPos) {
     }
 
     // push a new status to the array.
-    actionarray[app.actioncnt]['lindex'][linearindex] = {
+    actionarray[app.actioncnt].lindex[linearindex] = {
       xy: [ImPix_x, ImPix_y],
       // flag: 1,
       // undo: 0,
@@ -589,13 +589,14 @@ function storeObj(todb){
 
   var outObj_template = { //初期化
     imagename: app.brain_id,
-    seriesid: app.series_id,
+    series_id: app.series_id,
+    section_id: app.section_id,
     sectionNo: ""+app.current_section, //defined in pixel.html
-    tileNo: parseInt(app.sel_tile),
-    tileWidth: app.tilewid,
-    tileHeight: app.tilehei,
-    imageWidth: app.width,
-    imageHeight: app.height,
+    tile: parseInt(app.sel_tile),
+    tile_wid: app.tilewid,
+    tile_hei: app.tilehei,
+    image_wid: app.width,
+    image_hei: app.height,
     annotator:'default', //FIXME
     category: '',
     // pixObj: [],
@@ -863,6 +864,16 @@ function setElementAct(){
   $('#btn_firstpass').click(function(){
     if(app.category!= undefined) {
       addFirstPass(app.section_id,app.current_section,app.sel_tile,app.category);
+    }
+    else {
+      alert('Select category of neurite');
+    }
+  });
+
+  $('#btn_savedwork').click(function(){
+    if(app.category!= undefined) {
+      fetchAdditions(app.section_id,app.current_section,app.sel_tile,app.category,'default');
+      fetchDeletions(app.section_id,app.current_section,app.sel_tile,app.category,'default');
     }
     else {
       alert('Select category of neurite');

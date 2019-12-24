@@ -261,6 +261,40 @@ function addFirstPass(sectionid, sec, tile, category) {
 	});
 }
 
+function fetchAdditions( sectionid, sec, tile, category, annotator) {
+	apibase = 'http://localhost:8000/mbaservices/annotationservice';
+	// apibase = 'http://mitradevel.cshl.org/webtools/seriesbrowser';
+	msg = {"series_id":app.series_id, "section_id": sectionid, "section": sec, 
+	"tile": tile,"tile_wid":app.tilewid,"tile_hei":app.tilehei,"image_wid":app.width,"image_hei":app.height,
+	"category":category,"annotator":annotator};
+
+	$.getJSON(apibase+'/fetch_pixel_additions/',msg,function(data) {
+		pixels = data.detect.feature.geometry.coordinates[0];
+		pixels.forEach(function(pt){
+			paintRect(pt[1],pt[0]);
+		});
+		layer.draw();
+		updateannotationtracking(category, flag, pixels.length);
+	});
+}
+
+function fetchDeletions(sectionid, sec, tile, category, annotator) {
+	apibase = 'http://localhost:8000/mbaservices/annotationservice';
+	// apibase = 'http://mitradevel.cshl.org/webtools/seriesbrowser';
+	msg = {"series_id":app.series_id, "section_id": sectionid, "section": sec, 
+	"tile": tile,"tile_wid":app.tilewid,"tile_hei":app.tilehei,"image_wid":app.width,"image_hei":app.height,
+	"category":category,"annotator":annotator};
+
+	$.getJSON(apibase+'/fetch_pixel_deletions/',msg,function(data) {
+		pixels = data.detect.feature.geometry.coordinates[0];
+		pixels.forEach(function(pt){
+			eraseRect(pt[1],pt[0]);
+		});
+		layer.draw();
+		updateannotationtracking(category, flag, pixels.length);
+	});
+}
+
 function selectedToolBtn(){
 	$('#controlTool .tool-button').each(function(){
 	    $(this).click(function(){
@@ -543,7 +577,9 @@ function updateallinfo(){
 	let section_number = app.jp2Path.replace('.jp2','');
 	section_number = section_number.split('_');
 	section_number = section_number.slice(-1).pop();
-
+	if(find(app.jp2Path,"Stitched")){
+		section_number = app.current_section;
+	}
 	// section_number_init = section_number;
 
 	$('#header_info_brainname_section').html('Brain: ' + brain_name + ' | Section: ' + section_number ); 
