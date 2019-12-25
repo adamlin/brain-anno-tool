@@ -32,6 +32,8 @@ $.ajaxSetup({
 // var hei = 4096;
 var app = {};
 app.category = undefined; // initial category
+app.tracer = undefined;
+
 app.currentcolor = undefined; // initial color
 
 var colorForUndefined = '#808080';
@@ -58,6 +60,8 @@ colorTable = {  // Temporally.
   'artifact.autofluorescent_cell':'rgba(117, 87, 253, 0.7)',
   'artifact.dust':'rgba(17, 87, 253, 0.7)'
 };
+
+tracerlist = ['red','green','fastblue','ctb','nissl','myelin','na']
 
 var mouseLeftDown = false;
 var mouseRightDown = false;
@@ -599,6 +603,7 @@ function storeObj(todb){
     image_hei: app.height,
     annotator:'default', //FIXME
     category: '',
+    tracer: app.tracer,
     // pixObj: [],
     feature: undefined
   };
@@ -863,20 +868,20 @@ function setElementAct(){
 
   $('#btn_firstpass').click(function(){
     if(app.category!= undefined) {
-      addFirstPass(app.section_id,app.current_section,app.sel_tile,app.category);
+      addFirstPass(app.section_id,app.current_section,app.sel_tile,app.category,app.tracer);
     }
     else {
-      alert('Select category of neurite');
+      alert('Select class of neurite');
     }
   });
 
   $('#btn_savedwork').click(function(){
     if(app.category!= undefined) {
-      fetchAdditions(app.section_id,app.current_section,app.sel_tile,app.category,'default');
-      fetchDeletions(app.section_id,app.current_section,app.sel_tile,app.category,'default');
+      fetchAdditions(app.section_id,app.current_section,app.sel_tile,app.category,app.tracer,'default');
+      fetchDeletions(app.section_id,app.current_section,app.sel_tile,app.category,app.tracer,'default');
     }
     else {
-      alert('Select category of neurite');
+      alert('Select class of neurite');
     }
   });
 

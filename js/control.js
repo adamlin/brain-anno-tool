@@ -243,12 +243,12 @@ function selectedTile(tile, section_image_size, imageurl, current_gamma){
 	$('#tile-number').html('tile ' + tile);
 }
 
-function addFirstPass(sectionid, sec, tile, category) {
+function addFirstPass(sectionid, sec, tile, category,tracer) {
 	// apibase = 'http://localhost:8000/mbaservices/annotationservice';
 	apibase = 'http://mitradevel.cshl.org/webtools/seriesbrowser';
-	msg = {"series_id":app.series_id, "section_id": sectionid, "section": sec, 
+	msg = {"brain_id":app.brain_id, "series_id":app.series_id, "section_id": sectionid, "section": sec, 
 	"tile": tile,"tile_wid":app.tilewid,"tile_hei":app.tilehei,
-	"category":category};
+	"category":category, "tracer":tracer};
 
 	$.getJSON(apibase+'/load_firstpass/',msg,function(data) {
 		pixels = data.detect.feature.geometry.coordinates[0];
@@ -257,7 +257,7 @@ function addFirstPass(sectionid, sec, tile, category) {
 		});
 		layer.draw();
 		// console.log('done');
-		addnewannotation("2-"+category,2,category,pixels.length);
+		addnewannotation("2-"+category,2,category+'.'+tracer,pixels.length);
 	});
 }
 
@@ -266,7 +266,7 @@ function fetchAdditions( sectionid, sec, tile, category, annotator) {
 	apibase = 'http://mitradevel.cshl.org/webtools/seriesbrowser';
 	msg = {"series_id":app.series_id, "section_id": sectionid, "section": sec, 
 	"tile": tile,"tile_wid":app.tilewid,"tile_hei":app.tilehei,"image_wid":app.width,"image_hei":app.height,
-	"category":category,"annotator":annotator};
+	"category":category,"annotator":annotator, "tracer":app.tracer};
 
 	$.getJSON(apibase+'/fetch_pixel_additions/',msg,function(data) {
 		pixels = data.annotation.feature.geometry.coordinates[0];
@@ -274,7 +274,7 @@ function fetchAdditions( sectionid, sec, tile, category, annotator) {
 			paintRect(pt[1],pt[0]);
 		});
 		layer.draw();
-		updateannotationtracking(category, 1, pixels.length);
+		updateannotationtracking(category, 1, tracer, pixels.length);
 	});
 }
 
@@ -283,7 +283,7 @@ function fetchDeletions(sectionid, sec, tile, category, annotator) {
 	apibase = 'http://mitradevel.cshl.org/webtools/seriesbrowser';
 	msg = {"series_id":app.series_id, "section_id": sectionid, "section": sec, 
 	"tile": tile,"tile_wid":app.tilewid,"tile_hei":app.tilehei,"image_wid":app.width,"image_hei":app.height,
-	"category":category,"annotator":annotator};
+	"category":category,"annotator":annotator,"tracer":app.tracer};
 
 	$.getJSON(apibase+'/fetch_pixel_deletions/',msg,function(data) {
 		pixels = data.annotation.feature.geometry.coordinates[0];
@@ -291,7 +291,7 @@ function fetchDeletions(sectionid, sec, tile, category, annotator) {
 			eraseRect(pt[1],pt[0]);
 		});
 		layer.draw();
-		updateannotationtracking(category, 0, pixels.length);
+		updateannotationtracking(category, 0, tracer, pixels.length);
 	});
 }
 
@@ -313,11 +313,11 @@ function selectedToolBtn(){
 	});
 }
 
-function updateannotationtracking(category, flag, numOfPix){
+function updateannotationtracking(category, flag, tracer, numOfPix){
 	if ($('#listOfAnnotation').find('tr#row-'+flag+'-'+category).length>0)
 		$('#row-'+flag+'-'+category).find('td.area').html('<span>'+ numOfPix+' pixels</span>');
 	else
-		addnewannotation(flag+'-'+category, flag, category, numOfPix);
+		addnewannotation(flag+'-'+category, flag, category+'.'+tracer, numOfPix);
 	// console.log('here');
 }
 
@@ -390,12 +390,35 @@ function selectedpixel(){
 }
 
 function selectedclasses(){
+	$("#tracer_class a").click(function(e){
+		e.preventDefault(); // cancel the link behaviour
+		var trcr = $(this).attr('key');
+		if(app.tracer !=undefined) {
+			if(trcr!=app.tracer) 
+				if(confirm('Change of tracer will save your work and clear the annotation markings. Please confirm')) 
+				{
+					storeObj(true);
+					$('#listOfAnnotation').html('');
+					layer.clear();
+					actionarray.length=0;
+					app.tracer = trcr;
+					// actionarray = {};
+					$('#tracerClasses').text('Trcr: ' + $(this).text());
+				}
+		}
+		else {
+			app.tracer = trcr;
+			$('#tracerClasses').text('Trcr: ' + $(this).text());
+		}
+
+	});
+
 	$("#annotated_class a").click(function(e){
 	    e.preventDefault(); // cancel the link behaviour
 	    var selText = $(this).attr('key');
 	    setCtgAndColor(selText); // by Mitsu for obj output.
 	    // console.info(selText);
-	    $('#dropdownClasses').text('class: ' + selText);
+	    $('#dropdownClasses').text('Neurite: ' + selText);
 	});
 	//$("#classTree").DropDownTree(options);
 }
@@ -417,6 +440,15 @@ function generatesectiontils(seriesid, current_section) {
 	iipinfo = 'http://braincircuits.org/cgi-bin/iipsrv.fcgi?IIIF=';
 	iipzoomify = 'http://braincircuits.org/cgi-bin/iipsrv.fcgi?zoomify=';
 	apibase = 'http://mitradevel.cshl.org/webtools/seriesbrowser';
+
+	if(app.brain_id == undefined) {
+		$.getJSON(apibase+'/getbraininfo/'+seriesid, function(data){
+			var desc = data.desc;
+			parts = desc.split(" ");
+			stype = parts[1];
+			app.brain_id = parts[0].slice(11);
+		});
+	}
 
 	$.getJSON(apibase+'/getthumbnails/'+seriesid, function(data2) {
 		listOfSections = data2['F'];
@@ -550,7 +582,8 @@ function generatesectiontils_brainid(brain_id, current_section){
         	typeused = fluor;
         }else if (type == 'N'){
         	typeused = nissl;
-        }
+		}
+		app.brain_id = brain_id;
 		generatesectiontils(typeused, current_section);
 		
     });
@@ -569,7 +602,7 @@ function updateallinfo(){
 	$('#total_tiles').html('Total Tiles: ' + countTiles);
 	$('#full_image_file_name').html(app.jp2Path);
 
-	let brain_name = getUrlVars()["brain_id"];
+	let brain_name = app.brain_id; //getUrlVars()["brain_id"];
 	if(typeof brain_name == 'number'){
 		brain_name = 'PMD' + brain_name;
 	}
@@ -656,13 +689,13 @@ function beforeAndafterSection(current_section){
 	$("#btn_section_right").click(function(e){
 		$('#image_loading_selected').css("display", "block");
 		current_section = current_section + 1;
-		generatesectiontils_brainid(brain_id, current_section);
+		generatesectiontils_brainid(app.brain_id, current_section);
 	});
 
 	$("#btn_section_left").click(function(e){
 		$('#image_loading_selected').css("display", "block");
 		current_section = current_section - 1;
-		generatesectiontils_brainid(brain_id, current_section);
+		generatesectiontils_brainid(app.brain_id, current_section);
 	});
 }
 
@@ -756,7 +789,7 @@ function initRangeSlider(){
 
 function applyRangesControl(){
 	$("#apply_all_tiles_section").click(function(e){
-		generatesectiontils_brainid(brain_id, current_section);
+		generatesectiontils_brainid(app.brain_id, current_section);
 		ol_gamma = current_gamma[0];
 		generateOL(app.width, app.height, iipbase +app.jp2Path, ol_gamma);
 	});
@@ -765,7 +798,7 @@ function applyRangesControl(){
 		current_red_range 	= [1,0,1023];
 		current_blue_range 	= [2,0,1023];
 		current_green_range = [3,0,1023];
-		generatesectiontils_brainid(brain_id, current_section);
+		generatesectiontils_brainid(app.brain_id, current_section);
 		selectedTile(app.sel_tile, app.section_image_size, app.jp2Path, current_gamma);
 	});
 
@@ -773,7 +806,7 @@ function applyRangesControl(){
 
 function cell_annotation_marking_init(){
 
-	var meta_link = '<a href="http://www.braincircuits.org/mamo/ol_cshl_anno.html?brain_id=' + brain_id +'&label='+ type
+	var meta_link = '<a href="http://www.braincircuits.org/mamo/ol_cshl_anno.html?brain_id=' + app.brain_id +'&label='+ type
 			  + '&pid=' + $('#full_image_file_name').text() + '" '
 	          + 'data-featherlight="iframe" data-featherlight-iframe-frameborder="0" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-style="display:block;border:none;height:95vh;width:85vw;">'
 	          + '<button id="cell_annotation_marking" class="cell_annotation-tabs" type="button">M</button>'

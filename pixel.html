@@ -93,6 +93,21 @@
              <!-- header middle group -->
              <div class="navigator-wrapper">
                 <div class="tool-options">
+                   <div class="dropdown" style="margin-top:10px;margin-right:4px">
+                     <button class="btn btn-secondary dropdown-toggle" type="button" id="tracerClasses" data-toggle="dropdown" aria-haspopup="false" aria-expanded="false">Tracer
+                        </button>
+                        <ul id="tracer_class" class="dropdown-menu">
+                           <li class="dropdown-submenu">
+                              <a class="dropdown-item" href="#" key="red">Red</a>
+                              <a class="dropdown-item" href="#" key="green">Green</a>
+                              <a class="dropdown-item" href="#" key="fastblue">Fast blue</a>
+                              <a class="dropdown-item" href="#" key="ctb">CTB</a>
+                              <a class="dropdown-item" href="#" key="nissl">Nissl</a>
+                              <a class="dropdown-item" href="#" key="myelin">Myelin</a>
+                              <a class="dropdown-item" href="#" key="na">NA</a>
+                           </li>
+                        </ul>
+                  </div>
                    <div class="dropdown" style="margin-top: 10px">
                       <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownClasses" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Annotation Classes
                       </button>
@@ -467,6 +482,7 @@
                   $(this).addClass('active');
                   $(this).siblings().removeClass('active');
                   res = imageid.split('-');
+                  $('#listOfAnnotation').html("");
                   selectedTile(res[1],app.section_image_size, app.jp2Path, current_gamma);
                });
             }
