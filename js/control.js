@@ -253,7 +253,7 @@ function addFirstPass(sectionid, sec, tile, category,tracer) {
 	$.getJSON(apibase+'/load_firstpass/',msg,function(data) {
 		pixels = data.detect.feature.geometry.coordinates[0];
 		pixels.forEach(function(pt){
-			paintRect_firstpass(pt[1],pt[0]);
+			paintRect_firstpass(pt[0],pt[1]);
 		});
 		layer.draw();
 		// console.log('done');
@@ -261,34 +261,34 @@ function addFirstPass(sectionid, sec, tile, category,tracer) {
 	});
 }
 
-function fetchAdditions( sectionid, sec, tile, category, annotator) {
+function fetchAdditions( sectionid, sec, tile, category, tracer, annotator) {
 	// apibase = 'http://localhost:8000/mbaservices/annotationservice';
 	apibase = 'http://mitradevel.cshl.org/webtools/seriesbrowser';
 	msg = {"series_id":app.series_id, "section_id": sectionid, "section": sec, 
 	"tile": tile,"tile_wid":app.tilewid,"tile_hei":app.tilehei,"image_wid":app.width,"image_hei":app.height,
-	"category":category,"annotator":annotator, "tracer":app.tracer};
+	"category":category,"annotator":annotator, "tracer":tracer};
 
 	$.getJSON(apibase+'/fetch_pixel_additions/',msg,function(data) {
 		pixels = data.annotation.feature.geometry.coordinates[0];
 		pixels.forEach(function(pt){
-			paintRect(pt[1],pt[0]);
+			paintRect(pt[0],pt[1]);
 		});
 		layer.draw();
 		updateannotationtracking(category, 1, tracer, pixels.length);
 	});
 }
 
-function fetchDeletions(sectionid, sec, tile, category, annotator) {
+function fetchDeletions(sectionid, sec, tile, category,tracer, annotator) {
 	// apibase = 'http://localhost:8000/mbaservices/annotationservice';
 	apibase = 'http://mitradevel.cshl.org/webtools/seriesbrowser';
 	msg = {"series_id":app.series_id, "section_id": sectionid, "section": sec, 
 	"tile": tile,"tile_wid":app.tilewid,"tile_hei":app.tilehei,"image_wid":app.width,"image_hei":app.height,
-	"category":category,"annotator":annotator,"tracer":app.tracer};
+	"category":category,"annotator":annotator,"tracer":tracer};
 
 	$.getJSON(apibase+'/fetch_pixel_deletions/',msg,function(data) {
 		pixels = data.annotation.feature.geometry.coordinates[0];
 		pixels.forEach(function(pt){
-			eraseRect(pt[1],pt[0]);
+			eraseRect(pt[0],pt[1]);
 		});
 		layer.draw();
 		updateannotationtracking(category, 0, tracer, pixels.length);

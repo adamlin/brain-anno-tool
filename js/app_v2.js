@@ -653,7 +653,7 @@ function storeObj(todb){
       var coordinates = pointarray[ii][cat];
       
       var numOfPix = coordinates.length;
-      updateannotationtracking(cat, ii, numOfPix);
+      updateannotationtracking(cat, ii, app.tracer, numOfPix);
 
       if(todb != undefined) {
         outObj_template.feature = turf.multiPoint(coordinates);
