@@ -65,7 +65,9 @@ colorTable = {  // Temporally.
   'artifact.dust':'rgba(17, 87, 253, 0.7)'
 };
 
-tracerlist = ['na','red','green','red+green','fastblue','ctb','nissl','myelin']
+tracerlist = ['na','red','green','red+green','fastblue','ctb','nissl','myelin'];
+typelist = ['N','F','M','C']; // is this the value in url var 'type'?
+//FIXME:  make similar list for url var 'color'..
 
 var mouseLeftDown = false;
 var mouseRightDown = false;
