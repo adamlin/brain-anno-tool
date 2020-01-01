@@ -481,11 +481,11 @@ function generatesectiontils(seriesid, current_section) {
 				app.width = width;
 				app.height = height;
 
-				app.tilewid = 4096; //2174 = 1mm
-				app.tilehei = 4096;
+				app.tilewid = 1024; //2174 = 1mm
+				app.tilehei = 1024;
 				if(app.width < 24000) {
-					app.tilewid = 2048;
-					app.tilehei = 2048;
+					app.tilewid = 1024;
+					app.tilehei = 1024;
 				}
 				// var tilesize = 4096;
 
@@ -806,7 +806,7 @@ function applyRangesControl(){
 
 function cell_annotation_marking_init(){
 
-	var meta_link = '<a href="http://www.braincircuits.org/mamo/ol_cshl_anno.html?brain_id=' + app.brain_id +'&label='+ type
+	var meta_link = '<a href="http://www.braincircuits.org/mamo/ol_cshl_anno.html?brain_id=' + app.brain_id +'&label='+ type + '&color=' + color
 			  + '&pid=' + $('#full_image_file_name').text() + '" '
 	          + 'data-featherlight="iframe" data-featherlight-iframe-frameborder="0" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-style="display:block;border:none;height:95vh;width:85vw;">'
 	          + '<button id="cell_annotation_marking" class="cell_annotation-tabs" type="button">M</button>'
