@@ -40,6 +40,10 @@ var colorForUndefined = '#808080';
 // var indicesWithSaidColor = [];
 // var positionForColor = {};
 colorTable = {  // Temporally.
+  'process': 'rgba(253,225,87,0.7)',
+  'injsoma': 'rgba(253,225,87,0.7)',
+  'bouton': 'rgba(253,225,87,0.7)',
+
   'axon': 'rgba(253, 225, 87, 0.7)',
   'axon.fasciculated': 'rgba(253, 225, 87, 0.7)',
   'axon.terminal_arbor': 'rgba(253, 225, 87, 0.7)',
@@ -61,7 +65,7 @@ colorTable = {  // Temporally.
   'artifact.dust':'rgba(17, 87, 253, 0.7)'
 };
 
-tracerlist = ['red','green','fastblue','ctb','nissl','myelin','na']
+tracerlist = ['na','red','green','red+green','fastblue','ctb','nissl','myelin']
 
 var mouseLeftDown = false;
 var mouseRightDown = false;
