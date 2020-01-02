@@ -249,16 +249,57 @@ function addFirstPass(sectionid, sec, tile, category,tracer) {
 	msg = {"brain_id":app.brain_id, "series_id":app.series_id, "section_id": sectionid, "section": sec, 
 	"tile": tile,"tile_wid":app.tilewid,"tile_hei":app.tilehei,
 	"category":category, "tracer":tracer};
-
+	
 	$.getJSON(apibase+'/load_firstpass/',msg,function(data) {
 		pixels = data.detect.feature.geometry.coordinates[0];
+		app.fpidx = [];
 		pixels.forEach(function(pt){
-			paintRect_firstpass(pt[0],pt[1]);
+			idx = paintRect_firstpass(pt[0],pt[1]);
+			app.fpidx.push(idx);
 		});
 		layer.draw();
+		// stage.children.cache();
 		// console.log('done');
 		addnewannotation("2-"+category,2,category+'.'+tracer,pixels.length);
 	});
+}
+
+function hideFirstPass(){
+	// app.fpidx.forEach(function(elt){
+		
+    // 	var ImPix_x = elt%app.tilewid;
+	// 	var ImPix_y = (elt-ImPix_x)/app.tilewid;
+	// 	var stgposition = stage.position();
+	// 	var RectPos = {
+	// 		x: Math.round((ImPix_x+0.5)*disp.currentscale + stgposition.x), // Left-top Impix is [0, 0]. So, add 0.5 to point the center of the pixel.
+	// 		y: Math.round((ImPix_y+0.5)*disp.currentscale + stgposition.y) 
+	// 	};
+	// 	// var RectPos = {x:ImPix_x,y:ImPix_y};
+	// 	existingrect = stage.getIntersection(RectPos,"Rect");
+	// 	if (existingrect!=null)
+	// 		if(existingrect.className == "Rect") 
+	// 			existingrect.hide();
+	// });
+	// $('#image_loading_selected').css("display", "block");
+	layer.getChildren(function(node){
+		var nodeid = node.getAttr('id');
+		if(app.fpidx.indexOf(nodeid)!=-1) {
+			node.hide();
+			return node.getClassName()=='Rect';
+		}
+	});
+	// $('#image_loading_selected').css("display", "none");
+}
+function unhideFirstPass() {
+	// $('#image_loading_selected').css("display", "block");
+	layer.getChildren(function(node){
+		var nodeid = node.getAttr('id');
+		if(app.fpidx.indexOf(nodeid)!=-1) {
+			node.show();
+			return node.getClassName()=='Rect';
+		}
+	});
+	// $('#image_loading_selected').css("display", "none");
 }
 
 function fetchAdditions( sectionid, sec, tile, category, tracer, annotator) {
@@ -358,10 +399,24 @@ function addnewannotation(category,flag, catname, numOfPix){
 			         '<span><i title="Delete object 16292- 16292" class="icon-trash"></i></span>'+
 			      '</button>'+
 			   '</td>'+
-			   '<td class="icn show-hide"><a title="Hide"><i class="icon-eye"></i></a> <i class="icon-edit show-on-active"></i></td>'+
+			   '<td class="icn show-hide"><a id="'+category+'" title="Hide"><i class="icon-eye"></i></a> <i class="icon-edit show-on-active"></i></td>'+
 			   '<td class="padding"></td>'+
 			'</tr>';
 	$('#listOfAnnotation').html(content2);
+	if(flag==2) {
+		$('a#'+category).click(function(){
+			if($(this).attr('title')=="Hide") {
+				// alert("hide" + category);
+				hideFirstPass();
+				$(this).attr('title',"Show");
+			}
+			else {
+				// alert('show' + category);
+				unhideFirstPass();
+				$(this).attr('title',"Hide");
+			}
+		});
+	}
 }
 
 function clickrangecontrol(){
@@ -421,6 +476,11 @@ function selectedclasses(){
 	    $('#dropdownClasses').text('Neurite: ' + selText);
 	});
 	//$("#classTree").DropDownTree(options);
+
+	$('#listOfAnnotation a').click(function(e){
+		category = $(this).attr('id');
+		alert(category);
+	});
 }
 function generatesectiontils(seriesid, current_section) {
 	app.series_id = seriesid;

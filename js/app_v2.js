@@ -68,6 +68,7 @@ colorTable = {  // Temporally.
 tracerlist = ['na','red','green','red+green','fastblue','ctb','nissl','myelin'];
 typelist = ['N','F','M','C']; // is this the value in url var 'type'?
 //FIXME:  make similar list for url var 'color'..
+colorlist = ['R','G']; //...
 
 var mouseLeftDown = false;
 var mouseRightDown = false;
@@ -224,7 +225,10 @@ function paintRect_firstpass(ImPix_x, ImPix_y) {
   var linearindex = ImPix_y * app.tilewid + ImPix_x; // Left-top is 0.
   var newrect = makeNewRect(ImPix_x, ImPix_y,app.currentcolor,linearindex);
     // newrect.on("click tap", checkEraseRect);
+    
   layer.add(newrect);
+  // newrect.cache();
+  return linearindex;
 }
 
 function paintRect(ImPix_x, ImPix_y, pointerPos) {
@@ -874,7 +878,9 @@ function setElementAct(){
 
   $('#btn_firstpass').click(function(){
     if(app.category!= undefined) {
+      // $('#image_loading_selected').css("display", "block");
       addFirstPass(app.section_id,app.current_section,app.sel_tile,app.category,app.tracer);
+      // $('#image_loading_selected').css("display", "none");
     }
     else {
       alert('Select class of neurite');
@@ -883,8 +889,10 @@ function setElementAct(){
 
   $('#btn_savedwork').click(function(){
     if(app.category!= undefined) {
+      // $('#image_loading_selected').css("display", "block");
       fetchAdditions(app.section_id,app.current_section,app.sel_tile,app.category,app.tracer,'default');
       fetchDeletions(app.section_id,app.current_section,app.sel_tile,app.category,app.tracer,'default');
+      // $('#image_loading_selected').css("display", "none");
     }
     else {
       alert('Select class of neurite');
