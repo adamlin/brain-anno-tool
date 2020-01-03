@@ -192,12 +192,15 @@ function mouseevt() {
     if (mouseLeftDown == true){// || touchDown == true) {
     if (activatedBtn == "pointer") {
       stage.draggable(true);
+      // stage.children.cache();
     }else if (activatedBtn == "erase") {
       stage.draggable(false);
+      // stage.children.clearCache();
       eraseRect(ImPix_x,ImPix_y);
       // showstatus();
     }else if (activatedBtn == "raster_pixel"){
       stage.draggable(false);
+      // stage.children.clearCache();
         // console.log('[[ Start painting ]]');
       for (var i = 0; i < brushmatrix.length; i++) {
         paintRect(ImPix_x+brushmatrix[i][0], ImPix_y+brushmatrix[i][1], pointerPos);
@@ -228,7 +231,8 @@ function paintRect_firstpass(ImPix_x, ImPix_y) {
     
   layer.add(newrect);
   // newrect.cache();
-  return linearindex;
+  // return linearindex;
+  return newrect;
 }
 
 function paintRect(ImPix_x, ImPix_y, pointerPos) {
@@ -775,6 +779,13 @@ function setMouseEvt(){
     mouseLeftDown = false;
     // console.log('mouseleft');
   });
+
+  // stage.on('dragstart',function(){
+  //   hideFirstPass();
+  // });
+  // stage.on('dragend',function(){
+  //   unhideFirstPass();
+  // });
 
   stage.on("mouseup", function(e) {
     var click = e.evt.button; //0 if it's left click. 2 if it's right click. 1 if it's middle click. 

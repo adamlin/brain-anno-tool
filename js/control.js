@@ -1,7 +1,7 @@
 // var imagecurrentPath = '';
 // var section_image_size;
 // var brain_name ='';
-var countTiles = 0;
+// var countTiles = 0;
 // var section_number_init = 55;
 // var current_tile;
 // var current_image_url;
@@ -165,6 +165,8 @@ function selectedTile(tile, section_image_size, imageurl, current_gamma){
 	col = tile % ntiles1;
 	row = (tile - col) / ntiles1;
 
+	ol_show_tile(col*app.tilewid,row*app.tilehei);
+
 	xpc = col * app.tilewid/width;
 	ypc = row * app.tilehei/height;
 
@@ -232,7 +234,7 @@ function selectedTile(tile, section_image_size, imageurl, current_gamma){
 		
 		// addFirstPass(app.section_id,app.current_section,tile, "Soma", null);
 
-	    
+	    app.fpidx = [];
 	    // layer_vector.draw();
 	    console.info('tile ' + tile + '| ' + imageurl);
 	    // current_tile = tile;
@@ -252,13 +254,14 @@ function addFirstPass(sectionid, sec, tile, category,tracer) {
 	
 	$.getJSON(apibase+'/load_firstpass/',msg,function(data) {
 		pixels = data.detect.feature.geometry.coordinates[0];
-		app.fpidx = [];
+		
 		pixels.forEach(function(pt){
 			idx = paintRect_firstpass(pt[0],pt[1]);
 			app.fpidx.push(idx);
 		});
 		layer.draw();
-		// stage.children.cache();
+		// if(app.fpidx.length > 10000)
+			// stage.children.cache();
 		// console.log('done');
 		addnewannotation("2-"+category,2,category+'.'+tracer,pixels.length);
 	});
@@ -281,24 +284,32 @@ function hideFirstPass(){
 	// 			existingrect.hide();
 	// });
 	// $('#image_loading_selected').css("display", "block");
-	layer.getChildren(function(node){
-		var nodeid = node.getAttr('id');
-		if(app.fpidx.indexOf(nodeid)!=-1) {
-			node.hide();
-			return node.getClassName()=='Rect';
-		}
+	app.fpidx.forEach(function(elt){
+		elt.hide();
 	});
+	// layer.getChildren(function(node){
+	// 	var nodeid = node.getAttr('id');
+	// 	if(app.fpidx.indexOf(nodeid)!=-1) {
+	// 		node.hide();
+	// 		return node.getClassName()=='Rect';
+	// 	}
+	// });
+	layer.draw();
 	// $('#image_loading_selected').css("display", "none");
 }
 function unhideFirstPass() {
 	// $('#image_loading_selected').css("display", "block");
-	layer.getChildren(function(node){
-		var nodeid = node.getAttr('id');
-		if(app.fpidx.indexOf(nodeid)!=-1) {
-			node.show();
-			return node.getClassName()=='Rect';
-		}
+	app.fpidx.forEach(function(elt){
+		elt.show();
 	});
+	// layer.getChildren(function(node){
+	// 	var nodeid = node.getAttr('id');
+	// 	if(app.fpidx.indexOf(nodeid)!=-1) {
+	// 		node.show();
+	// 		return node.getClassName()=='Rect';
+	// 	}
+	// });
+	layer.draw();
 	// $('#image_loading_selected').css("display", "none");
 }
 
@@ -551,7 +562,7 @@ function generatesectiontils(seriesid, current_section) {
 
 				var ntiles1 = Math.round(width/app.tilewid);
 				var ntiles2 = Math.round(height/app.tilehei);
-
+				app.ntiles = [ntiles1,ntiles2];
 				wpc = app.tilewid / width;
 				hpc = app.tilehei / height;
 
@@ -570,11 +581,13 @@ function generatesectiontils(seriesid, current_section) {
 						 "&MINMAX=1:0,512&MINMAX=2:0,512&MINMAX=3:0,512&GAM=1&CVT=jpeg";
 
 						*/
-
+						// 1:0,255
+						// 2:0,255
+						// 3:0,255
 						imagePath = iipbase + jp2path + "&GAM=1"  + "&WID="+ app.tilewid/100 + "&RGN=" + rgnstring 
-						+"&MINMAX=1:0,2047" //+ current_red_range[0] + ":" + current_red_range[1] + "," + current_red_range[2] 
-						+ "&MINMAX=2:0,2047" // + current_green_range[0] + ":" + current_green_range[1] + "," + current_green_range[2] 
-						+ "&MINMAX=3:0,2047" //+ current_blue_range[0] + ":" + current_blue_range[1] + "," + current_blue_range[2] 
+						+ "&MINMAX=" + current_red_range[0] + ":" + current_red_range[1] + "," + current_red_range[2] 
+						+ "&MINMAX=" + current_green_range[0] + ":" + current_green_range[1] + "," + current_green_range[2] 
+						+ "&MINMAX=" + current_blue_range[0] + ":" + current_blue_range[1] + "," + current_blue_range[2] 
 						 + "&CVT=jpeg";
 		   
 						var i = row * ntiles1 + col;
@@ -618,7 +631,7 @@ function generatesectiontils(seriesid, current_section) {
 				}
 				$('#listOfTiles').html(content);
 				$('#image_loading_selected').css("display", "none");
-				countTiles = count;
+				// countTiles = count;
 				var nagImagesize = $(window).width() * 0.20 - 3;
 				var imageaddress = iipbase + app.jp2Path + "&WID=" + nagImagesize + "&QLT=130&CNT=1&CVT=jpeg";
 				  $('#navImageSection').attr("src",imageaddress);	
@@ -659,7 +672,7 @@ function getUrlVars() {
 }
 
 function updateallinfo(){
-	$('#total_tiles').html('Total Tiles: ' + countTiles);
+	$('#total_tiles').html('Total Tiles: ' + app.ntiles[0] + 'x'+app.ntiles[1]);
 	$('#full_image_file_name').html(app.jp2Path);
 
 	let brain_name = app.brain_id; //getUrlVars()["brain_id"];
@@ -702,13 +715,49 @@ function generateOL(width, height, brain_url, ol_gamma){
       url: applyargs(brain_url,uiargs), 
       size: [imgWidth, imgHeight],
       crossOrigin: 'anonymous'
-    });
+	});
+	
+	var gratstyle = new ol.style.Style({
+		fill : new ol.style.Fill({ color : 'rgba(255,255,255,0)'}),
+		stroke : new ol.style.Stroke({
+			color : 'rgba(255,255,255,0.5)',
+			width : 1
+		}),
+		image : new ol.style.Circle({
+			radius : 7,
+			fill : new ol.style.Fill({
+			color : '#ffcc33' 
+			})
+		})
+	});
 
-    var map = new ol.Map({
+	var selstyle = new ol.style.Style({
+		fill : new ol.style.Fill({color : 'rgba(0,255,255,0)'}),
+		stroke : new ol.style.Stroke({
+			color : 'rgba(0,255,255,0.5)',
+			width : 2
+		}),
+		image : new ol.style.Circle({
+			radius : 7,
+			fill : new ol.style.Fill({
+			color : '#ffcc33' 
+			})
+		})
+	});
+
+    app.map = new ol.Map({
       layers: [
         new ol.layer.Tile({
           source: source
-        })
+		}),
+		new ol.layer.Vector({            
+			source : new ol.source.Vector({wrapX:false,}), 				
+			style : gratstyle	
+		}),
+		new ol.layer.Vector({
+			source: new ol.source.Vector({ wrapX:false}),
+			style : selstyle
+		})
       ],
       target: 'map',
       view: new ol.View({
@@ -719,7 +768,57 @@ function generateOL(width, height, brain_url, ol_gamma){
 		maxZoom: 9,
 		extent: [0, -imgHeight, imgWidth, 0]
       })
-    });	
+	});	
+	add_graticule(app.map.getLayers().item(1));
+	seltilelayer = app.map.getLayers().item(2);
+	seltilelayer.getSource().addFeature(new ol.Feature({
+		geometry:new ol.geom.Polygon([[[0,0],[100,0],[100,100],[0,100]]])
+	}));
+}
+
+function ol_show_tile(tx,ty) {
+	seltilelayer = app.map.getLayers().item(2);
+	geom = seltilelayer.getSource().getFeatures()[0].getGeometry();
+	coords = [[[tx,-ty],[tx+app.tilewid,-ty],[tx+app.tilewid,-ty-app.tilehei],[tx,-ty-app.tilehei]]];
+	geom.setCoordinates(coords);
+}
+
+function add_graticule(gratlayer) 
+{
+    var mls = [];
+    mlsgeom = new ol.geom.MultiLineString();
+    // mmperpix=0.00046; // mm
+    halfmm=app.tilewid; // 1/2/mmperpix;
+    
+    imagedims = app.section_image_size; //app.imgdims; //[24000,18000]; //x,y
+    
+    for(px=0; px<imagedims[0]; px+=halfmm) {
+        linestr = [[px,0],[px,-imagedims[1]]];
+        //console.log(linestr);
+        mlsgeom.appendLineString(new ol.geom.LineString(linestr));
+        mls.push(linestr);
+        //break;
+    }
+    
+    for(py=0; py<imagedims[1]; py+=halfmm) {
+        linestr = [[0,-py],[imagedims[0],-py]];
+        //console.log(linestr);
+        mlsgeom.appendLineString(new ol.geom.LineString(linestr));
+        mls.push(linestr);
+        //break;
+    }
+
+    // var featcollection = {
+    //     'type':'FeatureCollection',
+    //     'features':[{
+    //         'type':'Feature',
+    //         'geometry': {
+    //             'type':'MultiLineString',
+    //             'coordinates':[mls]
+    //         }
+    //     }]
+	// };
+	gratlayer.getSource().addFeature(new ol.Feature({geometry:mlsgeom}));
 }
 
 function iipcmd(uiprop, arg) 
