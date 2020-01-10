@@ -6,10 +6,10 @@
 // var current_tile;
 // var current_image_url;
 
-var current_gamma 		= [1.3];
-var current_red_range 	= [1,0,4095];
-var current_blue_range 	= [2,0,1023];
-var current_green_range = [3,0,1023];
+var current_gamma 		= [1];
+var current_red_range 	= [1,10,255];
+var current_blue_range 	= [2,10,255];
+var current_green_range = [3,10,255];
 var current_opacity = [1.0];
 // var current_width;
 // var current_height;
@@ -601,7 +601,8 @@ function generatesectiontils(seriesid, current_section) {
 						// 1:0,255
 						// 2:0,255
 						// 3:0,255
-						imagePath = iipbase + jp2path + "&GAM=1"  + "&WID="+ app.tilewid/100 + "&RGN=" + rgnstring 
+						imagePath = iipbase + jp2path + "&GAM=0.4" //+ current_gamma[0] 
+						+ "&WID="+ app.tilewid/100 + "&RGN=" + rgnstring 
 						+ "&MINMAX=" + current_red_range[0] + ":" + current_red_range[1] + "," + current_red_range[2] 
 						+ "&MINMAX=" + current_green_range[0] + ":" + current_green_range[1] + "," + current_green_range[2] 
 						+ "&MINMAX=" + current_blue_range[0] + ":" + current_blue_range[1] + "," + current_blue_range[2] 
@@ -971,9 +972,9 @@ function applyRangesControl(){
 	});
 	$("#reset_all_tiles_section").click(function(e){
 		current_gamma 		= [1];
-		current_red_range 	= [1,0,1023];
-		current_blue_range 	= [2,0,1023];
-		current_green_range = [3,0,1023];
+		current_red_range 	= [1,10,255];
+		current_blue_range 	= [2,10,255];
+		current_green_range = [3,10,255];
 		generatesectiontils_brainid(app.brain_id, current_section);
 		selectedTile(app.sel_tile, app.section_image_size, app.jp2Path, current_gamma);
 	});
