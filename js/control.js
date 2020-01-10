@@ -148,6 +148,8 @@ function mouseclick(){
 function selectedTile(tile, section_image_size, imageurl, current_gamma){
 	$('#image_loading_selected').css("display", "block");
 
+	clear_actionarray(); 
+
 	var width = section_image_size[0];
 	var height = section_image_size[1];
 	//FIXME: get these from http://braincircuits.org/cgi-bin/iipsrv.fcgi?IIIF=/PITT001/Marmo_7NA_7_layers_1um_spacing.jp2/info.json
@@ -454,6 +456,20 @@ function selectedpixel(){
 	});
 	//$("#classTree").DropDownTree(options);
 }
+function clear_actionarray(){
+  var actiokeys = Object.keys(actionarray); //Key(action number) is supposed to be in order from small to big.
+ 
+  for (var i = 0; i<(actiokeys.length); i++) {
+    var action = actiokeys[i];
+    var linearindexkeys = Object.keys(actionarray[action]['lindex']);
+    
+	delete actionarray[action];
+    
+	for (var j = 0; j<linearindexkeys.length; j++) {
+		delete idxaction[linearindexkeys[j]];
+	}
+  }
+}
 
 function selectedclasses(){
 	$("#tracer_class a").click(function(e){
@@ -466,7 +482,8 @@ function selectedclasses(){
 					storeObj(true);
 					$('#listOfAnnotation').html('');
 					layer.clear();
-					actionarray.length=0;
+					// actionarray.length=0;
+					clear_actionarray();
 					app.tracer = trcr;
 					// actionarray = {};
 					$('#tracerClasses').text('Trcr: ' + $(this).text());

@@ -627,7 +627,7 @@ function storeObj(todb){
   var actiokeys = Object.keys(actionarray); //Key(action number) is supposed to be in order from small to big.
   
   actiokeys.forEach(function(action){
-
+    if(!isNaN(parseInt(action))){
   // for (var i = 0; i<actiokeys.length; i++) {
     // var action = actiokeys[i];
       var ac = actionarray[action];
@@ -654,8 +654,8 @@ function storeObj(todb){
       //   pointarray.push(outtemp.xy);
       // }
     
-  });
-  apibase = 'http://mitradevel.cshl.org/webtools/seriesbrowser';
+  }});
+  apibase = 'http://mitradevel.cshl.org/webtools/seriesbrowser/';
   // apibase = "http://localhost:8000/mbaservices/annotationservice/";
   apifuncnames = ['save_pixel_deletions/', 'save_pixel_additions/'];
 
