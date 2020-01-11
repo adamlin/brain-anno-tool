@@ -321,6 +321,7 @@ function paintRect(ImPix_x, ImPix_y, pointerPos) {
     // positionForColor[currentcolor].push([ImPix_x, ImPix_y]); /// need check
 
   }
+  return newrect;
 }
 
 
@@ -492,11 +493,17 @@ function checkEraseRect(evt) {   //// eraseRectと融合できる？ いらな�
 //   }
 }
 
-function eraseRect(ImPix_x,ImPix_y){
+function eraseRect(ImPix_x,ImPix_y,nobrush){
   // console.log('[[ Start erasing ]]');
-  for (var i = 0; i < brushmatrix.length; i++) {
-    var x = brushmatrix[i][0];
-    var y = brushmatrix[i][1];
+  if(nobrush==undefined){
+    br = brushmatrix;
+  }
+  else{
+    br = [[0,0]];
+  }
+  for (var i = 0; i < br.length; i++) {
+    var x = br[i][0];
+    var y = br[i][1];
 
     var linearindex = (ImPix_y+y) * app.tilewid + (ImPix_x+x);
     var action = idxaction[linearindex];
@@ -901,8 +908,9 @@ function setElementAct(){
   $('#btn_savedwork').click(function(){
     if(app.category!= undefined) {
       // $('#image_loading_selected').css("display", "block");
-      fetchAdditions(app.section_id,app.current_section,app.sel_tile,app.category,app.tracer,'default');
-      fetchDeletions(app.section_id,app.current_section,app.sel_tile,app.category,app.tracer,'default');
+      //fetchAdditions(app.section_id,app.current_section,app.sel_tile,app.category,app.tracer,'default');
+      //fetchDeletions(app.section_id,app.current_section,app.sel_tile,app.category,app.tracer,'default');
+      fetchAdditionsAndDeletions(app.section_id,app.current_section,app.sel_tile,app.category,app.tracer,'default');
       // $('#image_loading_selected').css("display", "none");
     }
     else {

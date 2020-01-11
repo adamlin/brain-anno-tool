@@ -332,6 +332,46 @@ function fetchAdditions( sectionid, sec, tile, category, tracer, annotator) {
 	});
 }
 
+function linearindexOf(x,y) {
+	return y*app.tilewid+x;
+}
+
+function fetchAdditionsAndDeletions( sectionid, sec, tile, category, tracer, annotator) {
+	// apibase = 'http://localhost:8000/mbaservices/annotationservice';
+	apibase = 'http://mitradevel.cshl.org/webtools/seriesbrowser';
+	msg = {"series_id":app.series_id, "section_id": sectionid, "section": sec, 
+	"tile": tile,"tile_wid":app.tilewid,"tile_hei":app.tilehei,"image_wid":app.width,"image_hei":app.height,
+	"category":category,"annotator":annotator, "tracer":tracer};
+
+	$.getJSON(apibase+'/fetch_pixel_additions/',msg,function(data) {
+		addpixels = data.annotation.feature.geometry.coordinates[0];
+		// addindices = [];
+		// addpixels.forEach(function(pt){
+		// 	addindices.push(linearindexOf(pt[0],pt[1]));
+		// });
+		$.getJSON(apibase+'/fetch_pixel_deletions/', msg, function(data2){
+			delpixels = data2.annotation.feature.geometry.coordinates[0];
+			var delindices = [];
+			delpixels.forEach(function(pt){
+				delindices.push(linearindexOf(pt[0],pt[1]));
+			});
+			addpixels.forEach(function(pt) {
+				addidx = linearindexOf(pt[0],pt[1]);
+				if(delindices.indexOf(addidx)!=-1) {
+					paintRect(pt[0],pt[1]);
+				}
+			});
+			delpixels.forEach(function(pt){
+				eraseRect(pt[0],pt[1],true); //no brush
+			});
+			updateannotationtracking(category, 0, tracer, delpixels.length);
+		});
+		layer.draw();
+		updateannotationtracking(category, 1, tracer, addpixels.length);
+				
+	});
+}
+
 function fetchDeletions(sectionid, sec, tile, category,tracer, annotator) {
 	// apibase = 'http://localhost:8000/mbaservices/annotationservice';
 	apibase = 'http://mitradevel.cshl.org/webtools/seriesbrowser';
@@ -342,7 +382,7 @@ function fetchDeletions(sectionid, sec, tile, category,tracer, annotator) {
 	$.getJSON(apibase+'/fetch_pixel_deletions/',msg,function(data) {
 		pixels = data.annotation.feature.geometry.coordinates[0];
 		pixels.forEach(function(pt){
-			eraseRect(pt[0],pt[1]);
+			eraseRect(pt[0],pt[1],true);
 		});
 		layer.draw();
 		updateannotationtracking(category, 0, tracer, pixels.length);
@@ -792,6 +832,14 @@ function generateOL(width, height, brain_url, ol_gamma){
 	seltilelayer.getSource().addFeature(new ol.Feature({
 		geometry:new ol.geom.Polygon([[[0,0],[100,0],[100,100],[0,100]]])
 	}));
+	app.map.on('click',function(evt){
+		var coord = app.map.getCoordinateFromPixel(evt.pixel);
+		var tmptilenum_y = Math.floor(-coord[1]/app.tilehei);
+		var tmptilenum_x = Math.floor(coord[0]/app.tilewid);
+		var ntiles1 = Math.round(app.width/app.tilewid) ;//tilesize);
+		var tmptilenum = tmptilenum_y*ntiles1 + tmptilenum_x;
+		$('#tile_number_help').html(tmptilenum);
+	});
 }
 
 function ol_show_tile(tx,ty) {
