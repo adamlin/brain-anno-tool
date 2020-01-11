@@ -315,6 +315,23 @@ function unhideFirstPass() {
 	// $('#image_loading_selected').css("display", "none");
 }
 
+function invalidateFirstPass(sectionid,sec,tile,category,tracer, annotator){
+	// apibase = 'http://localhost:8000/mbaservices/annotationservice';
+	apibase = 'http://mitradevel.cshl.org/webtools/seriesbrowser';
+
+	// msg = {"series_id":app.series_id, "section_id": sectionid, "section": sec, 
+	// "tile": tile,"tile_wid":app.tilewid,"tile_hei":app.tilehei,"image_wid":app.width,"image_hei":app.height,
+	// "category":category,"annotator":annotator,"tracer":tracer};
+	msg = {"brain_id":app.brain_id, "series_id":app.series_id, "section_id": sectionid, "section": sec, 
+	"tile": tile,"tile_wid":app.tilewid,"tile_hei":app.tilehei,
+	"category":category, "tracer":tracer};
+
+	$.getJSON(apibase+'/invalidate_firstpass',msg,function(data){
+		pts = data.detect.feature.geometry.coordinates[0];
+		updateannotationtracking(category,2,tracer,pts.length);
+	});
+}
+
 function fetchAdditions( sectionid, sec, tile, category, tracer, annotator) {
 	// apibase = 'http://localhost:8000/mbaservices/annotationservice';
 	apibase = 'http://mitradevel.cshl.org/webtools/seriesbrowser';
@@ -449,7 +466,7 @@ function addnewannotation(category,flag, catname, numOfPix){
 			   '</td>'+
 			   '<td class="icn">'+
 			      '<button type="button" class="el-button show-on-hover icon-btn black el-button--text">'+
-			         '<span><i title="Delete object 16292- 16292" class="icon-trash"></i></span>'+
+			         '<a id="del_'+category+'"><i title="" class="icon-trash"></i></span>'+
 			      '</button>'+
 			   '</td>'+
 			   '<td class="icn show-hide"><a id="'+category+'" title="Hide"><i class="icon-eye"></i></a> <i class="icon-edit show-on-active"></i></td>'+
@@ -457,6 +474,11 @@ function addnewannotation(category,flag, catname, numOfPix){
 			'</tr>';
 	$('#listOfAnnotation').html(content2);
 	if(flag==2) {
+		$('a#del_'+category).click(function(){
+			if(confirm('Caution cant undo; Confirm invalidate all first pass?')){
+				invalidateFirstPass(app.section_id,app.current_section,app.sel_tile,app.category,app.tracer, "default");
+			}
+		});
 		$('a#'+category).click(function(){
 			if($(this).attr('title')=="Hide") {
 				// alert("hide" + category);
