@@ -374,7 +374,7 @@ function fetchAdditionsAndDeletions( sectionid, sec, tile, category, tracer, ann
 			});
 			addpixels.forEach(function(pt) {
 				addidx = linearindexOf(pt[0],pt[1]);
-				if(delindices.indexOf(addidx)!=-1) {
+				if(delindices.indexOf(addidx)==-1) {
 					paintRect(pt[0],pt[1]);
 				}
 			});
@@ -382,8 +382,9 @@ function fetchAdditionsAndDeletions( sectionid, sec, tile, category, tracer, ann
 				eraseRect(pt[0],pt[1],true); //no brush
 			});
 			updateannotationtracking(category, 0, tracer, delpixels.length);
+			layer.draw();
 		});
-		layer.draw();
+		
 		updateannotationtracking(category, 1, tracer, addpixels.length);
 				
 	});
