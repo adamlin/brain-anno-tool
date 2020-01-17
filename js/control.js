@@ -433,6 +433,34 @@ function updateannotationtracking(category, flag, tracer, numOfPix){
 	// console.log('here');
 }
 
+function args2string(flag, args) {
+	if (flag==2)
+		return '"'+args.join('","')+'"';
+	else return null;
+}
+
+function confirm_invalidateFirstPass(sectionid, currentsection, sel_tile,category,tracer,annotator){
+	if(sectionid==null)
+		return;
+	if(confirm('Caution cant undo; Confirm invalidate all first pass of this tile? ' + category+'.'+tracer)){
+		invalidateFirstPass(sectionid, currentsection, sel_tile,category,tracer,annotator);
+			//app.section_id,app.current_section,app.sel_tile,app.category,app.tracer, "default"
+	}
+}
+
+function toggle_firstpass(category) {
+	if(category==null)
+		return;
+	if($('a#'+category).attr('title')=="Hide") {
+		hideFirstPass();
+		$('a#'+category).attr('title',"Show");
+	}
+	else {
+		unhideFirstPass();
+		$('a#'+category).attr('title',"Hide");
+	}
+}
+
 function addnewannotation(category,flag, catname, numOfPix){
 	color = flag==1?'green':'red';
 	color = flag==2?'black':color;
@@ -467,14 +495,14 @@ function addnewannotation(category,flag, catname, numOfPix){
 			   '</td>'+
 			   '<td class="icn">'+
 			      '<button type="button" class="el-button show-on-hover icon-btn black el-button--text">'+
-			         '<a id="del_'+category+'"><i title="" class="icon-trash"></i></span>'+
+			         '<a id="del_'+category+'" onclick=confirm_invalidateFirstPass('+ args2string(flag,[app.section_id,app.current_section,app.sel_tile,app.category,app.tracer, "default"]) +')><i title="" class="icon-trash"></i></span>'+
 			      '</button>'+
 			   '</td>'+
-			   '<td class="icn show-hide"><a id="'+category+'" title="Hide"><i class="icon-eye"></i></a> <i class="icon-edit show-on-active"></i></td>'+
+			   '<td class="icn show-hide"><a id="'+category+'" title="Hide" onclick=toggle_firstpass('+args2string(flag,[category])+')><i class="icon-eye"></i></a> <i class="icon-edit show-on-active"></i></td>'+
 			   '<td class="padding"></td>'+
 			'</tr>';
 	$('#listOfAnnotation').html(content2);
-	if(flag==2) {
+	/*if(flag==2) {
 		$('a#del_'+category).click(function(){
 			if(confirm('Caution cant undo; Confirm invalidate all first pass?')){
 				invalidateFirstPass(app.section_id,app.current_section,app.sel_tile,app.category,app.tracer, "default");
@@ -492,7 +520,7 @@ function addnewannotation(category,flag, catname, numOfPix){
 				$(this).attr('title',"Hide");
 			}
 		});
-	}
+	}*/
 }
 
 function clickrangecontrol(){
