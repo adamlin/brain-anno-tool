@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>Annotation tool - Developement | Adam - Mitsu - Keerthi</title>
+        <title>Annotation tool - Development | Adam - Mitsu - Keerthi</title>
         <!--script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.js"></script-->
         <link rel="icon" href="http://marmoset.brainarchitecture.org/wp-content/uploads/2016/02/logo.png" type="image/png">
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -98,14 +98,14 @@
                         </button>
                         <ul id="tracer_class" class="dropdown-menu">
                            <li class="dropdown-submenu">
-                              <a class="dropdown-item" href="#" key="na">NA</a>
-                              <a class="dropdown-item" href="#" key="red">Red</a>
-                              <a class="dropdown-item" href="#" key="green">Green</a>
-                              <a class="dropdown-item" href="#" key="red+green">Red+Green</a>
-                              <a class="dropdown-item" href="#" key="fastblue">Fast blue</a>
-                              <a class="dropdown-item" href="#" key="ctb">CTB</a>
-                              <a class="dropdown-item" href="#" key="nissl">Nissl</a>
-                              <a class="dropdown-item" href="#" key="myelin">Myelin</a>
+                              <a class="dropdown-item" href="#" key="na" clrcode=''>NA</a>
+                              <a class="dropdown-item" href="#" key="red" clrcode='R'>Red</a>
+                              <a class="dropdown-item" href="#" key="green" clrcode='G'>Green</a>
+                              <a class="dropdown-item" href="#" key="red+green" clrcode='RG'>Red+Green</a>
+                              <a class="dropdown-item" href="#" key="fastblue" clrcode='FB'>Fast blue</a>
+                              <a class="dropdown-item" href="#" key="ctb" clrcode='C'>CTB</a>
+                              <a class="dropdown-item" href="#" key="nissl" clrcode='N'>Nissl</a>
+                              <a class="dropdown-item" href="#" key="myelin" clrcode='M'>Myelin</a>
                            </li>
                         </ul>
                   </div>
@@ -192,19 +192,19 @@
                    <a id="undo_draw" class="btn">
                      <i class="zmdi zmdi-undo"></i><div>undo</div>
                  </a>
-                 <a id="redo_draw" class="btn">
+                 <a id="redo_draw" class="btn disabled">
                      <i class="zmdi zmdi-wrap-text"></i><div>redo</div>
                  </a>
                    <div class="divider"></div>
 
                    <div id="controlTool" class="toolBitmapOptions tool-options" style="margin-top: 8px;">
-                      <button class="el-tooltip tool-button active" id="pointer_active">
+                      <button class="el-tooltip tool-button active" title='move' id="pointer_active">
                          <!----> <!----> <i class="icon-plus"></i> <!---->
                       </button>
-                      <button class="el-tooltip tool-button" id="pixel_active">
+                      <button class="el-tooltip tool-button" title='draw' id="pixel_active">
                          <!----> <!----> <i class="icon-round-brush"></i> <!---->
                       </button>
-                      <button class="el-tooltip tool-button" id="erase_active">
+                      <button class="el-tooltip tool-button" title='erase' id="erase_active">
                          <!----> <!----> <i class="icon-eraser"></i> <!---->
                       </button>
 
@@ -281,8 +281,8 @@
           </div>
           -->
         
-          <div id="dynamitc_select" class="row">
-            <div id="stage-parent" class="col-md-10" style="">
+          <div id="dynamitc_select" class="row" style="background-color:slategray">
+            <div id="stage-parent" class="col-md-10">
               <div id="image_loading_selected" class="lds-dual-ring"></div>
               <div id="container">
               </div>
@@ -456,8 +456,8 @@
         
         var series_id = getUrlVars()['series_id'];
         var brain_id = getUrlVars()["brain_id"];
-        var type = getUrlVars()["type"];
-        var color = getUrlVars()["color"];
+        app.type = getUrlVars()["type"];
+        app.color = getUrlVars()["color"];
         var current_section = Number(getUrlVars()["section"]);
 
 
@@ -475,6 +475,9 @@
         }
         else
         {
+          if(app.type==undefined) {
+             app.type = 'F';
+          }
           generatesectiontils(series_id, current_section);
         }
 

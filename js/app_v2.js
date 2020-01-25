@@ -894,14 +894,27 @@ function setElementAct(){
   //   currentcolor = this.value;
   // });
 
+  app.firstpass_lock = false;
   $('#btn_firstpass').click(function(){
-    if(app.category!= undefined) {
-      // $('#image_loading_selected').css("display", "block");
-      addFirstPass(app.section_id,app.current_section,app.sel_tile,app.category,app.tracer);
-      // $('#image_loading_selected').css("display", "none");
-    }
-    else {
-      alert('Select class of neurite');
+    if(!app.firstpass_lock) {
+      app.firstpass_lock = true;
+      if(app.category!= undefined) {
+        if ($('#listOfAnnotation').find('tr#row-2-'+app.category).length==0) {
+          
+          $('#image_loading_selected').css("display", "block");
+          
+          addFirstPass(app.section_id,app.current_section,app.sel_tile,app.category,app.tracer);
+          $('#image_loading_selected').css("display", "none");
+          
+        }
+        else {
+          alert('already loaded');
+        }
+      }
+      else {
+        alert('Select class of neurite');
+      }
+      // app.firstpass_lock = false; // done inside addFirstPass as it has async api call 
     }
   });
 
@@ -1106,6 +1119,9 @@ function showstatus (){
 //   // now we need to fit stage into parent
 //   var containerWidth = container.offsetWidth;
 //   // to do this we need to scale the stage
+//   stageWidth = stage.width();
+//   stageHeight = stage.height();
+
 //   var scale = containerWidth / stageWidth;
 
 

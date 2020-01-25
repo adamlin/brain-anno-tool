@@ -60,7 +60,27 @@ function mouseclick(){
 	    document.removeEventListener('mousemove', onMouseMoveBtm);
 	    //adjustToolbt.onmouseup = null;
 	    console.info('moust up');
-  	});
+	  });
+	$(document).keyup(function(ev){
+		if(ev.key=='Escape'){
+			$('#pointer_active').click();
+		}
+		if(ev.key=='c'){
+			// sw = stage.getWidth();
+			// sh = stage.getHeight();
+
+			stage.position({x:100, y:100});
+			stage.batchDraw();
+		}
+		if(ev.key=='1' || ev.key=='2' || ev.key=='3' || ev.key=='4'){
+			sc = parseInt(ev.key);
+			stage.scale({x:sc,y:sc});
+			stage.batchDraw();
+			$("#myRange").val(sc);
+			$("#zoomlabel").html(sc);
+			disp.currentscale = sc;
+		}
+	});
 }
 
 // function generateTileTable(size){
@@ -215,9 +235,18 @@ function selectedTile(tile, section_image_size, imageurl, current_gamma){
 	        width: app.tilewid,
 	        height: app.tilehei,
 	        image: bgImage,
-	        draggable: false
+			draggable: false,
+			opacity:current_opacity[0],
+			name:'tileimg'
 		});
-		outimg.name('tileimg');
+
+		existingtile = layer.find('Image');
+		
+		if(existingtile[0]!=undefined && existingtile[0].hasName('tileimg'))
+			existingtile[0].destroy();
+		allchildren = layer.getChildren();
+
+		// outimg.name('tileimg');
 		// outimg2 = new Konva.Image({
 		// 	x:0,
 		// 	y:0,
@@ -230,13 +259,16 @@ function selectedTile(tile, section_image_size, imageurl, current_gamma){
 		// outimg2.name('msk');
 		layer.removeChildren();
 		layer.add(outimg);
+		allchildren.each(function(node,n){
+			layer.add(node);
+		});
 		// layer.add(outimg2);
 			//brain_id and current_section defined in pixel.html
 		layer.draw();
 		
 		// addFirstPass(app.section_id,app.current_section,tile, "Soma", null);
 
-	    app.fpidx = [];
+	    // app.fpidx = [];
 	    // layer_vector.draw();
 	    console.info('tile ' + tile + '| ' + imageurl);
 	    // current_tile = tile;
@@ -266,6 +298,7 @@ function addFirstPass(sectionid, sec, tile, category,tracer) {
 			// stage.children.cache();
 		// console.log('done');
 		addnewannotation("2-"+category,2,category+'.'+tracer,pixels.length);
+		app.firstpass_lock = false;
 	});
 }
 
@@ -410,16 +443,33 @@ function fetchDeletions(sectionid, sec, tile, category,tracer, annotator) {
 function selectedToolBtn(){
 	$('#controlTool .tool-button').each(function(){
 	    $(this).click(function(){
-	        $(this).siblings().removeClass('active'); // if you want to remove class from all sibling buttons
-	        $(this).toggleClass('active');
+			var id = $(this).attr('id');
+			if(id=='pixel_active' || id=='erase_active'){
+				if(app.tracer==undefined || app.category==undefined){
+					alert('Please select tracer and annotation class first');
+				}
+				else {
+					$(this).siblings().removeClass('active'); // if you want to remove class from all sibling buttons
+					$(this).toggleClass('active');
+					if(id=='pixel_active') 
+						activatedBtn = 'raster_pixel';
+					else if(id=='erase_active')
+						activatedBtn = 'erase';
+				}
+			}
+			else {
+				$(this).siblings().removeClass('active'); // if you want to remove class from all sibling buttons
+				$(this).toggleClass('active');
+				activatedBtn = 'pointer';
+			}
 
-	        if($('#pixel_active').hasClass('active')){
-	        	activatedBtn = 'raster_pixel';
-	    		}else if ($('#pointer_active').hasClass('active')){
-	    			activatedBtn = 'pointer';
-	    		}else if ($('#erase_active').hasClass('active')){
-	    			activatedBtn = 'erase';
-	    		}
+	        // if($('#pixel_active').hasClass('active')){
+	        // 	activatedBtn = 'raster_pixel';
+			// }else if ($('#pointer_active').hasClass('active')){
+			//  activatedBtn = 'pointer';
+			// }else if ($('#erase_active').hasClass('active')){
+			// 	activatedBtn = 'erase';
+			// }
 
 	    });
 	});
@@ -448,9 +498,9 @@ function confirm_invalidateFirstPass(sectionid, currentsection, sel_tile,categor
 	}
 }
 
-function toggle_firstpass(category) {
-	if(category==null)
-		return;
+function toggle_firstpass(flag,category) {
+	if(flag!=2)
+		return toggle_myedits(category);
 	if($('a#'+category).attr('title')=="Hide") {
 		hideFirstPass();
 		$('a#'+category).attr('title',"Show");
@@ -459,6 +509,11 @@ function toggle_firstpass(category) {
 		unhideFirstPass();
 		$('a#'+category).attr('title',"Hide");
 	}
+}
+
+function toggle_myedits(category){
+
+	return null;
 }
 
 function addnewannotation(category,flag, catname, numOfPix){
@@ -498,7 +553,7 @@ function addnewannotation(category,flag, catname, numOfPix){
 			         '<a id="del_'+category+'" onclick=confirm_invalidateFirstPass('+ args2string(flag,[app.section_id,app.current_section,app.sel_tile,app.category,app.tracer, "default"]) +')><i title="" class="icon-trash"></i></span>'+
 			      '</button>'+
 			   '</td>'+
-			   '<td class="icn show-hide"><a id="'+category+'" title="Hide" onclick=toggle_firstpass('+args2string(flag,[category])+')><i class="icon-eye"></i></a> <i class="icon-edit show-on-active"></i></td>'+
+			   '<td class="icn show-hide"><a id="'+category+'" title="Hide" onclick=toggle_firstpass('+flag+',"'+category+'")><i class="icon-eye"></i></a> <i class="icon-edit show-on-active"></i></td>'+
 			   '<td class="padding"></td>'+
 			'</tr>';
 	$('#listOfAnnotation').html(content2);
@@ -566,22 +621,28 @@ function selectedclasses(){
 	$("#tracer_class a").click(function(e){
 		e.preventDefault(); // cancel the link behaviour
 		var trcr = $(this).attr('key');
+		var clrcode = $(this).attr('clrcode');
 		if(app.tracer !=undefined) {
 			if(trcr!=app.tracer) 
-				if(confirm('Change of tracer will save your work and clear the annotation markings. Please confirm')) 
+				if(confirm('Changing tracer: unsaved work will be lost. Proceed ?')) 
+				// if(confirm('Change of tracer will save your work and clear the annotation markings. Please confirm')) 
 				{
-					storeObj(true);
+					// storeObj(true);
 					$('#listOfAnnotation').html('');
 					layer.clear();
 					// actionarray.length=0;
 					clear_actionarray();
 					app.tracer = trcr;
+					app.color = clrcode;
+					cell_annotation_marking_init();
 					// actionarray = {};
 					$('#tracerClasses').text('Trcr: ' + $(this).text());
 				}
 		}
 		else {
 			app.tracer = trcr;
+			app.color = clrcode;
+			cell_annotation_marking_init();
 			$('#tracerClasses').text('Trcr: ' + $(this).text());
 		}
 
@@ -659,7 +720,7 @@ function generatesectiontils(seriesid, current_section) {
 
 				app.width = width;
 				app.height = height;
-
+				
 				app.tilewid = 1024; //2174 = 1mm
 				app.tilehei = 1024;
 				if(app.width < 24000) {
@@ -668,6 +729,9 @@ function generatesectiontils(seriesid, current_section) {
 				}
 				// var tilesize = 4096;
 
+				generateOL(app.width, app.height, iipzoomify +app.jp2Path, current_gamma[0]);
+				cell_annotation_marking_init();
+				
 				var ntiles1 = Math.round(width/app.tilewid);
 				var ntiles2 = Math.round(height/app.tilehei);
 				app.ntiles = [ntiles1,ntiles2];
@@ -738,7 +802,8 @@ function generatesectiontils(seriesid, current_section) {
 						 count = count + 1;
 					}
 				}
-				$('#listOfTiles').html(content);
+				// $('#listOfTiles').html(content); //FIXME: this hides the listoftiles
+
 				$('#image_loading_selected').css("display", "none");
 				// countTiles = count;
 				var nagImagesize = $(window).width() * 0.20 - 3;
@@ -747,8 +812,7 @@ function generatesectiontils(seriesid, current_section) {
 				  updateallinfo();
 				//   current_width = width;
 				//   current_height = height;
-				  generateOL(app.width, app.height, iipzoomify +app.jp2Path, current_gamma[0]);
-				  cell_annotation_marking_init();
+
 			});
 		});
 	});
@@ -758,11 +822,13 @@ function generatesectiontils_brainid(brain_id, current_section){
 	apibase = 'http://mitradevel.cshl.org/webtools/seriesbrowser';
    
 	$.getJSON(apibase+'/getseriesid/'+brain_id, function(data) {
-        nissl = `${data.N}`
-        fluor = `${data.F}`
-        if(type == 'F'){
+        nissl = `${data.N}`;
+		fluor = `${data.F}`;
+		var typeused = ''; //contains seriesid
+        if(app.type == 'F' || app.type == undefined){
+			app.type = 'F';
         	typeused = fluor;
-        }else if (type == 'N'){
+        }else if (app.type == 'N'){
         	typeused = nissl;
 		}
 		app.brain_id = brain_id;
@@ -867,7 +933,8 @@ function generateOL(width, height, brain_url, ol_gamma){
 			source: new ol.source.Vector({ wrapX:false}),
 			style : selstyle
 		})
-      ],
+	  ],
+	  controls:ol.control.defaults({attribution:false,rotate:false,zoom:true}),
       target: 'map',
       view: new ol.View({
         projection: proj,
@@ -889,8 +956,20 @@ function generateOL(width, height, brain_url, ol_gamma){
 		var tmptilenum_x = Math.floor(coord[0]/app.tilewid);
 		var ntiles1 = Math.round(app.width/app.tilewid) ;//tilesize);
 		var tmptilenum = tmptilenum_y*ntiles1 + tmptilenum_x;
-		$('#tile_number_help').html(tmptilenum);
+		if(confirm('Changing tile: unsaved work will be lost. Proceed ?')) {
+			layer.destroyChildren();
+			app.fpidx = [];
+			tileselect(tmptilenum);
+			$('#tile_number_help').html(tmptilenum);
+		}
 	});
+}
+
+function tileselect(tilenum){
+	$('#image-'+tilenum).addClass('active');
+	$('#image-'+tilenum).siblings().removeClass('active');
+	$('#listOfAnnotation').html("");
+	selectedTile(tilenum,app.section_image_size, app.jp2Path, current_gamma);
 }
 
 function ol_show_tile(tx,ty) {
@@ -963,15 +1042,29 @@ function applyargs(current_url, args)
 function beforeAndafterSection(current_section){
 
 	$("#btn_section_right").click(function(e){
-		$('#image_loading_selected').css("display", "block");
-		current_section = current_section + 1;
-		generatesectiontils_brainid(app.brain_id, current_section);
+		if(confirm('Changing to next tile: unsaved work will be lost. Proceed ?')) {
+			$('#listOfAnnotation').html('');
+			layer.clear();
+			// actionarray.length=0;
+			clear_actionarray();
+
+			$('#image_loading_selected').css("display", "block");
+			current_section = current_section + 1;
+			generatesectiontils_brainid(app.brain_id, current_section);
+		}
 	});
 
 	$("#btn_section_left").click(function(e){
-		$('#image_loading_selected').css("display", "block");
-		current_section = current_section - 1;
-		generatesectiontils_brainid(app.brain_id, current_section);
+		if(confirm('Changing to previous tile: unsaved work will be lost. Proceed ?')) {
+			$('#listOfAnnotation').html('');
+			layer.clear();
+			// actionarray.length=0;
+			clear_actionarray();
+
+			$('#image_loading_selected').css("display", "block");
+			current_section = current_section - 1;
+			generatesectiontils_brainid(app.brain_id, current_section);
+		}
 	});
 }
 
@@ -1082,7 +1175,7 @@ function applyRangesControl(){
 
 function cell_annotation_marking_init(){
 
-	var meta_link = '<a href="http://www.braincircuits.org/mamo/ol_cshl_anno.html?brain_id=' + app.brain_id +'&label='+ type + '&color=' + color
+	var meta_link = '<a href="http://www.braincircuits.org/mamo/ol_cshl_anno.html?brain_id=' + app.brain_id +'&label='+ app.type + '&color=' + app.color
 			  + '&pid=' + $('#full_image_file_name').text() + '" '
 	          + 'data-featherlight="iframe" data-featherlight-iframe-frameborder="0" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-style="display:block;border:none;height:95vh;width:85vw;">'
 	          + '<button id="cell_annotation_marking" class="cell_annotation-tabs" type="button">M</button>'
