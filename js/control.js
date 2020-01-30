@@ -392,35 +392,37 @@ function fetchAdditionsAndDeletions( sectionid, sec, tile, category, tracer, ann
 	msg = {"series_id":app.series_id, "section_id": sectionid, "section": sec, 
 	"tile": tile,"tile_wid":app.tilewid,"tile_hei":app.tilehei,"image_wid":app.width,"image_hei":app.height,
 	"category":category,"annotator":annotator, "tracer":tracer};
-
+	var addpixels=[];
+	var delpixels=[];
 	$.getJSON(apibase+'/fetch_pixel_additions/',msg,function(data) {
 		addpixels = data.annotation.feature.geometry.coordinates[0];
 		// addindices = [];
 		// addpixels.forEach(function(pt){
 		// 	addindices.push(linearindexOf(pt[0],pt[1]));
-		// });
-		$.getJSON(apibase+'/fetch_pixel_deletions/', msg, function(data2){
-			delpixels = data2.annotation.feature.geometry.coordinates[0];
-			var delindices = [];
-			delpixels.forEach(function(pt){
-				delindices.push(linearindexOf(pt[0],pt[1]));
+		}).always(function(){
+			$.getJSON(apibase+'/fetch_pixel_deletions/', msg, function(data2){
+				delpixels = data2.annotation.feature.geometry.coordinates[0];
+			}).always(function() {
+				var delindices = [];
+				delpixels.forEach(function(pt){
+					delindices.push(linearindexOf(pt[0],pt[1]));
+				});
+				addpixels.forEach(function(pt) {
+					addidx = linearindexOf(pt[0],pt[1]);
+					if(delindices.indexOf(addidx)==-1) {
+						paintRect(pt[0],pt[1]);
+					}
+				});
+				delpixels.forEach(function(pt){
+					eraseRect(pt[0],pt[1],true); //no brush
+				});
+				updateannotationtracking(category, 0, tracer, delpixels.length);
+				layer.draw();
 			});
-			addpixels.forEach(function(pt) {
-				addidx = linearindexOf(pt[0],pt[1]);
-				if(delindices.indexOf(addidx)==-1) {
-					paintRect(pt[0],pt[1]);
-				}
-			});
-			delpixels.forEach(function(pt){
-				eraseRect(pt[0],pt[1],true); //no brush
-			});
-			updateannotationtracking(category, 0, tracer, delpixels.length);
-			layer.draw();
-		});
 		
-		updateannotationtracking(category, 1, tracer, addpixels.length);
+			updateannotationtracking(category, 1, tracer, addpixels.length);
 				
-	});
+		});
 }
 
 function fetchDeletions(sectionid, sec, tile, category,tracer, annotator) {
