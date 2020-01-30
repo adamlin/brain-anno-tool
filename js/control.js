@@ -605,6 +605,7 @@ function selectedpixel(){
 	//$("#classTree").DropDownTree(options);
 }
 function clear_actionarray(){
+	$('#pointer_active').click();
   var actiokeys = Object.keys(actionarray); //Key(action number) is supposed to be in order from small to big.
  
   for (var i = 0; i<(actiokeys.length); i++) {
