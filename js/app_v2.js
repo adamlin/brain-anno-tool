@@ -248,7 +248,7 @@ function paintRect(ImPix_x, ImPix_y, pointerPos) {
   if (action != undefined && actionarray[action].flag == 1) {
     // console.log('already exist');
   }else if (action != undefined && actionarray[action].flag == 0){ // When the pixel is empty by erasing or undo/redo at last time.
-    var newrect = makeNewRect(ImPix_x, ImPix_y,app.currentcolor,linearindex);
+    var newrect = makeNewRect(ImPix_x, ImPix_y,app.paintcolor,linearindex);
     // newrect.on("click tap", checkEraseRect);
     layer.add(newrect);
     // layer.draw();
@@ -286,7 +286,7 @@ function paintRect(ImPix_x, ImPix_y, pointerPos) {
     // positionForColor[currentcolor].push([ImPix_x, ImPix_y]); /// need check
     
   }else{ // Make a new rect at a new pixel
-    var newrect = makeNewRect(ImPix_x, ImPix_y,app.currentcolor,linearindex);
+    var newrect = makeNewRect(ImPix_x, ImPix_y,app.paintcolor,linearindex);
     // newrect.on("click tap", checkEraseRect);
     layer.add(newrect);
     // layer.draw();

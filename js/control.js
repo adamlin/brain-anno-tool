@@ -357,6 +357,7 @@ function hideMyEdits() {
 	layer.draw();
 	// return null;
 }
+
 function unhideMyEdits() {
 	app.edtidx.forEach(function(elt){
 		if(elt != undefined){
@@ -429,7 +430,6 @@ function fetchAdditionsAndDeletions( sectionid, sec, tile, category, tracer, ann
 				addpixels.forEach(function(pt) {
 					addidx = linearindexOf(pt[0],pt[1]);
 					if(delindices.indexOf(addidx)==-1) {
-						//paintRect(pt[0],pt[1]);
 						idx_edit = paintRect(pt[0],pt[1]);
 						app.edtidx.push(idx_edit);
 					}
@@ -537,6 +537,7 @@ function toggle_firstpass(flag,category) {
 }
 
 function toggle_myedits(category){
+	
 	if($('a#'+category).attr('title')=="Hide") {
 		hideMyEdits();
 		$('a#'+category).find("i").attr("class", "icon-eye");
@@ -547,7 +548,6 @@ function toggle_myedits(category){
 		$('a#'+category).find("i").attr("class", "icon-eye-with-line");
 		$('a#'+category).attr('title',"Hide");
 	}
-	// return null;
 }
 
 function addnewannotation(category,flag, catname, numOfPix){
@@ -561,7 +561,7 @@ function addnewannotation(category,flag, catname, numOfPix){
 			//    '<td class="icn">'+
 			//    '</td>'+
 			   '<td title="Priority" class="priority">'+
-			   	  '<div>'+category+'</div>'+
+			      '<div>'+category+'</div>'+
 			   '</td>'+
 			   '<td class="cnt icn clickable">'+
 			      '<div class="circle" style="background-color: '+color+';"></div>'+
