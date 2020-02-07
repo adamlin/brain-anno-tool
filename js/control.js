@@ -348,6 +348,25 @@ function unhideFirstPass() {
 	// $('#image_loading_selected').css("display", "none");
 }
 
+function hideMyEdits() {
+	app.edtidx.forEach(function(elt){
+		if(elt != undefined){
+			elt.hide();
+		}		
+	});
+	layer.draw();
+	// return null;
+}
+function unhideMyEdits() {
+	app.edtidx.forEach(function(elt){
+		if(elt != undefined){
+			elt.show();
+		}
+	});
+	layer.draw();
+	// return null;
+}
+
 function invalidateFirstPass(sectionid,sec,tile,category,tracer, annotator){
 	// apibase = 'http://localhost:8000/mbaservices/annotationservice';
 	apibase = 'http://mitradevel.cshl.org/webtools/seriesbrowser';
@@ -410,7 +429,9 @@ function fetchAdditionsAndDeletions( sectionid, sec, tile, category, tracer, ann
 				addpixels.forEach(function(pt) {
 					addidx = linearindexOf(pt[0],pt[1]);
 					if(delindices.indexOf(addidx)==-1) {
-						paintRect(pt[0],pt[1]);
+						//paintRect(pt[0],pt[1]);
+						idx_edit = paintRect(pt[0],pt[1]);
+						app.edtidx.push(idx_edit);
 					}
 				});
 				delpixels.forEach(function(pt){
@@ -505,32 +526,42 @@ function toggle_firstpass(flag,category) {
 		return toggle_myedits(category);
 	if($('a#'+category).attr('title')=="Hide") {
 		hideFirstPass();
+		$('a#'+category).find("i").attr("class", "icon-eye");
 		$('a#'+category).attr('title',"Show");
 	}
 	else {
 		unhideFirstPass();
+		$('a#'+category).find("i").attr("class", "icon-eye-with-line");
 		$('a#'+category).attr('title',"Hide");
 	}
 }
 
 function toggle_myedits(category){
-
-	return null;
+	if($('a#'+category).attr('title')=="Hide") {
+		hideMyEdits();
+		$('a#'+category).find("i").attr("class", "icon-eye");
+		$('a#'+category).attr('title',"Show");
+	}
+	else {
+		unhideMyEdits();
+		$('a#'+category).find("i").attr("class", "icon-eye-with-line");
+		$('a#'+category).attr('title',"Hide");
+	}
+	// return null;
 }
 
 function addnewannotation(category,flag, catname, numOfPix){
 	color = flag==1?'green':'red';
-	color = flag==2?'black':color;
+	color = flag==2?'purple':color;
 
 	var content2 = $('#listOfAnnotation').html();
 	content2 += 
 			'<tr id="row-'+category+'">'+
 			   '<td class="padding"></td>'+
-			   '<td class="icn">'+
-			   '</td>'+
+			//    '<td class="icn">'+
+			//    '</td>'+
 			   '<td title="Priority" class="priority">'+
-			      '<div ><span >#</span>1'+
-			      '</div>'+
+			   	  '<div>'+category+'</div>'+
 			   '</td>'+
 			   '<td class="cnt icn clickable">'+
 			      '<div class="circle" style="background-color: '+color+';"></div>'+
@@ -543,19 +574,19 @@ function addnewannotation(category,flag, catname, numOfPix){
 			      numOfPix+ ' pixels'+
 			      '</span>'+
 			   '</td>'+
-			   '<td class="icn">'+
-			      '<span >'+
-			         '<button type="button" class="el-button show-on-hover icon-btn black el-button--text">'+
-			            '<span><i title="Bind" class="icon-link"></i></span>'+
-			         '</button>'+
-			      '</span>'+
-			   '</td>'+
+			//    '<td class="icn">'+
+			//       '<span >'+
+			//          '<button type="button" class="el-button show-on-hover icon-btn black el-button--text">'+
+			//             '<span><i title="Bind" class="icon-link"></i></span>'+
+			//          '</button>'+
+			//       '</span>'+
+			//    '</td>'+
 			   '<td class="icn">'+
 			      '<button type="button" class="el-button show-on-hover icon-btn black el-button--text">'+
 			         '<a id="del_'+category+'" onclick=confirm_invalidateFirstPass('+ args2string(flag,[app.section_id,app.current_section,app.sel_tile,app.category,app.tracer, "default"]) +')><i title="" class="icon-trash"></i></span>'+
 			      '</button>'+
 			   '</td>'+
-			   '<td class="icn show-hide"><a id="'+category+'" title="Hide" onclick=toggle_firstpass('+flag+',"'+category+'")><i class="icon-eye"></i></a> <i class="icon-edit show-on-active"></i></td>'+
+			   '<td class="icn show-hide"><a id="'+category+'" title="Hide" onclick=toggle_firstpass('+flag+',"'+category+'")><i class="icon-eye-with-line"></i></a> <i class="icon-edit show-on-active"></i></td>'+
 			   '<td class="padding"></td>'+
 			'</tr>';
 	$('#listOfAnnotation').html(content2);
@@ -655,7 +686,8 @@ function selectedclasses(){
 	    e.preventDefault(); // cancel the link behaviour
 	    var selText = $(this).attr('key');
 	    setCtgAndColor(selText); // by Mitsu for obj output.
-	    // console.info(selText);
+		// console.info(selText);
+		app.category = selText;
 	    $('#dropdownClasses').text('Neurite: ' + selText);
 	});
 	//$("#classTree").DropDownTree(options);
@@ -962,6 +994,7 @@ function generateOL(width, height, brain_url, ol_gamma){
 		if(confirm('Changing tile: unsaved work will be lost. Proceed ?')) {
 			layer.destroyChildren();
 			app.fpidx = [];
+			app.edtidx = [];
 			tileselect(tmptilenum);
 			$('#tile_number_help').html(tmptilenum);
 		}

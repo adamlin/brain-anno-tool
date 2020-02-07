@@ -35,14 +35,15 @@ app.category = undefined; // initial category
 app.tracer = undefined;
 
 app.currentcolor = undefined; // initial color
+app.paintcolor = 'rgba(58, 230, 249, 1)';
 
 var colorForUndefined = '#808080';
 // var indicesWithSaidColor = [];
 // var positionForColor = {};
 colorTable = {  // Temporally.
-  'process': 'rgba(253,225,87,0.7)',
-  'injsoma': 'rgba(253,225,87,0.7)',
-  'bouton': 'rgba(253,225,87,0.7)',
+  'process': 'rgba(207, 57, 245, 1)',
+  'injsoma': 'rgba(119, 136, 153, 1)',
+  'bouton': 'rgba(253, 225, 87, 0.7)',
 
   'axon': 'rgba(253, 225, 87, 0.7)',
   'axon.fasciculated': 'rgba(253, 225, 87, 0.7)',
@@ -255,7 +256,7 @@ function paintRect(ImPix_x, ImPix_y, pointerPos) {
     if (actionarray[app.actioncnt] == undefined) { // 新しくactionを作る. Use associative array not to make a unnecessary empties.
       actionarray[app.actioncnt] = {
         category: app.category,
-        color: app.currentcolor,
+        color: app.paintcolor,
         flag: 1,
         undo: 0,
         // type: "pixel",
@@ -293,7 +294,7 @@ function paintRect(ImPix_x, ImPix_y, pointerPos) {
     if (actionarray[app.actioncnt] == undefined) { // 新しくactionを作る. Use associative array not to make a unnecessary empties.
       actionarray[app.actioncnt] = {
         category: app.category,
-        color: app.currentcolor,
+        color: app.paintcolor,
         flag: 1,
         undo: 0,
         // type: "pixel",
