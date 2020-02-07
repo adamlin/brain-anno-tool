@@ -76,6 +76,7 @@ var mouseRightDown = false;
 var touchDown = false;
 
 app.UndoOrRedo = 0;
+app.mouseevtpixels = []
 
 var actionarray = {}; //Associative array. Key is a action count.
 var idxaction = {}; //Associative array. Key is a linearindex.
@@ -204,7 +205,8 @@ function mouseevt() {
       // stage.children.clearCache();
         // console.log('[[ Start painting ]]');
       for (var i = 0; i < brushmatrix.length; i++) {
-        paintRect(ImPix_x+brushmatrix[i][0], ImPix_y+brushmatrix[i][1], pointerPos);
+        evt = paintRect(ImPix_x+brushmatrix[i][0], ImPix_y+brushmatrix[i][1], pointerPos);
+        app.mouseevtpixels.push(evt);
       }
       layer.batchDraw();
       app.actioncnt = app.actioncnt + 1;  // paintしなくてもactionが加算されることに注意

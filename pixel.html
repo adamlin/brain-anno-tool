@@ -216,9 +216,9 @@
                           </svg>
                         </span>
                       </button>
-                      <button class="el-tooltip tool-button" id="fillcolor_active">
-                         <!----> <!----> <i class="zmdi zmdi-format-color-fill drawing-color-change"></i> <!---->
-                      </button>
+                      <!-- <button class="el-tooltip tool-button" id="fillcolor_active">
+                         <i class="zmdi zmdi-format-color-fill drawing-color-change"></i>
+                      </button> -->
                       <!-- //hide for future uses
                       <button class="el-tooltip tool-button" id="crop_active">
                          <i class="zmdi zmdi-crop"></i>
@@ -354,25 +354,28 @@
                 </a> 
 
                  <div class="panel-body">
-                    <div class="el-scrollbar">
+                  <div id="map" class="map"></div>
+                  <div class="cell_annotation"><button id="cell_annotation_marking" class="cell_annotation-tabs" type="button">M</button></div>
+                    <!-- <div class="el-scrollbar">
                        <div class="el-scrollbar__wrap" style="margin-bottom: -15px; margin-right: -15px; height: 600px;">
                           <div class="el-scrollbar__view" style="position: relative;">
+                           
                              <div class="images-list" style="">
-                                <div class="table-list">
+                                <div class="table-list"> -->
                                    <!----> <!----> 
-                                   <table id='listTableTiles'>
+                                   <!-- <table id='listTableTiles'>
                                       <tbody id='listOfTiles'> 
                                       </tbody>
-                                   </table>
+                                   </table> -->
                                    <!---->
-                                </div>
+                                <!-- </div>
                                 <div class="el-loading-mask" style="display: none;">
                                    <div class="el-loading-spinner">
                                       <svg viewBox="25 25 50 50" class="circular">
                                          <circle cx="50" cy="50" r="20" fill="none" class="path"></circle>
-                                      </svg>
+                                      </svg> -->
                                       <!---->
-                                   </div>
+                                   <!-- </div>
                                 </div>
                              </div>
                              <div class="resize-triggers">
@@ -389,8 +392,8 @@
                        <div class="el-scrollbar__bar is-vertical">
                           <div class="el-scrollbar__thumb" style="transform: translateY(0%); height: 62.0833%;"></div>
                        </div>
-                    </div>
-                 </div>
+                    </div> -->
+                 </div> 
               </div>
               
               <!-- end panel-top -->
@@ -440,8 +443,7 @@
                     <i id="full_image_file_name" class="numbers">
                     </i>
                 </a>
-                <div id="map" class="map"></div> 
-                <div class="cell_annotation"><button id="cell_annotation_marking" class="cell_annotation-tabs" type="button">M</button></div>
+
                 <!-- <div class="cell_annotation"><button id="cell_annotation_marking" class="cell_annotation-tabs" type="button">M</button></div> -->
               </div>
               <!-- end panel-bottom -->

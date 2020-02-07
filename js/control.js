@@ -349,6 +349,14 @@ function unhideFirstPass() {
 }
 
 function hideMyEdits() {
+	// layer.clear();
+	// fetchAdditionsAndDeletions(app.section_id,app.current_section,app.sel_tile,app.category,app.tracer,'default');
+	app.mouseevtpixels.forEach(function(elt){
+		if(elt != undefined){
+			elt.hide();
+		}		
+	});
+
 	app.edtidx.forEach(function(elt){
 		if(elt != undefined){
 			elt.hide();
@@ -995,6 +1003,7 @@ function generateOL(width, height, brain_url, ol_gamma){
 			layer.destroyChildren();
 			app.fpidx = [];
 			app.edtidx = [];
+			app.mouseevtpixels = [];
 			tileselect(tmptilenum);
 			$('#tile_number_help').html(tmptilenum);
 		}
