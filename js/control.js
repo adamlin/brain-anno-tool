@@ -297,7 +297,7 @@ function addFirstPass(sectionid, sec, tile, category,tracer) {
 		// if(app.fpidx.length > 10000)
 			// stage.children.cache();
 		// console.log('done');
-		addnewannotation("2-"+category,2,category+'.'+tracer,pixels.length);
+		addnewannotation("2-"+category,2,category+'.'+tracer,pixels.length, 'First Pass');
 		app.firstpass_lock = false;
 	});
 }
@@ -367,6 +367,13 @@ function hideMyEdits() {
 }
 
 function unhideMyEdits() {
+
+	app.mouseevtpixels.forEach(function(elt){
+		if(elt != undefined){
+			elt.show();
+		}		
+	});
+
 	app.edtidx.forEach(function(elt){
 		if(elt != undefined){
 			elt.show();
@@ -445,11 +452,11 @@ function fetchAdditionsAndDeletions( sectionid, sec, tile, category, tracer, ann
 				delpixels.forEach(function(pt){
 					eraseRect(pt[0],pt[1],true); //no brush
 				});
-				updateannotationtracking(category, 0, tracer, delpixels.length);
+				updateannotationtracking(category, 0, tracer, delpixels.length, 'Deletions');
 				layer.draw();
 			});
 		
-			updateannotationtracking(category, 1, tracer, addpixels.length);
+			updateannotationtracking(category, 1, tracer, addpixels.length, 'Additions');
 				
 		});
 }
@@ -506,11 +513,11 @@ function selectedToolBtn(){
 	});
 }
 
-function updateannotationtracking(category, flag, tracer, numOfPix){
+function updateannotationtracking(category, flag, tracer, numOfPix, annoName){
 	if ($('#listOfAnnotation').find('tr#row-'+flag+'-'+category).length>0)
 		$('#row-'+flag+'-'+category).find('td.area').html('<span>'+ numOfPix+' pixels</span>');
 	else
-		addnewannotation(flag+'-'+category, flag, category+'.'+tracer, numOfPix);
+		addnewannotation(flag+'-'+category, flag, category+'.'+tracer, numOfPix, annoName);
 	// console.log('here');
 }
 
@@ -558,7 +565,7 @@ function toggle_myedits(category){
 	}
 }
 
-function addnewannotation(category,flag, catname, numOfPix){
+function addnewannotation(category,flag, catname, numOfPix, annoName){
 	color = flag==1?'green':'red';
 	color = flag==2?'purple':color;
 
@@ -569,7 +576,7 @@ function addnewannotation(category,flag, catname, numOfPix){
 			//    '<td class="icn">'+
 			//    '</td>'+
 			   '<td title="Priority" class="priority">'+
-			      '<div>'+category+'</div>'+
+			      '<div>'+annoName+'</div>'+
 			   '</td>'+
 			   '<td class="cnt icn clickable">'+
 			      '<div class="circle" style="background-color: '+color+';"></div>'+
