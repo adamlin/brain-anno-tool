@@ -28,6 +28,11 @@ $.ajaxSetup({
   }
 });
 
+// Disable rightclick
+window.addEventListener('contextmenu', function(e){
+  e.preventDefault();
+}, false);
+
 // var wid = 4096;
 // var hei = 4096;
 var app = {};
