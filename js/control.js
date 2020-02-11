@@ -898,7 +898,6 @@ function getUrlVars() {
 
 function updateallinfo(){
 	$('#total_tiles').html('Total Tiles: ' + app.ntiles[0] + 'x'+app.ntiles[1]);
-	$('#full_image_file_name').html(app.jp2Path);
 
 	let brain_name = app.brain_id; //getUrlVars()["brain_id"];
 	if(typeof brain_name == 'number'){
@@ -913,7 +912,8 @@ function updateallinfo(){
 	}
 	// section_number_init = section_number;
 
-	$('#header_info_brainname_section').html('Brain: ' + brain_name + ' | Section: ' + section_number ); 
+	$('#header_info_brainname_section').html('Brain: ' + brain_name + ' | Section: ' + section_number );
+	$('#full_image_file_name').html(app.jp2Path);
 }
 
 function generateOL(width, height, brain_url, ol_gamma){
