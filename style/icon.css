@@ -38,3 +38,21 @@
 	height: 20px;
 	margin-bottom: -5px;	
 }
+.icon-mouse-right-click-1{
+	content:url('../app/icon/right-click.png') !important;
+	width: 20px;
+	height: 20px;
+	margin-bottom: -5px;	
+}
+.icon-mouse-left-click-1{
+	content:url('../app/icon/left-click.png') !important;
+	width: 20px;
+	height: 20px;
+	margin-bottom: -5px;	
+}
+.icon-mouse-scroll-1{
+	content:url('../app/icon/mouse-scroll.png') !important;
+	width: 20px;
+	height: 20px;
+	margin-bottom: -5px;	
+}

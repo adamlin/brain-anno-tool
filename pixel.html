@@ -192,9 +192,9 @@
                    <a id="undo_draw" class="btn">
                      <i class="zmdi zmdi-undo"></i><div>undo</div>
                  </a>
-                 <a id="redo_draw" class="btn disabled">
+                 <!-- <a id="redo_draw" class="btn disabled">
                      <i class="zmdi zmdi-wrap-text"></i><div>redo</div>
-                 </a>
+                 </a> -->
                    <div class="divider"></div>
 
                    <div id="controlTool" class="toolBitmapOptions tool-options" style="margin-top: 8px;">
@@ -208,14 +208,14 @@
                          <!----> <!----> <i class="icon-eraser"></i> <!---->
                       </button>
 
-                      <button class="el-tooltip tool-button disabled" style="top: 2px;"> 
+                      <!-- <button class="el-tooltip tool-button disabled" style="top: 2px;"> 
                         <span class="svg-icon">
                           <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="32" height="32" viewBox="0 0 23 23" fill="">
                             <path d="M2,2V8H4.28L5.57,16H4V22H10V20.06L15,20.05V22H21V16H19.17L20,9H22V3H16V6.53L14.8,8H9.59L8,5.82V2M4,4H6V6H4M18,5H20V7H18M6.31,8H7.11L9,10.59V14H15V10.91L16.57,9H18L17.16,16H15V18.06H10V16H7.6M11,10H13V12H11M6,18H8V20H6M17,18H19V20H17">
                             </path>
                           </svg>
                         </span>
-                      </button>
+                      </button> -->
                       <!-- <button class="el-tooltip tool-button" id="fillcolor_active">
                          <i class="zmdi zmdi-format-color-fill drawing-color-change"></i>
                       </button> -->
@@ -443,7 +443,20 @@
                     <i id="full_image_file_name" class="numbers">
                     </i>
                 </a>
+                <div id="instructions" style="margin-left: 10px;">
+                  <div style="border-bottom: 1px solid gray; cursor: default;">1) First step is to select a brain tile from top left corner.</div>
+                  <div style="border-bottom: 1px solid gray; cursor: default;">2) Next select the tracer type and annotation class from the interface and click on first pass to see first pass annotations generated from mask.</div>
+                  <div style="border-bottom: 1px solid gray; cursor: default;">3) Click on "My edits" to load the pixels painted by the annotator/s.</div>
+                  <div style="border-bottom: 1px solid gray; cursor: default;">4) We can zoom in and out the current selected tile using mouse scroll or "Magnify" functionality in the top menu <i class="icon-mouse-scroll-1"></i></div>
+                  <div style="border-bottom: 1px solid gray; cursor: default;">5) To move the tile on the stage, select the right click and drag the tile to reposition it on the stage <i class="icon-mouse-right-click-1"></i></div>
+                  <div style="border-bottom: 1px solid gray; cursor: default;">6) You can create/edit annotations pixel by pixel on tile through this pixel painting tool after selecting draw button on top menu.</div>
+                  <div style="border-bottom: 1px solid gray; cursor: default;">7) The brush size is selected to "small" by default. You can change it according to your convinience while painting the pixels on the tile.</div>
+                  <div style="border-bottom: 1px solid gray; cursor: default;">8) Erase functionality lets you erase the painted pixels</div>
+                  <div style="border-bottom: 1px solid gray; cursor: default;">9) Undo functionality lets you undo each brush stroke one by one created in the current session.</div>
+                  <div style="border-bottom: 1px solid gray; cursor: default;">10) Save functionality lets you save the pixels painted.</div>
 
+                  <div></div>
+                </div>
                 <!-- <div class="cell_annotation"><button id="cell_annotation_marking" class="cell_annotation-tabs" type="button">M</button></div> -->
               </div>
               <!-- end panel-bottom -->
