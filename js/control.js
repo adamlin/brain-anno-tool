@@ -207,12 +207,23 @@ function selectedTile(tile, section_image_size, imageurl, current_gamma){
 		mskPath = "/imagedata/"+jp2path;
 	}
 
-	imagePath = iipbase + jp2path + "&GAM=" + current_gamma[0] + "&WID=" 
+	if (app.brain_id.includes("HUA_U19")){
+		imagePath = iipbase + jp2path + "&GAM=" + current_gamma[0] + "&WID=" 
+			  + app.tilewid + "&RGN=" + rgnstring + "&MINMAX="
+			  + "1:10,4096" + "&MINMAX="
+			  + "2:10,4096" + "&MINMAX="
+			  + "3:10,4096"
+			  + "&CVT=jpeg" ;
+	}else{
+		imagePath = iipbase + jp2path + "&GAM=" + current_gamma[0] + "&WID=" 
 			  + app.tilewid + "&RGN=" + rgnstring + "&MINMAX="
 			  + current_red_range[0] + ":" + current_red_range[1] + "," + current_red_range[2] + "&MINMAX="
 			  + current_green_range[0] + ":" + current_green_range[1] + "," + current_green_range[2] + "&MINMAX="
 			  + current_blue_range[0] + ":" + current_blue_range[1] + "," + current_blue_range[2] 
 			  + "&CVT=jpeg" ;
+	}
+
+	
 
 	maskPath = iipbase + mskPath + "&GAM=1" + "&WID=" 
 				+ app.tilewid + "&RGN=" + rgnstring 
@@ -923,6 +934,15 @@ function generateOL(width, height, brain_url, ol_gamma){
         range_green: [current_green_range[1], current_green_range[2]],
         range_blue: [current_blue_range[1], current_blue_range[2]]
     };
+
+    if (app.brain_id.includes("HUA_U19")){
+		uiargs = {
+	        gamma: ol_gamma,
+	        range_red: [10, 4096],
+	        range_green: [10, 4096],
+	        range_blue: [10, 4096]
+	    };
+    }
 
 	$('#map').html('');
     var imgWidth = width;
