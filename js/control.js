@@ -10,7 +10,7 @@ var current_gamma 		= [1];
 var current_red_range 	= [1,10,255];
 var current_blue_range 	= [2,10,255];
 var current_green_range = [3,10,255];
-var current_opacity = [1.0];
+var current_opacity = [0.9];
 // var current_width;
 // var current_height;
 
@@ -223,18 +223,22 @@ function selectedTile(tile, section_image_size, imageurl, current_gamma){
 			  + "&CVT=jpeg" ;
 	}
 
-	
+	// maskPath = iipbase + mskPath + "&GAM=1" + "&WID=" 
+	// 			+ app.tilewid + "&RGN=" + rgnstring 
+	// 			// + "&MINMAX="
+	// 			// + current_red_range[0] + ":" + current_red_range[1] + "," + current_red_range[2] + "&MINMAX="
+	// 			// + current_green_range[0] + ":" + current_green_range[1] + "," + current_green_range[2] + "&MINMAX="
+	// 			// + current_blue_range[0] + ":" + current_blue_range[1] + "," + current_blue_range[2] 
+	// 			+ "&CVT=jpeg" ;
 
-	maskPath = iipbase + mskPath + "&GAM=1" + "&WID=" 
-				+ app.tilewid + "&RGN=" + rgnstring 
-				// + "&MINMAX="
-				// + current_red_range[0] + ":" + current_red_range[1] + "," + current_red_range[2] + "&MINMAX="
-				// + current_green_range[0] + ":" + current_green_range[1] + "," + current_green_range[2] + "&MINMAX="
-				// + current_blue_range[0] + ":" + current_blue_range[1] + "," + current_blue_range[2] 
-				+ "&CVT=jpeg" ;
-	
+	// apibase = 'http://localhost:8000/mbaservices/annotationservice';
+	apibase = 'http://mitradevel.cshl.org/webtools/seriesbrowser';
+	maskPath = apibase+'/get_mask_from_geojson/'
+		+'?brain_id='+app.brain_id+'&series_id='+app.series_id+'&section_id='+app.section_id+'&section='+app.current_section
+		+'&tile='+app.sel_tile+'&tile_wid='+app.tilewid+'&tile_hei='+app.tilehei
+		+'&category='+app.category+'&tracer='+app.tracer;
 	bgImage.src = imagePath;
-	// mskImage.src = maskPath;
+	mskImage.src = maskPath; //FIXME: this might give 404 if mask is absent
 
 	// bgImage.src = 'http://braincircuits.org/cgi-bin/iipsrv.fcgi?FIF=/PITT001/Marmo_7NA_7_layers_1um_spacing.jp2&GAM=1&MINMAX=1:0,512&MINMAX=2:0,512&MINMAX=3:0,512&JTL=3,' + tile;
 	// $('#regdetails').html(''+xpix+','+ypix+'; '+wid+'x'+hei);
@@ -258,22 +262,24 @@ function selectedTile(tile, section_image_size, imageurl, current_gamma){
 		allchildren = layer.getChildren();
 
 		// outimg.name('tileimg');
-		// outimg2 = new Konva.Image({
-		// 	x:0,
-		// 	y:0,
-		// 	width: tilesize,
-		// 	height: tilesize,
-		// 	image: mskImage,
-		// 	draggable: false,
-		// 	opacity: 0.1 //current_opacity
-		// });
+		outimg2 = new Konva.Image({
+			x:0,
+			y:0,
+			width: app.tilewid,
+			height: app.tilehei,
+			image: mskImage,
+			draggable: false,
+			opacity: 1, //current_opacity
+			name:'msk'
+		});
 		// outimg2.name('msk');
 		layer.removeChildren();
 		layer.add(outimg);
+		layer.add(outimg2);
 		allchildren.each(function(node,n){
 			layer.add(node);
 		});
-		// layer.add(outimg2);
+		
 			//brain_id and current_section defined in pixel.html
 		layer.draw();
 		

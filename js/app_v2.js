@@ -142,22 +142,22 @@ function initializeStage (){
 
   bgImage = new Image();
   
-  // mskImage = new Image(); // set in control::selectedTile
+  mskImage = new Image(); // set in control::selectedTile
 
-  bgImage.onload = function() {
-    var outimg = new Konva.Image({
-        x: 0,
-        y: 0,
-        width: app.tilewid,
-        height: app.tilehei,
-        image: bgImage,
-        draggable: false
-    });
+  // bgImage.onload = function() {
+  //   var outimg = new Konva.Image({
+  //       x: 0,
+  //       y: 0,
+  //       width: app.tilewid,
+  //       height: app.tilehei,
+  //       image: bgImage,
+  //       draggable: false
+  //   });
 
-    layer.add(outimg);
-    layer.draw();
-    // layer_vector.draw();
-  };
+  //   layer.add(outimg);
+  //   layer.draw();
+  //   // layer_vector.draw();
+  // };
   // bgImage.src = "https://image.freepik.com/free-vector/sun-shining-blue-sky-with-white-clouds-realistic-background_1284-10467.jpg";
   bgImage.src = "";
 }
