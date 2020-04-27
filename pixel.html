@@ -476,7 +476,19 @@
         app.tracer = getUrlVars()["tracer"];
         app.category = getUrlVars()["category"];
         var current_section = Number(getUrlVars()["section"]);
+        app.admin = getUrlVars()["isadmin"];
 
+        tracer_to_color = {'R':'red', 'G':'green', 'na':'na'}
+        if(!app.admin || app.admin==0) {
+         if(app.tracer!=undefined) {
+            $('#tracerClasses').text('Trcr: ' + tracer_to_color[app.tracer]);
+            $('#tracer_class').css('display','none');
+         }
+         if(app.category!=undefined) {
+            $('#dropdownClasses').text('Neurite: ' + app.category);
+            $('#annotated_class').css('display','none');
+         }
+        }
 
         if(series_id == undefined){
 
