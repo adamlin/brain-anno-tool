@@ -906,7 +906,7 @@ function setElementAct(){
   $('#btn_firstpass').click(function(){
     if(!app.firstpass_lock) {
       app.firstpass_lock = true;
-      if(app.category!= undefined) {
+      if(app.category!= undefined && app.category!="") {
         if ($('#listOfAnnotation').find('tr#row-2-'+app.category).length==0) {
           
           $('#image_loading_selected').css("display", "block");
@@ -917,10 +917,12 @@ function setElementAct(){
         }
         else {
           alert('already loaded');
+          app.firstpass_lock = false;
         }
       }
       else {
         alert('Select class of neurite');
+        app.firstpass_lock = false;
       }
       // app.firstpass_lock = false; // done inside addFirstPass as it has async api call 
     }

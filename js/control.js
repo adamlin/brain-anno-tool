@@ -298,6 +298,16 @@ function selectedTile(tile, section_image_size, imageurl, current_gamma){
 
 function addFirstPass(sectionid, sec, tile, category,tracer) {
 	// apibase = 'http://localhost:8000/mbaservices/annotationservice';
+	if(app.tracer==undefined || app.tracer=="") {
+		alert('Please select tracer');
+		app.firstpass_lock = false;
+		return false;
+	}
+	if(tile == undefined || tile == "") {
+		alert('Please select tile');
+		app.firstpass_lock = false;
+		return false;
+	}
 	apibase = 'http://mitradevel.cshl.org/webtools/seriesbrowser';
 	msg = {"brain_id":app.brain_id, "series_id":app.series_id, "section_id": sectionid, "section": sec, 
 	"tile": tile,"tile_wid":app.tilewid,"tile_hei":app.tilehei,

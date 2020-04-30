@@ -472,23 +472,26 @@
         var series_id = getUrlVars()['series_id'];
         var brain_id = getUrlVars()["brain_id"];
         app.type = getUrlVars()["type"];
-        app.color = getUrlVars()["color"];
-        app.tracer = getUrlVars()["tracer"];
-        app.category = getUrlVars()["category"];
+        app.color = getUrlVars()["color"]; //for point annotation link
+        app.tracer = decodeURI(getUrlVars()["tracer"]).trim();
+        app.category = decodeURI(getUrlVars()["category"]).trim();
         var current_section = Number(getUrlVars()["section"]);
         app.admin = getUrlVars()["isadmin"];
 
-        tracer_to_color = {'R':'red', 'G':'green', 'na':'na'}
-        if(!app.admin || app.admin==0) {
-         if(app.tracer!=undefined) {
-            $('#tracerClasses').text('Trcr: ' + tracer_to_color[app.tracer]);
-            $('#tracer_class').css('display','none');
+      //   tracer_to_color = {'R':'red', 'G':'green', 'na':'na'}
+        
+         if(app.tracer!=undefined && app.tracer!="") {
+            $('#tracerClasses').text('Trcr: ' + app.tracer);
+            if(!app.admin || app.admin==0) {
+               $('#tracer_class').css('display','none');
+            }
          }
-         if(app.category!=undefined) {
+         if(app.category!=undefined && app.category!="") {
             $('#dropdownClasses').text('Neurite: ' + app.category);
-            $('#annotated_class').css('display','none');
+            if(!app.admin || app.admin==0) {
+               $('#annotated_class').css('display','none');
+            }
          }
-        }
 
         if(series_id == undefined){
 
