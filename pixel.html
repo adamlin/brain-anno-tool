@@ -480,13 +480,13 @@
 
       //   tracer_to_color = {'R':'red', 'G':'green', 'na':'na'}
         
-         if(app.tracer!=undefined && app.tracer!="") {
+         if(app.tracer!=undefined && app.tracer!="" && app.tracer!="undefined") {
             $('#tracerClasses').text('Trcr: ' + app.tracer);
             if(!app.admin || app.admin==0) {
                $('#tracer_class').css('display','none');
             }
          }
-         if(app.category!=undefined && app.category!="") {
+         if(app.category!=undefined && app.category!="" && app.category!="undefined") {
             $('#dropdownClasses').text('Neurite: ' + app.category);
             if(!app.admin || app.admin==0) {
                $('#annotated_class').css('display','none');
