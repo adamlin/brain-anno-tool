@@ -326,6 +326,13 @@ function addFirstPass(sectionid, sec, tile, category,tracer) {
 		// console.log('done');
 		addnewannotation("2-"+category,2,category+'.'+tracer,pixels.length, 'First Pass');
 		app.firstpass_lock = false;
+
+	}).fail(function( jqxhr, textStatus, error ) {
+		app.firstpass_lock = false;
+		var err = textStatus + ", " + error;
+		console.log( "Request Failed: " + err );
+		alert('load_firstpass failed:' + err);
+		
 	});
 }
 
