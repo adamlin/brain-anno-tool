@@ -168,7 +168,7 @@ function mouseclick(){
 function selectedTile(tile, section_image_size, imageurl, current_gamma){
 	$('#image_loading_selected').css("display", "block");
 
-	clear_actionarray(); 
+	 
 
 	var width = section_image_size[0];
 	var height = section_image_size[1];
@@ -314,18 +314,23 @@ function addFirstPass(sectionid, sec, tile, category,tracer) {
 	"category":category, "tracer":tracer};
 	
 	$.getJSON(apibase+'/load_firstpass/',msg,function(data) {
-		pixels = data.detect.feature.geometry.coordinates[0];
+		if(data.hasOwnProperty('detect')){
+			pixels = data.detect.feature.geometry.coordinates[0];
+		}
+		else {
+			pixels = [];
+		}
+			pixels.forEach(function(pt){
+				idx = paintRect_firstpass(pt[0],pt[1]);
+				app.fpidx.push(idx);
+			});
+			layer.draw();
+			// if(app.fpidx.length > 10000)
+				// stage.children.cache();
+			// console.log('done');
+			addnewannotation("2-"+category,2,category+'.'+tracer,pixels.length, 'First Pass');
+			app.firstpass_lock = false;
 		
-		pixels.forEach(function(pt){
-			idx = paintRect_firstpass(pt[0],pt[1]);
-			app.fpidx.push(idx);
-		});
-		layer.draw();
-		// if(app.fpidx.length > 10000)
-			// stage.children.cache();
-		// console.log('done');
-		addnewannotation("2-"+category,2,category+'.'+tracer,pixels.length, 'First Pass');
-		app.firstpass_lock = false;
 
 	}).fail(function( jqxhr, textStatus, error ) {
 		app.firstpass_lock = false;
@@ -548,10 +553,18 @@ function selectedToolBtn(){
 }
 
 function updateannotationtracking(category, flag, tracer, numOfPix, annoName){
-	if ($('#listOfAnnotation').find('tr#row-'+flag+'-'+category).length>0)
+	if ($('#listOfAnnotation').find('tr#row-'+flag+'-'+category).length>0) {
+		let existing = $('#row-'+flag+'-'+category).find('td.area').find('span').html().split(' ')[0];
+		// FIXME: still not correct
+		// if(flag==1 && parseInt(existing)>numOfPix) {
+		// 	alert('Action array seems to be incorrect. not saving');
+		// 	return false;
+		// }
 		$('#row-'+flag+'-'+category).find('td.area').html('<span>'+ numOfPix+' pixels</span>');
+	}
 	else
 		addnewannotation(flag+'-'+category, flag, category+'.'+tracer, numOfPix, annoName);
+	return true;
 	// console.log('here');
 }
 
@@ -1064,6 +1077,7 @@ function tileselect(tilenum){
 	$('#image-'+tilenum).addClass('active');
 	$('#image-'+tilenum).siblings().removeClass('active');
 	$('#listOfAnnotation').html("");
+	clear_actionarray();
 	selectedTile(tilenum,app.section_image_size, app.jp2Path, current_gamma);
 }
 

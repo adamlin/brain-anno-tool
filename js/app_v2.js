@@ -682,19 +682,20 @@ function storeObj(todb){
       var coordinates = pointarray[ii][cat];
       
       var numOfPix = coordinates.length;
-      updateannotationtracking(cat, ii, app.tracer, numOfPix);
+      if(updateannotationtracking(cat, ii, app.tracer, numOfPix)) {
 
-      if(todb != undefined) {
-        outObj_template.feature = turf.multiPoint(coordinates);
-        outObj_template.category = cat;
+        if(todb != undefined) {
+          outObj_template.feature = turf.multiPoint(coordinates);
+          outObj_template.category = cat;
 
-        var postdata = JSON.stringify(outObj_template);
-        $.post(apibase+apifuncnames[ii],
-            {'msg':postdata}, 
-            function(resp){
-              alert(JSON.stringify(resp));
-            }
-          );  
+          var postdata = JSON.stringify(outObj_template);
+          $.post(apibase+apifuncnames[ii],
+              {'msg':postdata}, 
+              function(resp){
+                alert("Saved action " + resp['op']+":"+numOfPix); //JSON.stringify(resp));
+              }
+            );  
+        }
       }
     });
   }
