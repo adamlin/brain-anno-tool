@@ -1030,6 +1030,15 @@ function setElementAct(){
     // typeOfOperations = [];
   });
 
+  $("#exportbutton").click(function(e){
+    var down_geojson = 'http://mitradevel.cshl.org/webtools/seriesbrowser/get_annotation_export/?brain_id=' 
+           + app.brain_id + '&series_id=' + app.series_id + '&section_id=' + app.section_id + '&section=' + current_section
+           + '&ntiles=' + app.ntiles[0] * app.ntiles[1] + '&tile_wid=1024&tile_hei=1024&img_wid=' + app.width + '&img_hei=' + app.height
+           + '&category=' + app.category + '&tracer=' + app.tracer + '&annotator=default';
+    console.info(down_geojson);
+
+  });
+
   // $("#BrushSize").change(function(){calBrushMatrix()}); 
 
   // referring this https://konvajs.github.io/docs/sandbox/Zooming_Relative_To_Pointer.html

@@ -730,7 +730,7 @@ function selectedclasses(){
 					clear_actionarray();
 					app.tracer = trcr;
 					app.color = clrcode;
-					cell_annotation_marking_init();
+					//cell_annotation_marking_init();
 					// actionarray = {};
 					$('#tracerClasses').text('Trcr: ' + $(this).text());
 				}
@@ -738,7 +738,7 @@ function selectedclasses(){
 		else {
 			app.tracer = trcr;
 			app.color = clrcode;
-			cell_annotation_marking_init();
+			//cell_annotation_marking_init();
 			$('#tracerClasses').text('Trcr: ' + $(this).text());
 		}
 
@@ -827,7 +827,7 @@ function generatesectiontils(seriesid, current_section) {
 				// var tilesize = 4096;
 
 				generateOL(app.width, app.height, iipzoomify +app.jp2Path, current_gamma[0]);
-				cell_annotation_marking_init();
+				//cell_annotation_marking_init();
 				
 				var ntiles1 = Math.round(width/app.tilewid);
 				var ntiles2 = Math.round(height/app.tilehei);
@@ -961,6 +961,7 @@ function updateallinfo(){
 
 	$('#header_info_brainname_section').html('Brain: ' + brain_name + ' | Section: ' + section_number );
 	$('#full_image_file_name').html(app.jp2Path);
+	cell_annotation_marking_init();
 }
 
 function generateOL(width, height, brain_url, ol_gamma){
@@ -1283,9 +1284,14 @@ function applyRangesControl(){
 }
 
 function cell_annotation_marking_init(){
-
+	if(app.tracer == "red"){
+		app.color = "R";
+	}else if (app.tracer == "green"){
+		app.color = "G";
+	}
+	
 	var meta_link = '<a href="http://www.braincircuits.org/mamo/ol_cshl_anno.html?brain_id=' + app.brain_id +'&label='+ app.type + '&color=' + app.color
-			  + '&pid=' + $('#full_image_file_name').text() + '" '
+			  + '&pid=/brainimg/' + $('#full_image_file_name').text() + '&tracer=' + app.tracer + '&annot_brain_id=' + app.annot_brain_id + '&session_id=' + app.session_ids +'" '
 	          + 'data-featherlight="iframe" data-featherlight-iframe-frameborder="0" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-style="display:block;border:none;height:95vh;width:85vw;">'
 	          + '<button id="cell_annotation_marking" class="cell_annotation-tabs" type="button">M</button>'
 	          + '</a>';
@@ -1298,3 +1304,4 @@ function cell_annotation_marking_init(){
 	   }
 	});
 }
+

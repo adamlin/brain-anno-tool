@@ -185,7 +185,7 @@
                    <a id="savebutton" class="btn">
                        <i class="zmdi zmdi-save"></i><div>save</div>
                    </a>
-                   <a class="btn">
+                   <a id="exportbutton" class="btn">
                        <i class="zmdi zmdi-download"></i><div>export</div>
                    </a>
 
@@ -477,6 +477,9 @@
         app.category = decodeURI(getUrlVars()["category"]).trim();
         var current_section = Number(getUrlVars()["section"]);
         app.admin = getUrlVars()["isadmin"];
+        app.session_ids = getUrlVars()["session_id"];
+        app.annot_brain_id = getUrlVars()["annot_brain_id"];
+
 
       //   tracer_to_color = {'R':'red', 'G':'green', 'na':'na'}
         
