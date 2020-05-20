@@ -758,7 +758,20 @@ function selectedclasses(){
 		category = $(this).attr('id');
 		alert(category);
 	});
+
+	$('#status_in_dashboard a').click(function(){
+		var selText = $(this).attr('key');
+		$('#status-class').text($(this).text());
+		if($(this).text() == 'start'){
+			startsectionannotation_dashboard(app.annot_brain_id, app.section_num);
+		}else if($(this).text() == 'stop'){
+			stopsectionannotation_dashboard(app.annot_brain_id, app.section_num);
+		}else if ($(this).text() == 'final'){
+			finalizesectionannotation_dashboard(app.annot_brain_id, app.section_num);
+		}
+	})
 }
+
 function generatesectiontils(seriesid, current_section) {
 	app.series_id = seriesid;
 	app.current_section = current_section;
@@ -1304,4 +1317,61 @@ function cell_annotation_marking_init(){
 	   }
 	});
 }
+
+
+// Dashboard interaction //
+
+function getannotationsectionstatus_dashboard(session_ids, annot_brain_id, section_num){
+  if(session_ids){
+    $.get(dashboard_api + 'getannotationsectionstatus/', {session_id: session_ids, annot_brain_id: annot_brain_id, section_num: section_num}, function(resp){
+          console.info(resp);
+          if (resp.status == 'CHKIN'){
+          	$('#status-class').text('start');
+          }else if (resp.status == 'CHKOUT'){
+        	$('#status-class').text('stop');
+          }else if (resp.status == 'FINAL'){
+          	$('#status-class').text('final');
+          }
+      }
+    )
+  }
+}
+
+function getsessiondetails_dashboard(session_ids){
+  if(session_ids){
+    $.get(dashboard_api + 'getsessiondetails/', {session_id: session_ids}, function(resp){
+          $('#login-status').html('Welcome Back: ' + resp.user + ' <br/> ' + 'Last Login: ' + resp.last_login);
+      }
+    )
+  }
+}
+
+function startsectionannotation_dashboard(annot_brain_id, section_num){
+  if(app.session_ids){
+    $.post(dashboard_api + 'startsectionannotation/', {annot_brain_id: annot_brain_id, section_num: section_num}, function(resp){
+          console.info(resp);
+      }
+    )
+  }
+}
+
+function stopsectionannotation_dashboard(annot_brain_id, section_num){
+  if(app.session_ids){
+    $.post(dashboard_api + 'stopsectionannotation/', {annot_brain_id: annot_brain_id, section_num: section_num}, function(resp){
+          console.info(resp);
+      }
+    )
+  }
+}
+
+function finalizesectionannotation_dashboard(annot_brain_id, section_num){
+  if(app.session_ids){
+    $.post(dashboard_api + 'finalsectionannotation/', {annot_brain_id: annot_brain_id, section_num: section_num}, function(resp){
+          console.info(resp);
+      }
+    )
+  }
+}
+
+// disable change section button
 

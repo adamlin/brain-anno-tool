@@ -93,6 +93,18 @@
              <!-- header middle group -->
              <div class="navigator-wrapper">
                 <div class="tool-options">
+                    <!-- // related to dashboard start, stop and final (change status in database) //  -->
+                    <div class="dropdown" style="margin-top: 10px; margin-right:4px">         
+                        <button id="status-class" type="button" class="btn btn-success dropdown-toggle" data-toggle="dropdown"> 
+                            status
+                        </button> 
+                          
+                        <div id="status_in_dashboard" class="dropdown-menu"> 
+                            <a class="dropdown-item" href="#" data-value="start">start</a>
+                            <a class="dropdown-item" href="#" data-value="stop">stop</a>
+                            <a class="dropdown-item" href="#" data-value="final">final</a> 
+                        </div> 
+                    </div>                     
                    <div class="dropdown" style="margin-top:10px;margin-right:4px">
                      <button class="btn btn-secondary dropdown-toggle" type="button" id="tracerClasses" data-toggle="dropdown" aria-haspopup="false" aria-expanded="false">Tracer
                         </button>
@@ -238,7 +250,7 @@
                               <a class="dropdown-item" href="#" data-value="25">Medium</a> 
                               <a class="dropdown-item" href="#" data-value="49">Large</a>
                           </div> 
-                      </div>                      
+                      </div>                  
                       <div class="magnify_style" style="margin-left: 30px; margin-top: 10px;opacity:0.9">
                         <p style="position: absolute; z-index:-1; font-size: 80%; font-weight: 400; margin-left: 60px;">Magnify (x<label id="zoomlabel">1</label>)</p>
                         <input style="margin-top: -6px; margin-left: 15px;" type="range" min="0.5" max="8" step="0.5" class="slider2" id="myRange"/>
@@ -443,7 +455,9 @@
                     <i id="full_image_file_name" class="numbers">
                     </i>
                 </a>
-                <div id="instructions" style="margin-left: 10px;">
+                <div id="instructions" style="margin-left: 10px; font-size: 10px">
+                  <div id="login-status"></div><br/><br/>
+                  <div style="text-align: center;">-- Manual --</div><br/>
                   <div style="border-bottom: 1px solid gray; cursor: default;">1) First step is to select a brain tile from top left corner.</div>
                   <div style="border-bottom: 1px solid gray; cursor: default;">2) Next select the tracer type and annotation class from the interface and click on first pass to see first pass annotations generated from mask.</div>
                   <div style="border-bottom: 1px solid gray; cursor: default;">3) Click on "My edits" to load the pixels painted by the annotator/s.</div>
@@ -471,6 +485,7 @@
         
         var series_id = getUrlVars()['series_id'];
         var brain_id = getUrlVars()["brain_id"];
+        var dashboard_api = 'http://mitradevel.cshl.org/webtools/annot_dash/';
         app.type = getUrlVars()["type"];
         app.color = getUrlVars()["color"]; //for point annotation link
         app.tracer = decodeURI(getUrlVars()["tracer"]).trim();
@@ -478,8 +493,12 @@
         var current_section = Number(getUrlVars()["section"]);
         app.admin = getUrlVars()["isadmin"];
         app.session_ids = getUrlVars()["session_id"];
+        
+        if(app.session_ids != undefined){
+            app.session_ids = app.session_ids.replace("#", ""); //due to change of status - given a # at the end.
+        }
         app.annot_brain_id = getUrlVars()["annot_brain_id"];
-
+        app.section_num = getUrlVars()["section"];
 
       //   tracer_to_color = {'R':'red', 'G':'green', 'na':'na'}
         
@@ -555,9 +574,15 @@
           clickrangecontrol();
           initRangeSlider();
           applyRangesControl();
+          getsessiondetails_dashboard(app.session_ids);
+          getannotationsectionstatus_dashboard(app.session_ids, app.annot_brain_id, app.section_num);
           // fitStageIntoParentContainer();
           // adapt the stage on any window resize
-          // window.addEventListener('resize', fitStageIntoParentContainer);        
+          // window.addEventListener('resize', fitStageIntoParentContainer);
+          if (app.session_ids != undefined){
+            $('#btn_section_right').css("pointer-events", "none");
+            $('#btn_section_left').css("pointer-events", "none");
+          }        
         });
       </script>
     </body>
