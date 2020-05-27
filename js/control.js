@@ -693,7 +693,10 @@ function selectedpixel(){
 	    $(this).siblings().removeClass('active');
 	    $(this).toggleClass('active');
 	    var brushsize = $(this).attr('data-value'); ///// Brush size need be either of [1, 9, 25, 49,...] Mitsu
-	    calBrushMatrix(brushsize);  //Mitsu
+		
+		disp.brushsize = parseInt(brushsize);
+		//calBrushMatrix(brushsize);  //Mitsu
+		zoomBrushMatix(disp.brushsize,disp.currentscale);
 	});
 	//$("#classTree").DropDownTree(options);
 }

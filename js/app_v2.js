@@ -93,6 +93,7 @@ var lastActIsEraseOrPaint = 0;
 
 var disp = {};
 disp.currentscale = 0.5;
+disp.brushSize=1;
 // var currentvector = undefined;
 
 var initBrushsize = 9; // Temporally. Brush size should be set at selector when page loaded.
@@ -112,9 +113,10 @@ function setInitValue (){
   // magnify slider
   $("#myRange").val(disp.currentscale);
   $("#zoomlabel").html(disp.currentscale);
-
+  
   // paint brush size
   brushmatrix = calBrushMatrix(initBrushsize);
+  zoomBrushMatix(2,disp.currentscale);
 }
 
 function initializeStage (){
@@ -737,7 +739,27 @@ var cumulateColorPoints = function(listOfColors) {
   // });
   // return finalResult;
 };
-
+var zoomLevel = [100,81,64,49,36,25,16,9,1];
+function zoomIndex(currentscale){
+  if(currentscale>=8)
+    return 6;
+  if(currentscale>=4)
+    return 4;
+  if(currentscale>=2)
+    return 2;
+  if(currentscale>=1)
+    return 0;
+  return 0;
+}
+function zoomBrushMatix(brushSize,zoomlevel){
+  zIndex=zoomIndex(zoomlevel);
+  bSize= zoomLevel[zIndex+brushSize];
+  
+  console.log("Scale= "+zoomlevel+" , Index ="+zIndex+ " , base Zoom level="+zoomLevel[zIndex]);
+  console.log("Brush Size= "+brushSize);
+  console.log("Brush zoom size= "+bSize);
+  calBrushMatrix(bSize);
+}
 function calBrushMatrix(brushsize) {
   brushmatrix = [];
   //var brushsize = $("#BrushSize").val();
@@ -889,6 +911,7 @@ function setMouseEvt(){
     stage.batchDraw();
 
     disp.currentscale = newScale;
+    zoomBrushMatix(disp.brushsize,disp.currentscale);
 
     var n = 1; // Num of digits after the decimal point.
     newScale_show = Math.floor(newScale*Math.pow(10,n))/Math.pow(10,n);
