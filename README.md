@@ -7,6 +7,9 @@ What's New
 	- cell annotation: (1). add, delete, modify cells in world-map coordidated bases. (2). group cell for fast labeling. (3). save as geojson with tracking lables (add, delete). (4). divide tracer channel.
 	- pixel annotation: (1). add, detete, modify process in pixel value. (2). auto divide image into (1024 by 1024) tiles withtout corpping. (3). read mask fiile and convert to pixel value (4). save as geojson as an annotated section. (5). divide channel, tracer, processes, cell type etc ....
 
+
+<img src="https://github.com/adamlin/annotation_tool/blob/master/images/cell_annotation_example.png">
+<img src="https://github.com/adamlin/annotation_tool/blob/master/images/pixel_annotation_example.png">
 In order to access the dataset with url, this is example:
 
 cell annotation
