@@ -1303,7 +1303,7 @@ function cell_annotation_marking_init(){
 		app.color = "G";
 	}
 	
-	var meta_link = '<a href="http://www.braincircuits.org/mamo/ol_cshl_anno.html?brain_id=' + app.brain_id +'&label='+ app.type + '&color=' + app.color
+	var meta_link = '<a href="/annotation_tool/ol_cshl_anno.html?brain_id=' + app.brain_id +'&label='+ app.type + '&color=' + app.color
 			  + '&pid=/brainimg/' + $('#full_image_file_name').text() + '&tracer=' + app.tracer + '&annot_brain_id=' + app.annot_brain_id + '&session_id=' + app.session_ids +'" '
 	          + 'data-featherlight="iframe" data-featherlight-iframe-frameborder="0" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-style="display:block;border:none;height:95vh;width:85vw;">'
 	          + '<button id="cell_annotation_marking" class="cell_annotation-tabs" type="button">M</button>'
