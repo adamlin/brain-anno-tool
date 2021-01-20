@@ -10,12 +10,14 @@ What's New
 
 <img src="https://github.com/adamlin/annotation_tool/blob/master/images/cell_annotation_example.png">
 <img src="https://github.com/adamlin/annotation_tool/blob/master/images/pixel_annotation_example.png">
-In order to access the dataset with url, this is example:
+In order to access the dataset with url, this is parameter example:</br>
 
-cell annotation
+
+cell annotation [live](http://www.braincircuits.org/mamo/ol_cshl_anno.html?brain_id=1159&label=F&pid=/brainimg/PMD1159/PMD1160%261159-F31-2012.09.07-22.20.56_PMD1159_2_0092.jp2&color=R&annot_brain_id=1&session_id=ae58yijnrqxshk1bo16vn6jr9z978rhr)</br>
 http://localhost/annotation_tool/ol_cshl_anno.html?brain_id=1159&label=F&pid=/brainimg/brainimage.jp2&color=R&annot_brain_id=1&session_id=testingfromadamlin2020
+</br>
 
-pixel annotation
+pixel annotation [live](http://braincircuits.org/annotation_tool/pixel_v3.html?brain_id=1159&type=F&section=90&category=process&tracer=red&annot_brain_id=4)</br>
 http://localhost/annotation_tool/pixel.html?brain_id=1159&type=F&section=90&category=process&tracer=red&annot_brain_id=1&session_id=testingfromadamlin2020
 
 post stable release of this tool : 
